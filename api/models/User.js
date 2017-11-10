@@ -69,6 +69,10 @@ module.exports = {
       collection: 'ask',
       via: 'askowner'
     },
+    tradeusers: {
+      collection: 'tradeuser',
+      via: 'tradeuserowner'
+    },
     toJSON: function() {
       var obj = this.toObject();
       delete obj.encryptedPassword;

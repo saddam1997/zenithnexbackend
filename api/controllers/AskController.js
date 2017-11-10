@@ -4,6 +4,32 @@
  * @description :: Server-side logic for managing asks
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+
+//BTC Wallet Details
+var bitcoinBTC = require('bitcoin');
+var clientBTC = new bitcoinBTC.Client({
+  host: sails.config.company.clientBTChost,
+  port: sails.config.company.clientBTCport,
+  user: sails.config.company.clientBTCuser,
+  pass: sails.config.company.clientBTCpass
+});
+var companyBTCAccount = sails.config.company.companyBTCAccount;
+var companyBTCAccountAddress = sails.config.company.companyBTCAccountAddress;
+
+
+//BCH Wallet Details
+var bitcoinBCH = require('bitcoin');
+var clientBCH = new bitcoinBCH.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+var companyBCHAccount = sails.config.company.companyBCHAccount;
+var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
+var transactionFeeBCH = sails.config.company.txFeeBCH;
+var transactionFeeBTC = sails.config.company.txFeeBTC;
+
 var _ = require('underscore');
 
 module.exports = {
@@ -45,7 +71,6 @@ module.exports = {
     User.findOne({
       id: userAskownerId
     }).exec(function(errToFindUser, userAsker) {
-
       if (errToFindUser) {
         return res.json({
           "message": "Error to find userAsker",
@@ -126,14 +151,14 @@ module.exports = {
                           console.log("Error to find ask");
                         }
                         if (!allBidsFromdb) {
+                          //No bid match on this rate Ask and Ask placed successfully
                           return res.json({
-                            "message": "No bid found for this ask!!!!",
+                            "message": "Your ask placed successfully!",
                             statusCode: 200
                           });
                         }
                         if (allBidsFromdb) {
                           if (allBidsFromdb.length >= 1) {
-
                             //Find exact bid if available in db
                             var exactAmountMatchBid = _.findWhere(allBidsFromdb, {
                               bidAmountBCH: parseFloat(userAskAmountBCH)
@@ -224,7 +249,7 @@ module.exports = {
                                                                 clientBCH.cmd('move',
                                                                   companyBCHAccount,
                                                                   userBidder.email,
-                                                                  userAskAmountBCH,
+                                                                  exactAmountMatchBid.bidAmountBCH,
                                                                   function(err, transactionBuyBTC, resHeaders) {
                                                                     if (err) {
                                                                       console.log("Error from sendFromBCHAccount:: ");
@@ -237,14 +262,14 @@ module.exports = {
                                                                       console.log("transactionBuyBTC ::: " + transactionBuyBTC);
                                                                       if (transactionBuyBTC == true) {
                                                                         console.log("Transaction successfully for move user To Company acc::: " + transactionBuyBTC);
-                                                                        var updatedBTCbalance = (parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userbuyAmountBTC).toFixed(8));
-                                                                        var updatedBCHbalance = (parseFloat(userBCHBalanceInDb) +
-                                                                          parseFloat(userbuyAmountBCH)).toFixed(8);
+                                                                        var updatedBTCbalanceBidder = (parseFloat(userBidder.BTCbalance).toFixed(8) - parseFloat(exactAmountMatchBid.bidAmountBTC).toFixed(8));
+                                                                        var updatedBCHbalanceBidder = (parseFloat(userBidder.BCHbalance) +
+                                                                          parseFloat(exactAmountMatchBid.bidAmountBCH)).toFixed(8);
                                                                         User.update({
-                                                                            email: userAsker.email
+                                                                            email: userBidder.email
                                                                           }, {
-                                                                            BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-                                                                            BCHbalance: parseFloat(updatedBCHbalance).toFixed(8)
+                                                                            BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8),
+                                                                            BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
                                                                           })
                                                                           .exec(function(err, updatedUser) {
                                                                             if (err) {
@@ -254,29 +279,52 @@ module.exports = {
                                                                                 statusCode: 400
                                                                               });
                                                                             }
-                                                                            User.findOne({
-                                                                              email: userAsker.email
-                                                                            }).populateAll().exec(function(err, user) {
+                                                                            console.log("Removing ask !!!");
+                                                                            Ask.destroy({
+                                                                              id: askDetails.id
+                                                                            }).exec(function(err) {
                                                                               if (err) {
                                                                                 return res.json({
-                                                                                  "message": "Error to find user",
-                                                                                  statusCode: 401
+                                                                                  "message": "Error to remove ask",
+                                                                                  statusCode: 400
                                                                                 });
                                                                               }
-                                                                              if (!user) {
-                                                                                return res.json({
-                                                                                  "message": "Invalid email!",
-                                                                                  statusCode: 401
-                                                                                });
-                                                                              }
-                                                                              return res.json({
-                                                                                user: user,
-                                                                                statusCode: 200
+                                                                              console.log("Removing bid !!! !!!");
+                                                                              Bid.destroy({
+                                                                                id: exactAmountMatchBid.id
+                                                                              }).exec(function(err) {
+                                                                                if (err) {
+                                                                                  return res.json({
+                                                                                    "message": "Error to remove ask",
+                                                                                    statusCode: 400
+                                                                                  });
+                                                                                }
+                                                                                console.log("Returning user details !!!");
+                                                                                User.findOne({
+                                                                                    email: userAsker.email
+                                                                                  })
+                                                                                  .populateAll()
+                                                                                  .exec(function(err, user) {
+                                                                                    if (err) {
+                                                                                      return res.json({
+                                                                                        "message": "Error to find user",
+                                                                                        statusCode: 401
+                                                                                      });
+                                                                                    }
+                                                                                    if (!user) {
+                                                                                      return res.json({
+                                                                                        "message": "Invalid email!",
+                                                                                        statusCode: 401
+                                                                                      });
+                                                                                    }
+                                                                                    return res.json({
+                                                                                      user: user,
+                                                                                      statusCode: 200
+                                                                                    });
+                                                                                  });
                                                                               });
                                                                             });
-
                                                                           });
-
                                                                       } else {
                                                                         return res.json({
                                                                           "message": "Transaction Failed BTC",
@@ -322,13 +370,14 @@ module.exports = {
                             } //Find Exact value not matched
                             else {
                               return res.json({
-                                "message": "value not matched",
+                                "message": allBidsFromdb,
                                 statusCode: 200
                               });
                             }
                           } else {
+                            //No bid match on this rate Ask and Ask placed successfully
                             return res.json({
-                              user: "No bid found for this ask!!!!",
+                              "message": "Your ask placed successfully!!",
                               statusCode: 200
                             });
                           }
