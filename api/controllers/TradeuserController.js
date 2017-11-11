@@ -189,6 +189,7 @@ module.exports = {
         "bids": allBidsFromdb,
         statusCode: 200
       });
+
     } else {
       //No bid match on this rate Ask and Ask placed successfully
       return res.json({
@@ -196,5 +197,5 @@ module.exports = {
         statusCode: 200
       });
     }
-  },
+  }
 };
