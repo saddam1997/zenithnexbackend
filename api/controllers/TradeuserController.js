@@ -76,12 +76,13 @@ module.exports = {
         for (var i = 0; i < allBidsFromdb.length; i++) {
           total_bid = total_bid + allBidsFromdb[i].bidAmountBCH;
         }
-        for (var i = 0; i < allBidsFromdb.length; i++) {
-          currentBidDetails = allBidsFromdb[i];
-          console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
-          console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-          console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
-          if (total_bid <= totoalAskRemainingBCH) {
+        if (total_bid <= totoalAskRemainingBCH) {
+          for (var i = 0; i < allBidsFromdb.length; i++) {
+            currentBidDetails = allBidsFromdb[i];
+            console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
+            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+
             console.log("Enter into total_bid <= totoalAskRemainingBCH");
             console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
             //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
@@ -91,34 +92,38 @@ module.exports = {
             if (totoalAskRemainingBCH == 0) {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingBCH == 0");
-              var userAllDetailsInDBBidder = User.findOne({
+              var userAllDetailsInDBBidder = await User.findOne({
                 id: currentBidDetails.bidowner
               });
-              var userAllDetailsInDBAsker = User.findOne({
+              var userAllDetailsInDBAsker = await User.findOne({
                 id: askDetails.askowner
               })
               console.log("userAll askDetails.askowner :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH)).toFixed(8);
-              var userUpdateBidder = User.update({
+              var userUpdateBidder = await User.update({
                 id: currentBidDetails.bidowner
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
               });
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(askDetails.askAmountBTC)).toFixed(8);
-              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(askDetails.askAmountBCH).toFixed(8));
-              var userUpdateAsker = User.update({
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
+              var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH).toFixed(8);
+              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+              var updatedUser = await User.update({
                 id: askDetails.askowner
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
               });
-              var bidDestroy = Bid.destroy({
+              console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
+              var bidDestroy = await Bid.destroy({
                 id: currentBidDetails.id
               });
-              var askDestroy = Ask.destroy({
+              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await Ask.destroy({
                 id: askDetails.id
               });
               return res.json({
@@ -180,8 +185,149 @@ module.exports = {
                 askAmountBCH: parseFloat(totoalAskRemainingBCH).toFixed(8)
               });
             }
+
           }
+        } else {
+          for (var i = 0; i < allBidsFromdb.length; i++) {
+            currentBidDetails = allBidsFromdb[i];
+            console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
+            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
+            //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
+            if (totoalAskRemainingBCH >= currentBidDetails.bidAmountBCH) {
+              totoalAskRemainingBCH = (parseFloat(totoalAskRemainingBCH).toFixed(8) - parseFloat(currentBidDetails.bidAmountBCH).toFixed(8));
+              totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
+              console.log("start from here totoalAskRemainingBCH == 0::: " + totoalAskRemainingBCH);
+
+              if (totoalAskRemainingBCH == 0) {
+                //destroy bid and ask and update bidder and asker balances and break
+                console.log("Enter into totoalAskRemainingBCH == 0");
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidowner
+                });
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: askDetails.askowner
+                });
+                console.log("userAll askDetails.askowner :: ");
+                console.log("Update value of Bidder and asker");
+                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
+                var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH)).toFixed(8);
+                var userUpdateBidder = await User.update({
+                  id: currentBidDetails.bidowner
+                }, {
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
+                });
+                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
+                var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH).toFixed(8);
+                console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+                console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+                var updatedUser = await User.update({
+                  id: askDetails.askowner
+                }, {
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
+                });
+                console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
+                var bidDestroy = await Bid.destroy({
+                  id: currentBidDetails.id
+                });
+                console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
+                var askDestroy = await Ask.destroy({
+                  id: askDetails.id
+                });
+                return res.json({
+                  "message": "Ask Executed successfully",
+                  statusCode: 200
+                });
+              } else {
+                //destroy bid
+                console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
+                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidowner " + currentBidDetails.bidowner);
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidowner
+                });
+                console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
+                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
+                var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH)).toFixed(8);
+                console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+                console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+
+                var userAllDetailsInDBBidderUpdate = await User.update({
+                  id: currentBidDetails.bidowner
+                }, {
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
+                });
+                console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
+                var desctroyCurrentBid = await Bid.destroy({
+                  id: currentBidDetails.id
+                });
+                console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
+              }
+            } else {
+              //destroy ask and update bid and  update asker and bidder and break
+
+              console.log(currentBidDetails.id + " userAll Details :: ");
+              console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
+
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askowner
+              });
+              //Update Bid
+              var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
+              var updatedBidAmountBCH = (parseFloat(currentBidDetails.bidAmountBCH) - parseFloat(totoalAskRemainingBCH)).toFixed(8);
+
+              var updatedaskDetails = await Bid.update({
+                id: currentBidDetails.id
+              }, {
+                bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
+                bidAmountBCH: parseFloat(updatedBidAmountBCH).toFixed(8)
+              });
+
+              //Update Bidder===========================================
+              var userAllDetailsInDBBiddder = await User.findOne({
+                id: currentBidDetails.bidowner
+              });
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
+              var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.BCHbalance) + parseFloat(totoalAskRemainingBCH)).toFixed(8);
+              console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+              console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+              var userAllDetailsInDBBidderUpdate = await User.update({
+                id: currentBidDetails.bidowner
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
+              });
+              //Update asker===========================================
+
+              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askowner");
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8);
+              var updatedFreezedBCHbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(userAskAmountBCH).toFixed(8);
+              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+              var updatedUser = await User.update({
+                id: askDetails.askowner
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
+              });
+              //Destroy Ask===========================================
+              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await Ask.destroy({
+                id: askDetails.id
+              });
+              console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+              return res.json({
+                "message": "Ask Executed successfully",
+                statusCode: 200
+              });
+            }
+          }
+
         }
+
       }
       console.log("Total Bid ::: " + total_bid);
       return res.json({
