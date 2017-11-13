@@ -647,10 +647,7 @@ module.exports = {
               });
             }
           }
-
-
         }
-
       }
       console.log("Total Bid ::: " + total_ask);
       return res.json({
@@ -658,7 +655,6 @@ module.exports = {
         "bids": allAsksFromdb,
         statusCode: 200
       });
-
     } else {
       //No bid match on this rate Ask and Ask placed successfully
       return res.json({

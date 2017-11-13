@@ -7,8 +7,28 @@
 
 module.exports = {
 
+  schema: true,
+  autoCreatedAt: false,
+  autoUpdatedAt: false,
   attributes: {
 
+    askAmountBTC: {
+      type: 'float',
+      defaultsTo: 0.00,
+      required: true
+    },
+    askAmountGDS: {
+      type: 'float',
+      defaultsTo: 0.00,
+      required: true
+    },
+    askRate: {
+      type: 'float',
+      required: true,
+      defaultsTo: 0
+    },
+    askowner: {
+      model: 'user'
+    }
   }
 };
-

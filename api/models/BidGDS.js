@@ -1,5 +1,5 @@
 /**
- * AskEBT.js
+ * BidGDS.js
  *
  * @description :: TODO: You might write a short summary of how this model works and what it represents here.
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
@@ -7,27 +7,30 @@
 
 module.exports = {
 
-  schema: true,
   autoCreatedAt: false,
   autoUpdatedAt: false,
+  schema: true,
   attributes: {
-    askAmountBTC: {
+
+    bidAmountBTC: {
       type: 'float',
       defaultsTo: 0.00,
       required: true
     },
-    askAmountEBT: {
+    bidAmountGDS: {
       type: 'float',
       defaultsTo: 0.00,
       required: true
     },
-    askRate: {
+
+    bidRate: {
       type: 'float',
       required: true,
       defaultsTo: 0
     },
-    askowner: {
+    bidowner: {
       model: 'user'
     }
+
   }
 };

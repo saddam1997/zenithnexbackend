@@ -35,7 +35,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    var askDetails = await Ask.create({
+    var askDetails = await AskEBT.create({
       askAmountBTC: userAskAmountBTC,
       askAmountEBT: userAskAmountEBT,
       askRate: parseFloat(userAskRate).toFixed(8),
@@ -50,7 +50,7 @@ module.exports = {
       FreezedEBTbalance: updateFreezedEBTBalance,
       EBTbalance: updateUserEBTBalance,
     });
-    var allBidsFromdb = await Bid.find({
+    var allBidsFromdb = await BidEBT.find({
       bidRate: {
         'like': parseFloat(userAskRate)
       }
@@ -107,12 +107,12 @@ module.exports = {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
               });
-              console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentBidDetails.id + " BidEBT.destroy currentBidDetails.id::: " + currentBidDetails.id);
+              var bidDestroy = await BidEBT.destroy({
                 id: currentBidDetails.id
               });
-              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await AskEBT.destroy({
                 id: askDetails.id
               });
               return res.json({
@@ -139,7 +139,7 @@ module.exports = {
                 EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
               });
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-              var desctroyCurrentBid = await Bid.destroy({
+              var desctroyCurrentBid = await BidEBT.destroy({
                 id: currentBidDetails.id
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
@@ -167,7 +167,7 @@ module.exports = {
               console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
               console.log(currentBidDetails.id + " Update In last Ask askAmountEBT totoalAskRemainingEBT " + totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
-              var updatedaskDetails = await Ask.update({
+              var updatedaskDetails = await AskEBT.update({
                 id: askDetails.id
               }, {
                 askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
@@ -218,12 +218,12 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                   FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
                 });
-                console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                var bidDestroy = await Bid.destroy({
+                console.log(currentBidDetails.id + " BidEBT.destroy currentBidDetails.id::: " + currentBidDetails.id);
+                var bidDestroy = await BidEBT.destroy({
                   id: currentBidDetails.id
                 });
-                console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-                var askDestroy = await Ask.destroy({
+                console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
+                var askDestroy = await AskEBT.destroy({
                   id: askDetails.id
                 });
                 return res.json({
@@ -250,7 +250,7 @@ module.exports = {
                   EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                var desctroyCurrentBid = await Bid.destroy({
+                var desctroyCurrentBid = await BidEBT.destroy({
                   id: currentBidDetails.id
                 });
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
@@ -268,7 +268,7 @@ module.exports = {
               var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT)).toFixed(8);
 
-              var updatedaskDetails = await Bid.update({
+              var updatedaskDetails = await BidEBT.update({
                 id: currentBidDetails.id
               }, {
                 bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
@@ -303,8 +303,8 @@ module.exports = {
                 FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
               });
               //Destroy Ask===========================================
-              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await AskEBT.destroy({
                 id: askDetails.id
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
@@ -362,7 +362,8 @@ module.exports = {
         statusCode: 401
       });
     }
-    var bidDetails = await Bid.create({
+    console.log("BidEBT.create ............");
+    var bidDetails = await BidEBT.create({
       bidAmountBTC: userBidAmountBTC,
       bidAmountEBT: userBidAmountEBT,
       bidRate: parseFloat(userBidRate),
@@ -379,7 +380,7 @@ module.exports = {
       BTCbalance: updateUserBTCBalance,
     });
     console.log("Bid created .........");
-    var allAsksFromdb = await Ask.find({
+    var allAsksFromdb = await AskEBT.find({
       askRate: {
         'like': parseFloat(userBidRate)
       }
@@ -440,12 +441,12 @@ module.exports = {
                 EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
-              console.log(currentAskDetails.id + " Bid.destroy currentAskDetails.id::: " + currentAskDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentAskDetails.id + " BidEBT.destroy currentAskDetails.id::: " + currentAskDetails.id);
+              var bidDestroy = await BidEBT.destroy({
                 id: bidDetails.bidowner
               });
-              console.log(currentAskDetails.id + " Ask.destroy bidDetails.id::: " + bidDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentAskDetails.id + " AskEBT.destroy bidDetails.id::: " + bidDetails.id);
+              var askDestroy = await AskEBT.destroy({
                 id: currentAskDetails.askowner
               });
               return res.json({
@@ -473,7 +474,7 @@ module.exports = {
                 BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
               });
               console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-              var destroyCurrentAsk = await Ask.destroy({
+              var destroyCurrentAsk = await AskEBT.destroy({
                 id: currentAskDetails.id
               });
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
@@ -489,7 +490,7 @@ module.exports = {
                 id: bidDetails.bidowner
               });
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidEBT.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -502,7 +503,7 @@ module.exports = {
               console.log(currentAskDetails.id + " Update In last Ask askAmountBTC totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " Update In last Ask askAmountEBT totoalBidRemainingEBT " + totoalBidRemainingEBT);
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
-              var updatedbidDetails = await Bid.update({
+              var updatedbidDetails = await BidEBT.update({
                 id: bidDetails.bidowner
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
@@ -551,12 +552,12 @@ module.exports = {
                   EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
                 });
-                console.log(currentAskDetails.id + " Bid.destroy currentAskDetails.id::: " + currentAskDetails.id);
-                var bidDestroy = await Ask.destroy({
+                console.log(currentAskDetails.id + " BidEBT.destroy currentAskDetails.id::: " + currentAskDetails.id);
+                var bidDestroy = await AskEBT.destroy({
                   id: currentAskDetails.id
                 });
-                console.log(currentAskDetails.id + " Ask.destroy bidDetails.id::: " + bidDetails.id);
-                var bidDestroy = await Bid.destroy({
+                console.log(currentAskDetails.id + " AskEBT.destroy bidDetails.id::: " + bidDetails.id);
+                var bidDestroy = await BidEBT.destroy({
                   id: bidDetails.id
                 });
                 return res.json({
@@ -583,7 +584,7 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
                 });
                 console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-                var destroyCurrentAsk = await Ask.destroy({
+                var destroyCurrentAsk = await AskEBT.destroy({
                   id: currentAskDetails.id
                 });
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
@@ -599,7 +600,7 @@ module.exports = {
               var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8));
               var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC)).toFixed(8);
 
-              var updatedaskDetails = await Ask.update({
+              var updatedaskDetails = await AskEBT.update({
                 id: currentAskDetails.id
               }, {
                 askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
@@ -633,8 +634,8 @@ module.exports = {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
               });
               //Destroy Bid===========================================Working
-              console.log(currentAskDetails.id + " Bid.destroy bidDetails.id::: " + bidDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentAskDetails.id + " BidEBT.destroy bidDetails.id::: " + bidDetails.id);
+              var bidDestroy = await BidEBT.destroy({
                 id: bidDetails.id
               });
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");

@@ -99,6 +99,7 @@ module.exports = {
                     statusCode: 400
                   });
                 }
+                //sails.sockets.blast('bidcreated', bidDetails);
                 var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
                 var updateFreezedBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
                 User.update({
