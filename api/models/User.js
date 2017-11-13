@@ -16,15 +16,28 @@ module.exports = {
       required: true,
       unique: true
     },
+
+    BTCMainbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
     BTCbalance: {
       type: 'float',
       defaultsTo: 0
     },
-    BCHbalance: {
+    FreezedBTCbalance: {
       type: 'float',
       defaultsTo: 0
     },
-    FreezedBTCbalance: {
+    userBTCAddress: {
+      type: 'string'
+    },
+
+    BCHMainbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    BCHbalance: {
       type: 'float',
       defaultsTo: 0
     },
@@ -35,9 +48,39 @@ module.exports = {
     userBCHAddress: {
       type: 'string'
     },
-    userBTCAddress: {
+
+    GDSMainbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    GDSbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    FreezedGDSbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    userGDSAddress: {
       type: 'string'
     },
+
+    EBTMainbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    EBTbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    FreezedEBTbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    userEBTAddress: {
+      type: 'string'
+    },
+
     encryptedPassword: {
       type: 'string'
     },

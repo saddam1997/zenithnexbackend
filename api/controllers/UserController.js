@@ -30,6 +30,22 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
+//EBT Wallet Details
+var bitcoinEBT = require('bitcoin');
+var clientEBT = new bitcoinEBT.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+//GDS Wallet Details
+var bitcoinGDS = require('bitcoin');
+var clientGDS = new bitcoinGDS.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
 var companyBCHAccount = sails.config.company.companyBCHAccount;
 var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
 
@@ -137,62 +153,110 @@ module.exports = {
               });
             }
             console.log('New address created from BCHServer :: ', newBCHAddressForUser);
-            bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
+            clientEBT.cmd('getnewaddress', useremailaddress, function(err, newEBTAddressForUser, resHeaders) {
               if (err) {
-                console.log("Error To bcrypt spendingpassword");
+                console.log("Error from sendFromBCHAccount:: ");
+                if (err.code && err.code == "ECONNREFUSED") {
+                  return res.json({
+                    "message": "BCH Server Refuse to connect App",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code < 0) {
+                  return res.json({
+                    "message": "Problem in BCH server",
+                    statusCode: 400
+                  });
+                }
                 return res.json({
-                  "message": err,
-                  statusCode: 500
+                  "message": "Error in BCH Server",
+                  statusCode: 400
                 });
               }
-              var otpForEmail = Math.floor(100000 + Math.random() * 900000);
-              console.log("otpForEmail :: " + otpForEmail);
-              bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
-                if (err) return next(err);
-                var encOtpForEmail = hash;
-                var userObj = {
-                  email: useremailaddress,
-                  password: userpassword,
-                  encryptedSpendingpassword: hashspendingpassword,
-                  userBTCAddress: newBTCAddressForUser,
-                  userBCHAddress: newBCHAddressForUser,
-                  encryptedEmailVerificationOTP: encOtpForEmail
-                }
-                User.create(userObj).exec(function(err, userAddDetails) {
-                  if (err) {
-                    console.log("Error to Create New user !!!");
-                    console.log(err);
+              console.log('New address created from newEBTAddressForUser :: ', newEBTAddressForUser);
+              clientGDS.cmd('getnewaddress', useremailaddress, function(err, newGDSAddressForUser, resHeaders) {
+                if (err) {
+                  console.log("Error from sendFromBCHAccount:: ");
+                  if (err.code && err.code == "ECONNREFUSED") {
                     return res.json({
-                      "message": "Error to create New User",
+                      "message": "BCH Server Refuse to connect App",
                       statusCode: 400
                     });
                   }
-                  console.log("User Create Succesfully...........");
-                  var mailOptions = {
-                    from: 'wallet.bcc@gmail.com',
-                    to: useremailaddress,
-                    subject: 'Sending Email using Node.js',
-                    text: 'Otp Password for Verify email  ' + otpForEmail
-                  };
-                  transporter.sendMail(mailOptions, function(error, info) {
-                    if (error) {
-                      console.log(error);
-                    } else {
-                      console.log('Email sent: ' + info.response);
-
-                      return res.json(200, {
-                        "message": "Otp sent on user mail id",
-                        "userMailId": useremailaddress,
-                        statusCode: 200
-                      });
-                    }
+                  if (err.code && err.code < 0) {
+                    return res.json({
+                      "message": "Problem in BCH server",
+                      statusCode: 400
+                    });
+                  }
+                  return res.json({
+                    "message": "Error in BCH Server",
+                    statusCode: 400
                   });
+                }
+                console.log('New address created from newEBTAddressForUser :: ', newGDSAddressForUser);
+                console.log('New address created from BCHServer :: ', newBCHAddressForUser);
+                bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
+                  if (err) {
+                    console.log("Error To bcrypt spendingpassword");
+                    return res.json({
+                      "message": err,
+                      statusCode: 500
+                    });
+                  }
+                  var otpForEmail = Math.floor(100000 + Math.random() * 900000);
+                  console.log("otpForEmail :: " + otpForEmail);
+                  bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
+                    if (err) return next(err);
+                    var encOtpForEmail = hash;
+                    var userObj = {
+                      email: useremailaddress,
+                      password: userpassword,
+                      encryptedSpendingpassword: hashspendingpassword,
+                      userBTCAddress: newBTCAddressForUser,
+                      userBCHAddress: newBCHAddressForUser,
+                      userEBTAddress: newEBTAddressForUser,
+                      userGDSAddress: newGDSAddressForUser,
+                      encryptedEmailVerificationOTP: encOtpForEmail
+                    }
+                    User.create(userObj).exec(function(err, userAddDetails) {
+                      if (err) {
+                        console.log("Error to Create New user !!!");
+                        console.log(err);
+                        return res.json({
+                          "message": "Error to create New User",
+                          statusCode: 400
+                        });
+                      }
+                      console.log("User Create Succesfully...........");
+                      var mailOptions = {
+                        from: 'wallet.bcc@gmail.com',
+                        to: useremailaddress,
+                        subject: 'Sending Email using Node.js',
+                        text: 'Otp Password for Verify email  ' + otpForEmail
+                      };
+                      transporter.sendMail(mailOptions, function(error, info) {
+                        if (error) {
+                          console.log(error);
+                        } else {
+                          console.log('Email sent: ' + info.response);
 
+                          return res.json(200, {
+                            "message": "Otp sent on user mail id",
+                            "userMailId": useremailaddress,
+                            statusCode: 200
+                          });
+                        }
+                      });
+
+                    });
+                  });
                 });
               });
             });
           });
         });
+
       }
     });
   },
@@ -873,3 +937,111 @@ module.exports = {
       });
   }
 };
+
+
+
+
+
+//
+//
+// clientEBT.cmd('getnewaddress', useremailaddress, function(err, newEBTAddressForUser, resHeaders) {
+//   if (err) {
+//     console.log("Error from sendFromBCHAccount:: ");
+//     if (err.code && err.code == "ECONNREFUSED") {
+//       return res.json({
+//         "message": "BCH Server Refuse to connect App",
+//         statusCode: 400
+//       });
+//     }
+//     if (err.code && err.code < 0) {
+//       return res.json({
+//         "message": "Problem in BCH server",
+//         statusCode: 400
+//       });
+//     }
+//     return res.json({
+//       "message": "Error in BCH Server",
+//       statusCode: 400
+//     });
+//   }
+//   console.log('New address created from newEBTAddressForUser :: ', newEBTAddressForUser);
+//   clientGDS.cmd('getnewaddress', useremailaddress, function(err, newGDSAddressForUser, resHeaders) {
+//     if (err) {
+//       console.log("Error from sendFromBCHAccount:: ");
+//       if (err.code && err.code == "ECONNREFUSED") {
+//         return res.json({
+//           "message": "BCH Server Refuse to connect App",
+//           statusCode: 400
+//         });
+//       }
+//       if (err.code && err.code < 0) {
+//         return res.json({
+//           "message": "Problem in BCH server",
+//           statusCode: 400
+//         });
+//       }
+//       return res.json({
+//         "message": "Error in BCH Server",
+//         statusCode: 400
+//       });
+//     }
+//     console.log('New address created from newEBTAddressForUser :: ', newGDSAddressForUser);
+//     console.log('New address created from BCHServer :: ', newBCHAddressForUser);
+//     bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
+//       if (err) {
+//         console.log("Error To bcrypt spendingpassword");
+//         return res.json({
+//           "message": err,
+//           statusCode: 500
+//         });
+//       }
+//       var otpForEmail = Math.floor(100000 + Math.random() * 900000);
+//       console.log("otpForEmail :: " + otpForEmail);
+//       bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
+//         if (err) return next(err);
+//         var encOtpForEmail = hash;
+//         var userObj = {
+//           email: useremailaddress,
+//           password: userpassword,
+//           encryptedSpendingpassword: hashspendingpassword,
+//           userBTCAddress: newBTCAddressForUser,
+//           userBCHAddress: newBCHAddressForUser,
+//           userEBTAddress: newEBTAddressForUser,
+//           userGDSAddress: newGDSAddressForUser,
+//           encryptedEmailVerificationOTP: encOtpForEmail
+//         }
+//         User.create(userObj).exec(function(err, userAddDetails) {
+//           if (err) {
+//             console.log("Error to Create New user !!!");
+//             console.log(err);
+//             return res.json({
+//               "message": "Error to create New User",
+//               statusCode: 400
+//             });
+//           }
+//           console.log("User Create Succesfully...........");
+//           var mailOptions = {
+//             from: 'wallet.bcc@gmail.com',
+//             to: useremailaddress,
+//             subject: 'Sending Email using Node.js',
+//             text: 'Otp Password for Verify email  ' + otpForEmail
+//           };
+//           transporter.sendMail(mailOptions, function(error, info) {
+//             if (error) {
+//               console.log(error);
+//             } else {
+//               console.log('Email sent: ' + info.response);
+//
+//               return res.json(200, {
+//                 "message": "Otp sent on user mail id",
+//                 "userMailId": useremailaddress,
+//                 statusCode: 200
+//               });
+//             }
+//           });
+//
+//         });
+//       });
+//     });
+//   });
+// });
