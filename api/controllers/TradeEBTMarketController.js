@@ -660,5 +660,218 @@ module.exports = {
         statusCode: 200
       });
     }
-  }
+  },
+  removeBidEBTMarket: function(req, res) {
+    console.log("Enter into bid api removeBid :: ");
+    var userBidId = req.body.bidId;
+    var bidownerId = req.body.bidownerId;
+
+    if (!userBidId || !bidownerId) {
+      console.log("User Entered invalid parameter !!!");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    BidEBT.findOne({
+      bidowner: bidownerId,
+      id: userBidId
+    }).exec(function(err, bidDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find bid",
+          statusCode: 400
+        });
+      }
+      if (!bidDetails) {
+        return res.json({
+          "message": "No Bid found for this user",
+          statusCode: 400
+        });
+      }
+      console.log("Valid bid details !!!" + JSON.stringify(bidDetails));
+
+
+      User.findOne({
+        id: bidownerId
+      }).exec(function(err, user) {
+        if (err) {
+          return res.json({
+            "message": "Error to find user",
+            statusCode: 401
+          });
+        }
+        if (!user) {
+          return res.json({
+            "message": "Invalid email!",
+            statusCode: 401
+          });
+        }
+
+        var userBTCBalanceInDb = parseFloat(user.BTCbalance).toFixed(8);
+        var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC).toFixed(8);
+        var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance).toFixed(8);
+        var updateFreezedBalance = userFreezedBTCbalanceInDB - bidAmountOfBTCInBidTableDB;
+        var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) + parseFloat(bidAmountOfBTCInBidTableDB)).toFixed(8);
+        console.log("userBTCBalanceInDb :" + userBTCBalanceInDb);
+        console.log("bidAmountOfBTCInBidTableDB :" + bidAmountOfBTCInBidTableDB);
+        console.log("userFreezedBTCbalanceInDB :" + userFreezedBTCbalanceInDB);
+        console.log("updateFreezedBalance :" + updateFreezedBalance);
+        console.log("updateUserBTCBalance :" + updateUserBTCBalance);
+
+        User.update({
+            id: bidownerId
+          }, {
+            BTCbalance: parseFloat(updateUserBTCBalance).toFixed(8),
+            FreezedBTCbalance: parseFloat(updateFreezedBalance).toFixed(8)
+          })
+          .exec(function(err, updatedUser) {
+            if (err) {
+              console.log("Error to update user BTC balance");
+              return res.json({
+                "message": "Error to update User values",
+                statusCode: 400
+              });
+            }
+            console.log("Removing bid !!!");
+            BidEBT.destroy({
+              id: userBidId
+            }).exec(function(err) {
+              if (err) {
+                return res.json({
+                  "message": "Error to remove bid",
+                  statusCode: 400
+                });
+              }
+              console.log("Returning user details !!!");
+              User.findOne({
+                  id: bidownerId
+                })
+                .populateAll()
+                .exec(function(err, userDetailsReturn) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to find user",
+                      statusCode: 401
+                    });
+                  }
+                  if (!userDetailsReturn) {
+                    return res.json({
+                      "message": "Invalid Id!",
+                      statusCode: 401
+                    });
+                  }
+                  return res.json(200, {
+                    user: userDetailsReturn,
+                    statusCode: 200
+                  });
+                });
+            });
+          });
+      });
+    });
+  },
+  removeAskEBTMarket: function(req, res) {
+    console.log("Enter into ask api removeAsk :: ");
+    var userAskId = req.body.askId;
+    var askownerId = req.body.askownerId;
+    if (!userAskId || !askownerId) {
+      console.log("User Entered invalid parameter !!!");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    AskEBT.findOne({
+      askowner: askownerId,
+      id: userAskId
+    }).exec(function(err, askDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find ask",
+          statusCode: 400
+        });
+      }
+      if (!askDetails) {
+        return res.json({
+          "message": "No ask found for this user",
+          statusCode: 400
+        });
+      }
+      console.log("Valid ask details !!!" + JSON.stringify(askDetails));
+      User.findOne({
+        id: askownerId
+      }).exec(function(err, user) {
+        if (err) {
+          return res.json({
+            "message": "Error to find user",
+            statusCode: 401
+          });
+        }
+        if (!user) {
+          return res.json({
+            "message": "Invalid email!",
+            statusCode: 401
+          });
+        }
+        var userEBTBalanceInDb = parseFloat(user.EBTbalance).toFixed(8);
+        var askAmountOfEBTInAskTableDB = parseFloat(askDetails.askAmountEBT).toFixed(8);
+        var userFreezedEBTbalanceInDB = parseFloat(user.FreezedEBTbalance).toFixed(8);
+        console.log("userEBTBalanceInDb :" + userEBTBalanceInDb);
+        console.log("askAmountOfEBTInAskTableDB :" + askAmountOfEBTInAskTableDB);
+        console.log("userFreezedEBTbalanceInDB :" + userFreezedEBTbalanceInDB);
+        var updateFreezedEBTBalance = userFreezedEBTbalanceInDB - askAmountOfEBTInAskTableDB;
+        var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) + parseFloat(askAmountOfEBTInAskTableDB)).toFixed(8);
+        User.update({
+            id: askownerId
+          }, {
+            EBTbalance: parseFloat(updateUserEBTBalance).toFixed(8),
+            FreezedEBTbalance: parseFloat(updateFreezedEBTBalance).toFixed(8)
+          })
+          .exec(function(err, updatedUser) {
+            if (err) {
+              console.log("Error to update user BTC balance");
+              return res.json({
+                "message": "Error to update User values",
+                statusCode: 400
+              });
+            }
+            console.log("Removing ask !!!");
+            AskEBT.destroy({
+              id: userAskId
+            }).exec(function(err) {
+              if (err) {
+                return res.json({
+                  "message": "Error to remove ask",
+                  statusCode: 400
+                });
+              }
+              console.log("Returning user details !!!");
+              User.findOne({
+                  id: askownerId
+                })
+                .populateAll()
+                .exec(function(err, userDetailsReturn) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to find user",
+                      statusCode: 401
+                    });
+                  }
+                  if (!userDetailsReturn) {
+                    return res.json({
+                      "message": "Invalid Id!",
+                      statusCode: 401
+                    });
+                  }
+                  return res.json({
+                    user: userDetailsReturn,
+                    statusCode: 200
+                  });
+                });
+            });
+          });
+      });
+    });
+  },
 };

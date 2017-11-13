@@ -145,6 +145,28 @@ module.exports = {
 
     });
   },
+  testBid: function(req, res) {
+    console.log("Enter into bid api testBid :: ");
+    console.log("Valid spending password !!!");
+    Bid.create({
+        bidAmountBTC: "0.01",
+        bidAmountBCH: "0.1",
+        bidRate: "0.1",
+        bidowner: "1"
+      })
+      .exec(function(err, bidDetails) {
+        if (err) {
+          console.log("Error to Create Bid !!!");
+          return res.json({
+            "message": "Error to create Bid",
+            statusCode: 400
+          });
+        }
+        sails.sockets.blast('bidcreated', bidDetails);
+        console.log("Bid creeated successfully");
+      });
+
+  },
   removeBid: function(req, res) {
     console.log("Enter into bid api removeBid :: ");
     var userBidId = req.body.bidId;
