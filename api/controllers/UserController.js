@@ -58,8 +58,187 @@ var transporter = nodemailer.createTransport({
 });
 
 module.exports = {
+  getNewGDSAddress: function(req, res) {
+    var userMailId = req.body.userMailId;
+    if (!userMailId)
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientGDS.cmd('getnewaddress', userMailId, function(err, address) {
+        if (err)
+          return res.json({
+            "message": "Failed to get new address from gds server",
+            statusCode: 400
+          });
 
-  createNewUser: function(req, res) {
+        console.log('gds address generated', address);
+        User.update({email: userMailId}, {userGDSAddress:address}, function (err, response) {
+          if(err)
+            return res.json({
+              "message": "Failed to update new address in database",
+              statusCode: 401
+            });
+
+          res.json({
+            "message": "Address has been generated and saved in database",
+            statusCode: 200
+          });
+        })
+      });
+    });
+},
+  getNewEBTAddress: function(req, res) {
+    var userMailId = req.body.userMailId;
+    if (!userMailId)
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientEBT.cmd('getnewaddress', userMailId, function(err, address) {
+        if (err)
+          return res.json({
+            "message": "Failed to get new address from ebt server",
+            statusCode: 400
+          });
+
+        console.log('ebt address generated', address);
+        User.update({email: userMailId}, {userEBTAddress:address}, function (err, response) {
+          if(err)
+            return res.json({
+              "message": "Failed to update new address in database",
+              statusCode: 401
+            });
+
+          res.json({
+            "message": "Address has been generated and saved in database",
+            statusCode: 200
+          });
+        })
+      });
+    });
+},
+  getNewBTCAddress: function(req, res) {
+    var userMailId = req.body.userMailId;
+    if (!userMailId)
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientBTC.cmd('getnewaddress', userMailId, function(err, address) {
+        if (err)
+          return res.json({
+            "message": "Failed to get new address from btc server",
+            statusCode: 400
+          });
+
+        console.log('btc address generated', address);
+        User.update({email: userMailId}, {userBTCAddress:address}, function (err, response) {
+          if(err)
+            return res.json({
+              "message": "Failed to update new address in database",
+              statusCode: 401
+            });
+
+          res.json({
+            "message": "Address has been generated and saved in database",
+            statusCode: 200
+          });
+        })
+      });
+    });
+},
+  getNewBCHAddress: function(req, res) {
+    var userMailId = req.body.userMailId;
+    if (!userMailId)
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientBCH.cmd('getnewaddress', userMailId, function(err, address) {
+        if (err)
+          return res.json({
+            "message": "Failed to get new address from bch server",
+            statusCode: 400
+          });
+
+        console.log('bch address generated', address);
+        User.update({email: userMailId}, {userBCHAddress:address}, function (err, response) {
+          if(err)
+            return res.json({
+              "message": "Failed to update new address in database",
+              statusCode: 401
+            });
+
+          res.json({
+            "message": "Address has been generated and saved in database",
+            statusCode: 200
+          });
+        })
+      });
+    });
+},
+createNewUser: function(req, res) {
     console.log("Enter into createNewUser :: ");
     var useremailaddress = req.body.email;
     var userpassword = req.body.password;
