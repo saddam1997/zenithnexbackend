@@ -19,9 +19,6 @@ var clientBTC = new bitcoinBTC.Client({
   user: sails.config.company.clientBTCuser,
   pass: sails.config.company.clientBTCpass
 });
-var companyBTCAccount = sails.config.company.companyBTCAccount;
-var companyBTCAccountAddress = sails.config.company.companyBTCAccountAddress;
-
 //BCH Wallet Details
 var bitcoinBCH = require('bitcoin');
 var clientBCH = new bitcoinBCH.Client({
@@ -48,7 +45,6 @@ var clientGDS = new bitcoinGDS.Client({
 });
 var companyBCHAccount = sails.config.company.companyBCHAccount;
 var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
-
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -56,9 +52,7 @@ var transporter = nodemailer.createTransport({
     pass: 'boosters@123'
   }
 });
-
 module.exports = {
-
   createNewUser: function(req, res) {
     console.log("Enter into createNewUser :: ");
     var useremailaddress = req.body.email;
@@ -913,8 +907,7 @@ module.exports = {
     User.findOne({
         email: userMailId
       })
-      .populate("bids")
-      .populate("asks")
+      .populateAll()
       .exec(function(err, user) {
         if (err) {
           return res.json({

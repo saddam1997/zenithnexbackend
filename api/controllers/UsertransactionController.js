@@ -12,10 +12,6 @@ var clientBTC = new bitcoinBTC.Client({
   user: sails.config.company.clientBTCuser,
   pass: sails.config.company.clientBTCpass
 });
-var companyBTCAccount = sails.config.company.companyBTCAccount;
-var companyBTCAccountAddress = sails.config.company.companyBTCAccountAddress;
-
-
 //BCH Wallet Details
 var bitcoinBCH = require('bitcoin');
 var clientBCH = new bitcoinBCH.Client({
@@ -24,11 +20,6 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
-var companyBCHAccount = sails.config.company.companyBCHAccount;
-var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
-var transactionFeeBCH = sails.config.company.txFeeBCH;
-var transactionFeeBTC = sails.config.company.txFeeBTC;
-
 //EBT Wallet Details
 var bitcoinEBT = require('bitcoin');
 var clientEBT = new bitcoinEBT.Client({
@@ -45,7 +36,10 @@ var clientGDS = new bitcoinGDS.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
-
+var transactionFeeBCH = sails.config.company.txFeeBCH;
+var transactionFeeBTC = sails.config.company.txFeeBTC;
+var transactionFeeEBT = sails.config.company.txFeeEBT;
+var transactionFeeGDS = sails.config.company.txFeeGDS;
 module.exports = {
   sendBTC: function(req, res, next) {
     console.log("Enter into sendBTC");
