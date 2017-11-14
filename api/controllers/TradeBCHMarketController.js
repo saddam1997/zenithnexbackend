@@ -39,7 +39,7 @@ module.exports = {
       askAmountBTC: userAskAmountBTC,
       askAmountBCH: userAskAmountBCH,
       askRate: parseFloat(userAskRate).toFixed(8),
-      askowner: userIdInDb
+      askownerBCH: userIdInDb
     });
     var updateUserBCHBalance = parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userAskAmountBCH).toFixed(8);
     var updateFreezedBCHBalance = (parseFloat(userFreezedBCHBalanceInDb) + parseFloat(userAskAmountBCH)).toFixed(8);
@@ -82,17 +82,17 @@ module.exports = {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingBCH == 0");
               var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               });
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               })
-              console.log("userAll askDetails.askowner :: ");
+              console.log("userAll askDetails.askownerBCH :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH)).toFixed(8);
               var userUpdateBidder = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
@@ -102,7 +102,7 @@ module.exports = {
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
@@ -122,9 +122,9 @@ module.exports = {
             } else {
               //destroy bid
               console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
-              console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidowner " + currentBidDetails.bidowner);
+              console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerBCH " + currentBidDetails.bidownerBCH);
               var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               });
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
@@ -132,7 +132,7 @@ module.exports = {
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
               var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
@@ -148,15 +148,15 @@ module.exports = {
               console.log(currentBidDetails.id + " userAll Details :: ");
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               });
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askowner");
+              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
               var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
@@ -189,17 +189,17 @@ module.exports = {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalAskRemainingBCH == 0");
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerBCH
                 });
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askowner
+                  id: askDetails.askownerBCH
                 });
-                console.log("userAll askDetails.askowner :: ");
+                console.log("userAll askDetails.askownerBCH :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
                 var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH)).toFixed(8);
                 var userUpdateBidder = await User.update({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerBCH
                 }, {
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
@@ -209,7 +209,7 @@ module.exports = {
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
                 var updatedUser = await User.update({
-                  id: askDetails.askowner
+                  id: askDetails.askownerBCH
                 }, {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                   FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
@@ -229,9 +229,9 @@ module.exports = {
               } else {
                 //destroy bid
                 console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
-                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidowner " + currentBidDetails.bidowner);
+                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerBCH " + currentBidDetails.bidownerBCH);
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerBCH
                 });
                 console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
@@ -240,7 +240,7 @@ module.exports = {
                 console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
 
                 var userAllDetailsInDBBidderUpdate = await User.update({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerBCH
                 }, {
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
@@ -258,7 +258,7 @@ module.exports = {
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               });
               //Update Bid
               var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
@@ -273,27 +273,27 @@ module.exports = {
 
               //Update Bidder===========================================
               var userAllDetailsInDBBiddder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               });
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.BCHbalance) + parseFloat(totoalAskRemainingBCH)).toFixed(8);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
               var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerBCH
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
               });
               //Update asker ===========================================
 
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askowner");
+              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8);
               var updatedFreezedBCHbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(userAskAmountBCH).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerBCH
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
@@ -333,10 +333,10 @@ module.exports = {
     var userBidAmountBTC = req.body.bidAmountBTC;
     var userBidAmountBCH = req.body.bidAmountBCH;
     var userBidRate = req.body.bidRate;
-    var userBidownerId = req.body.bidownerId;
+    var userBid1ownerId = req.body.bidownerId;
 
     if (!userBidAmountBCH || !userBidAmountBTC ||
-      !userBidRate || !userBidownerId) {
+      !userBidRate || !userBid1ownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -344,7 +344,7 @@ module.exports = {
       });
     }
     var userBidder = await User.findOne({
-      id: userBidownerId
+      id: userBid1ownerId
     });
     console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
@@ -362,7 +362,7 @@ module.exports = {
       bidAmountBTC: userBidAmountBTC,
       bidAmountBCH: userBidAmountBCH,
       bidRate: parseFloat(userBidRate),
-      bidowner: userIdInDb
+      bidownerBCH: userIdInDb
     });
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
@@ -407,19 +407,19 @@ module.exports = {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalBidRemainingBCH == 0");
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               });
               var BidderuserAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               });
-              console.log("userAll bidDetails.askowner :: ");
+              console.log("userAll bidDetails.askownerBCH :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountBCH).toFixed(8));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
               //current ask details of Asker  updated
               //Ask FreezedBCHbalance balance of asker deducted and BTC to give asker
               var userUpdateAsker = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               }, {
                 FreezedBCHbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BTCbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
@@ -431,18 +431,18 @@ module.exports = {
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               }, {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
               console.log(currentAskDetails.id + " BidBCH.destroy currentAskDetails.id::: " + currentAskDetails.id);
               var bidDestroy = await BidBCH.destroy({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               });
               console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               var askDestroy = await AskBCH.destroy({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               });
               return res.json({
                 "message": "Ask Executed successfully",
@@ -452,9 +452,9 @@ module.exports = {
             } else {
               //destroy bid
               console.log(currentAskDetails.id + " enter into else of totoalBidRemainingBCH == 0");
-              console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidowner " + currentAskDetails.bidowner);
+              console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerBCH " + currentAskDetails.bidownerBCH);
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               });
               console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
               var updatedFreezedBCHbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountBCH).toFixed(8));
@@ -463,7 +463,7 @@ module.exports = {
               console.log(currentAskDetails.id + " updatedBTCbalanceBidder:: " + updatedBTCbalanceBidder);
 
               var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               }, {
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceBidder).toFixed(8),
                 BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
@@ -482,15 +482,15 @@ module.exports = {
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
 
               var userAllDetailsInDBBid = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               });
-              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
+              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerBCH");
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBid.BCHbalance) + parseFloat(userBidAmountBCH)).toFixed(8) - parseFloat(totoalBidRemainingBCH).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               }, {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -500,7 +500,7 @@ module.exports = {
               console.log(currentAskDetails.id + " Update In last Ask askAmountBCH totoalBidRemainingBCH " + totoalBidRemainingBCH);
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
               var updatedbidDetails = await BidBCH.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
                 bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8)
@@ -525,17 +525,17 @@ module.exports = {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalBidRemainingBCH == 0");
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerBCH
                 });
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: bidDetails.bidowner
+                  id: bidDetails.bidownerBCH
                 });
-                console.log("userAll bidDetails.askowner :: ");
+                console.log("userAll bidDetails.askownerBCH :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountBCH).toFixed(8));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
                 var userUpdateAsker = await User.update({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerBCH
                 }, {
                   FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8),
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
@@ -545,7 +545,7 @@ module.exports = {
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
                 var updatedUser = await User.update({
-                  id: bidDetails.bidowner
+                  id: bidDetails.bidownerBCH
                 }, {
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -565,9 +565,9 @@ module.exports = {
               } else {
                 //destroy bid
                 console.log(currentAskDetails.id + " enter into else of totoalBidRemainingBCH == 0");
-                console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidowner " + currentAskDetails.bidowner);
+                console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerBCH " + currentAskDetails.bidownerBCH);
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerBCH
                 });
                 console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
                 var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountBCH).toFixed(8));
@@ -576,7 +576,7 @@ module.exports = {
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
                 var userAllDetailsInDBAskerUpdate = await User.update({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerBCH
                 }, {
                   FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8),
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
@@ -592,7 +592,7 @@ module.exports = {
               console.log(currentAskDetails.id + " userAll Details :: ");
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
               var userAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               });
               //Update Ask
               var updatedAskAmountBCH = (parseFloat(currentAskDetails.askAmountBCH).toFixed(8) - parseFloat(totoalBidRemainingBCH).toFixed(8));
@@ -607,26 +607,26 @@ module.exports = {
 
               //Update Asker===========================================11
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               });
               var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance).toFixed(8) - parseFloat(totoalBidRemainingBCH).toFixed(8));
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC)).toFixed(8);
               console.log(currentAskDetails.id + " updatedFreezedBCHbalanceAsker:: " + updatedFreezedBCHbalanceAsker);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
               var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerBCH
               }, {
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8),
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
               });
               //Update bidder =========================================== 11
-              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
+              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerBCH");
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(userBidAmountBCH)).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBCHbalanceBidder);
               console.log(currentAskDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerBCH
               }, {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -647,23 +647,21 @@ module.exports = {
       }
       console.log("Total Bid ::: " + total_ask);
       return res.json({
-        "total_ask": total_ask,
-        "bids": allAsksFromdb,
+        "message": "Your bid placed successfully!!",
         statusCode: 200
       });
     } else {
       //No bid match on this rate Ask and Ask placed successfully
       return res.json({
-        "message": "Your ask placed successfully!!",
+        "message": "Your bid placed successfully!!",
         statusCode: 200
       });
     }
   },
   removeBidBCHMarket: function(req, res) {
     console.log("Enter into bid api removeBid :: ");
-    var userBidId = req.body.bidId;
+    var userBidId = req.body.bidIdBCH;
     var bidownerId = req.body.bidownerId;
-
     if (!userBidId || !bidownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
@@ -672,7 +670,7 @@ module.exports = {
       });
     }
     BidBCH.findOne({
-      bidowner: bidownerId,
+      bidownerBCH: bidownerId,
       id: userBidId
     }).exec(function(err, bidDetails) {
       if (err) {
@@ -688,8 +686,6 @@ module.exports = {
         });
       }
       console.log("Valid bid details !!!" + JSON.stringify(bidDetails));
-
-
       User.findOne({
         id: bidownerId
       }).exec(function(err, user) {
@@ -705,7 +701,6 @@ module.exports = {
             statusCode: 401
           });
         }
-
         var userBTCBalanceInDb = parseFloat(user.BTCbalance).toFixed(8);
         var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC).toFixed(8);
         var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance).toFixed(8);
@@ -742,28 +737,32 @@ module.exports = {
                 });
               }
               console.log("Returning user details !!!");
-              User.findOne({
-                  id: bidownerId
-                })
-                .populateAll()
-                .exec(function(err, userDetailsReturn) {
-                  if (err) {
-                    return res.json({
-                      "message": "Error to find user",
-                      statusCode: 401
-                    });
-                  }
-                  if (!userDetailsReturn) {
-                    return res.json({
-                      "message": "Invalid Id!",
-                      statusCode: 401
-                    });
-                  }
-                  return res.json(200, {
-                    user: userDetailsReturn,
-                    statusCode: 200
-                  });
-                });
+              return res.json({
+                "message": "Bid removed successfully!!!",
+                statusCode: 200
+              });
+              // User.findOne({
+              //     id: bidownerId
+              //   })
+              //   .populateAll()
+              //   .exec(function(err, userDetailsReturn) {
+              //     if (err) {
+              //       return res.json({
+              //         "message": "Error to find user",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     if (!userDetailsReturn) {
+              //       return res.json({
+              //         "message": "Invalid Id!",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     return res.json(200, {
+              //       user: userDetailsReturn,
+              //       statusCode: 200
+              //     });
+              //   });
             });
           });
       });
@@ -771,7 +770,7 @@ module.exports = {
   },
   removeAskBCHMarket: function(req, res) {
     console.log("Enter into ask api removeAsk :: ");
-    var userAskId = req.body.askId;
+    var userAskId = req.body.askIdBCH;
     var askownerId = req.body.askownerId;
     if (!userAskId || !askownerId) {
       console.log("User Entered invalid parameter !!!");
@@ -781,7 +780,7 @@ module.exports = {
       });
     }
     AskBCH.findOne({
-      askowner: askownerId,
+      askownerBCH: askownerId,
       id: userAskId
     }).exec(function(err, askDetails) {
       if (err) {
@@ -845,28 +844,32 @@ module.exports = {
                 });
               }
               console.log("Returning user details !!!");
-              User.findOne({
-                  id: askownerId
-                })
-                .populateAll()
-                .exec(function(err, userDetailsReturn) {
-                  if (err) {
-                    return res.json({
-                      "message": "Error to find user",
-                      statusCode: 401
-                    });
-                  }
-                  if (!userDetailsReturn) {
-                    return res.json({
-                      "message": "Invalid Id!",
-                      statusCode: 401
-                    });
-                  }
-                  return res.json({
-                    user: userDetailsReturn,
-                    statusCode: 200
-                  });
-                });
+              return res.json({
+                "message": "Ask removed successfully!!",
+                statusCode: 200
+              });
+              // User.findOne({
+              //     id: askownerId
+              //   })
+              //   .populateAll()
+              //   .exec(function(err, userDetailsReturn) {
+              //     if (err) {
+              //       return res.json({
+              //         "message": "Error to find user",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     if (!userDetailsReturn) {
+              //       return res.json({
+              //         "message": "Invalid Id!",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     return res.json({
+              //       user: userDetailsReturn,
+              //       statusCode: 200
+              //     });
+              //   });
             });
           });
       });

@@ -39,7 +39,7 @@ module.exports = {
       askAmountBTC: userAskAmountBTC,
       askAmountGDS: userAskAmountGDS,
       askRate: parseFloat(userAskRate).toFixed(8),
-      askowner: userIdInDb
+      askownerGDS: userIdInDb
     });
     var updateUserGDSBalance = parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userAskAmountGDS).toFixed(8);
     var updateFreezedGDSBalance = (parseFloat(userFreezedGDSBalanceInDb) + parseFloat(userAskAmountGDS)).toFixed(8);
@@ -82,17 +82,17 @@ module.exports = {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingGDS == 0");
               var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               });
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               })
-              console.log("userAll askDetails.askowner :: ");
+              console.log("userAll askDetails.askownerGDS :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS)).toFixed(8);
               var userUpdateBidder = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
@@ -102,7 +102,7 @@ module.exports = {
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
@@ -122,9 +122,9 @@ module.exports = {
             } else {
               //destroy bid
               console.log(currentBidDetails.id + " enter into else of totoalAskRemainingGDS == 0");
-              console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidowner " + currentBidDetails.bidowner);
+              console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerGDS " + currentBidDetails.bidownerGDS);
               var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               });
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
@@ -133,7 +133,7 @@ module.exports = {
               console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
 
               var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
@@ -150,15 +150,15 @@ module.exports = {
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               });
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askowner");
+              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
               var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
@@ -193,17 +193,17 @@ module.exports = {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalAskRemainingGDS == 0");
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerGDS
                 });
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askowner
+                  id: askDetails.askownerGDS
                 });
-                console.log("userAll askDetails.askowner :: ");
+                console.log("userAll askDetails.askownerGDS :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
                 var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS)).toFixed(8);
                 var userUpdateBidder = await User.update({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerGDS
                 }, {
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                   GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
@@ -213,7 +213,7 @@ module.exports = {
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
                 var updatedUser = await User.update({
-                  id: askDetails.askowner
+                  id: askDetails.askownerGDS
                 }, {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                   FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
@@ -233,9 +233,9 @@ module.exports = {
               } else {
                 //destroy bid
                 console.log(currentBidDetails.id + " enter into else of totoalAskRemainingGDS == 0");
-                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidowner " + currentBidDetails.bidowner);
+                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerGDS " + currentBidDetails.bidownerGDS);
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerGDS
                 });
                 console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
@@ -244,7 +244,7 @@ module.exports = {
                 console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
 
                 var userAllDetailsInDBBidderUpdate = await User.update({
-                  id: currentBidDetails.bidowner
+                  id: currentBidDetails.bidownerGDS
                 }, {
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                   GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
@@ -262,7 +262,7 @@ module.exports = {
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
               var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               });
               //Update Bid
               var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
@@ -277,27 +277,27 @@ module.exports = {
 
               //Update Bidder===========================================
               var userAllDetailsInDBBiddder = await User.findOne({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               });
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.GDSbalance) + parseFloat(totoalAskRemainingGDS)).toFixed(8);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
               var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidowner
+                id: currentBidDetails.bidownerGDS
               }, {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
               });
               //Update asker ===========================================
 
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askowner");
+              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8);
               var updatedFreezedGDSbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(userAskAmountGDS).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               var updatedUser = await User.update({
-                id: askDetails.askowner
+                id: askDetails.askownerGDS
               }, {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
@@ -366,7 +366,7 @@ module.exports = {
       bidAmountBTC: userBidAmountBTC,
       bidAmountGDS: userBidAmountGDS,
       bidRate: parseFloat(userBidRate),
-      bidowner: userIdInDb
+      bidownerGDS: userIdInDb
     });
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
@@ -411,19 +411,19 @@ module.exports = {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalBidRemainingGDS == 0");
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               });
               var BidderuserAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               });
-              console.log("userAll bidDetails.askowner :: ");
+              console.log("userAll bidDetails.askownerGDS :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountGDS).toFixed(8));
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
               //current ask details of Asker  updated
               //Ask FreezedGDSbalance balance of asker deducted and BTC to give asker
               var userUpdateAsker = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               }, {
                 FreezedGDSbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
                 BTCbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
@@ -435,18 +435,18 @@ module.exports = {
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               }, {
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
               console.log(currentAskDetails.id + " BidGDS.destroy currentAskDetails.id::: " + currentAskDetails.id);
               var bidDestroy = await BidGDS.destroy({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               });
               console.log(currentAskDetails.id + " AskGDS.destroy bidDetails.id::: " + bidDetails.id);
               var askDestroy = await AskGDS.destroy({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               });
               return res.json({
                 "message": "Ask Executed successfully",
@@ -456,9 +456,9 @@ module.exports = {
             } else {
               //destroy bid
               console.log(currentAskDetails.id + " enter into else of totoalBidRemainingGDS == 0");
-              console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidowner " + currentAskDetails.bidowner);
+              console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerGDS " + currentAskDetails.bidownerGDS);
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               });
               console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
               var updatedFreezedGDSbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountGDS).toFixed(8));
@@ -467,7 +467,7 @@ module.exports = {
               console.log(currentAskDetails.id + " updatedBTCbalanceBidder:: " + updatedBTCbalanceBidder);
 
               var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               }, {
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceBidder).toFixed(8),
                 BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
@@ -486,15 +486,15 @@ module.exports = {
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
 
               var userAllDetailsInDBBid = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               });
-              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
+              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerGDS");
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBid.GDSbalance) + parseFloat(userBidAmountGDS)).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               }, {
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -504,7 +504,7 @@ module.exports = {
               console.log(currentAskDetails.id + " Update In last Ask askAmountGDS totoalBidRemainingGDS " + totoalBidRemainingGDS);
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
               var updatedbidDetails = await BidGDS.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
                 bidAmountGDS: parseFloat(totoalBidRemainingGDS).toFixed(8)
@@ -529,17 +529,17 @@ module.exports = {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalBidRemainingGDS == 0");
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerGDS
                 });
                 var userAllDetailsInDBBidder = await User.findOne({
-                  id: bidDetails.bidowner
+                  id: bidDetails.bidownerGDS
                 });
-                console.log("userAll bidDetails.askowner :: ");
+                console.log("userAll bidDetails.askownerGDS :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountGDS).toFixed(8));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
                 var userUpdateAsker = await User.update({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerGDS
                 }, {
                   FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8),
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
@@ -549,7 +549,7 @@ module.exports = {
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
                 var updatedUser = await User.update({
-                  id: bidDetails.bidowner
+                  id: bidDetails.bidownerGDS
                 }, {
                   GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8),
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -569,9 +569,9 @@ module.exports = {
               } else {
                 //destroy bid
                 console.log(currentAskDetails.id + " enter into else of totoalBidRemainingGDS == 0");
-                console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidowner " + currentAskDetails.bidowner);
+                console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerGDS " + currentAskDetails.bidownerGDS);
                 var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerGDS
                 });
                 console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
                 var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountGDS).toFixed(8));
@@ -580,7 +580,7 @@ module.exports = {
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
                 var userAllDetailsInDBAskerUpdate = await User.update({
-                  id: currentAskDetails.askowner
+                  id: currentAskDetails.askownerGDS
                 }, {
                   FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8),
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
@@ -596,7 +596,7 @@ module.exports = {
               console.log(currentAskDetails.id + " userAll Details :: ");
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
               var userAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               });
               //Update Ask
               var updatedAskAmountGDS = (parseFloat(currentAskDetails.askAmountGDS).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8));
@@ -611,26 +611,26 @@ module.exports = {
 
               //Update Asker===========================================11
               var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               });
               var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8));
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC)).toFixed(8);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker:: " + updatedFreezedGDSbalanceAsker);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
               var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askowner
+                id: currentAskDetails.askownerGDS
               }, {
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8),
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
               });
               //Update bidder =========================================== 11
-              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
+              console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerGDS");
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedGDSbalanceBidder);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               var updatedUser = await User.update({
-                id: bidDetails.bidowner
+                id: bidDetails.bidownerGDS
               }, {
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
@@ -651,8 +651,7 @@ module.exports = {
       }
       console.log("Total Bid ::: " + total_ask);
       return res.json({
-        "total_ask": total_ask,
-        "bids": allAsksFromdb,
+        "message": "Your ask placed successfully!!",
         statusCode: 200
       });
 
@@ -664,7 +663,7 @@ module.exports = {
       });
     }
   },
-  removeBidBCHMarket: function(req, res) {
+  removeBidGDSMarket: function(req, res) {
     console.log("Enter into bid api removeBid :: ");
     var userBidId = req.body.bidId;
     var bidownerId = req.body.bidownerId;
@@ -677,7 +676,7 @@ module.exports = {
       });
     }
     BidGDS.findOne({
-      bidowner: bidownerId,
+      bidownerGDS: bidownerId,
       id: userBidId
     }).exec(function(err, bidDetails) {
       if (err) {
@@ -747,34 +746,38 @@ module.exports = {
                 });
               }
               console.log("Returning user details !!!");
-              User.findOne({
-                  id: bidownerId
-                })
-                .populateAll()
-                .exec(function(err, userDetailsReturn) {
-                  if (err) {
-                    return res.json({
-                      "message": "Error to find user",
-                      statusCode: 401
-                    });
-                  }
-                  if (!userDetailsReturn) {
-                    return res.json({
-                      "message": "Invalid Id!",
-                      statusCode: 401
-                    });
-                  }
-                  return res.json(200, {
-                    user: userDetailsReturn,
-                    statusCode: 200
-                  });
-                });
+              return res.json({
+                "message": "Bid removed successfully!!!",
+                statusCode: 400
+              });
+              // User.findOne({
+              //     id: bidownerId
+              //   })
+              //   .populateAll()
+              //   .exec(function(err, userDetailsReturn) {
+              //     if (err) {
+              //       return res.json({
+              //         "message": "Error to find user",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     if (!userDetailsReturn) {
+              //       return res.json({
+              //         "message": "Invalid Id!",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     return res.json(200, {
+              //       user: userDetailsReturn,
+              //       statusCode: 200
+              //     });
+              //   });
             });
           });
       });
     });
   },
-  removeAskBCHMarket: function(req, res) {
+  removeAskGDSMarket: function(req, res) {
     console.log("Enter into ask api removeAsk :: ");
     var userAskId = req.body.askId;
     var askownerId = req.body.askownerId;
@@ -786,7 +789,7 @@ module.exports = {
       });
     }
     AskGDS.findOne({
-      askowner: askownerId,
+      askownerGDS: askownerId,
       id: userAskId
     }).exec(function(err, askDetails) {
       if (err) {
@@ -817,19 +820,19 @@ module.exports = {
             statusCode: 401
           });
         }
-        var userBCHBalanceInDb = parseFloat(user.BCHbalance).toFixed(8);
-        var askAmountOfBCHInAskTableDB = parseFloat(askDetails.askAmountBCH).toFixed(8);
-        var userFreezedBCHbalanceInDB = parseFloat(user.FreezedBCHbalance).toFixed(8);
-        console.log("userBCHBalanceInDb :" + userBCHBalanceInDb);
-        console.log("askAmountOfBCHInAskTableDB :" + askAmountOfBCHInAskTableDB);
-        console.log("userFreezedBCHbalanceInDB :" + userFreezedBCHbalanceInDB);
-        var updateFreezedBCHBalance = userFreezedBCHbalanceInDB - askAmountOfBCHInAskTableDB;
-        var updateUserBCHBalance = (parseFloat(userBCHBalanceInDb) + parseFloat(askAmountOfBCHInAskTableDB)).toFixed(8);
+        var userGDSBalanceInDb = parseFloat(user.GDSbalance).toFixed(8);
+        var askAmountOfGDSInAskTableDB = parseFloat(askDetails.askAmountGDS).toFixed(8);
+        var userFreezedGDSbalanceInDB = parseFloat(user.FreezedGDSbalance).toFixed(8);
+        console.log("userGDSBalanceInDb :" + userGDSBalanceInDb);
+        console.log("askAmountOfGDSInAskTableDB :" + askAmountOfGDSInAskTableDB);
+        console.log("userFreezedGDSbalanceInDB :" + userFreezedGDSbalanceInDB);
+        var updateFreezedGDSBalance = userFreezedGDSbalanceInDB - askAmountOfGDSInAskTableDB;
+        var updateUserGDSBalance = (parseFloat(userGDSBalanceInDb) + parseFloat(askAmountOfGDSInAskTableDB)).toFixed(8);
         User.update({
             id: askownerId
           }, {
-            BCHbalance: parseFloat(updateUserBCHBalance).toFixed(8),
-            FreezedBCHbalance: parseFloat(updateFreezedBCHBalance).toFixed(8)
+            GDSbalance: parseFloat(updateUserGDSBalance).toFixed(8),
+            FreezedGDSbalance: parseFloat(updateFreezedGDSBalance).toFixed(8)
           })
           .exec(function(err, updatedUser) {
             if (err) {
@@ -850,28 +853,32 @@ module.exports = {
                 });
               }
               console.log("Returning user details !!!");
-              User.findOne({
-                  id: askownerId
-                })
-                .populateAll()
-                .exec(function(err, userDetailsReturn) {
-                  if (err) {
-                    return res.json({
-                      "message": "Error to find user",
-                      statusCode: 401
-                    });
-                  }
-                  if (!userDetailsReturn) {
-                    return res.json({
-                      "message": "Invalid Id!",
-                      statusCode: 401
-                    });
-                  }
-                  return res.json({
-                    user: userDetailsReturn,
-                    statusCode: 200
-                  });
-                });
+              return res.json({
+                "message": "ask remove successfully!!",
+                statusCode: 200
+              });
+              // User.findOne({
+              //     id: askownerId
+              //   })
+              //   .populateAll()
+              //   .exec(function(err, userDetailsReturn) {
+              //     if (err) {
+              //       return res.json({
+              //         "message": "Error to find user",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     if (!userDetailsReturn) {
+              //       return res.json({
+              //         "message": "Invalid Id!",
+              //         statusCode: 401
+              //       });
+              //     }
+              //     return res.json({
+              //       user: userDetailsReturn,
+              //       statusCode: 200
+              //     });
+              //   });
             });
           });
       });

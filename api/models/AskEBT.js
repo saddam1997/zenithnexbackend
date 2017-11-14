@@ -26,7 +26,7 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    askowner: {
+    askownerEBT: {
       model: 'user'
     }
   }

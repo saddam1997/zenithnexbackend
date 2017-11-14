@@ -24,6 +24,7 @@ module.exports = {
         statusCode: 401
       });
     }
+    console.log("Finding user....");
     User.findOne({
         email: useremail
       })
@@ -41,6 +42,7 @@ module.exports = {
             statusCode: 401
           });
         }
+        console.log("Compare passs");
         User.comparePassword(password, user, function(err, valid) {
           if (err) {
             console.log("Error to compare password");

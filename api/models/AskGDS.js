@@ -27,7 +27,7 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    askowner: {
+    askownerGDS: {
       model: 'user'
     }
   }

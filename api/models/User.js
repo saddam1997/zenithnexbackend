@@ -104,15 +104,33 @@ module.exports = {
       type: "boolean",
       defaultsTo: false
     },
-    bids: {
-      collection: 'bid',
-      via: 'bidowner'
+    //BCH
+    bidsBCH: {
+      collection: 'bidBCH',
+      via: 'bidownerBCH'
     },
-    asks: {
-      collection: 'ask',
-      via: 'askowner'
+    asksBCH: {
+      collection: 'askBCH',
+      via: 'askownerBCH'
     },
-
+    //GDS
+    bidsGDS: {
+      collection: 'bidGDS',
+      via: 'bidownerGDS'
+    },
+    asksGDS: {
+      collection: 'askGDS',
+      via: 'askownerGDS'
+    },
+    //EBT
+    bidsEBT: {
+      collection: 'bidEBT',
+      via: 'bidownerEBT'
+    },
+    asksEBT: {
+      collection: 'askEBT',
+      via: 'askownerEBT'
+    },
     toJSON: function() {
       var obj = this.toObject();
       delete obj.encryptedPassword;
@@ -133,24 +151,33 @@ module.exports = {
       })
     })
   },
-  comparePassword: function(password, user) {
+  comparePassword: function(password, user, cb = () => {}) {
     bcrypt.compare(password, user.encryptedPassword, function(err, match) {
       return new Promise(function(resolve, reject) {
-          if (err)
-            return reject(err);
-          resolve(match);
+        if (err) {
+          cb(err);
+          return reject(err);
+
         }
-        // if (err) {
-        //   console.log(" cb(err).. findOne.authenticated called.........");
-        //   cb(err);
-        // }
-        // if (match) {
-        //   cb(null, true);
-        // } else {
-        //   console.log(" cb(else).. findOne.authenticated called.........");
-        //   cb(err);
-        // }
-      );
+        cb(null, match)
+        resolve(match);
+      })
+      // return new Promise(function(resolve, reject) {
+      //     if (err)
+      //       return reject(err);
+      //     resolve(match);
+      //   }
+      //   // if (err) {
+      //   //   console.log(" cb(err).. findOne.authenticated called.........");
+      //   //   cb(err);
+      //   // }
+      //   // if (match) {
+      //   //   cb(null, true);
+      //   // } else {
+      //   //   console.log(" cb(else).. findOne.authenticated called.........");
+      //   //   cb(err);
+      //   // }
+      // );
     })
   },
 

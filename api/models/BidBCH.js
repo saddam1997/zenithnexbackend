@@ -28,7 +28,7 @@ module.exports = {
       required: true,
       defaultsTo: 0
     },
-    bidowner: {
+    bidownerBCH: {
       model: 'user'
     }
 
