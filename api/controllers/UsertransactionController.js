@@ -88,7 +88,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userBTCBalanceInDb = parseFloat(userDetails.BTCbalance).toFixed(8);
+        var userBTCBalanceInDb = parseFloat(userDetails.BTCMainbalance).toFixed(8);
         console.log("User BTC balance in database ::: " + userBTCBalanceInDb);
         console.log("User want send BTC to send ::: " + userBTCAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -109,7 +109,7 @@ module.exports = {
             } else {
               console.log("Valid spending password !!!");
               var userBTCAddressInDb = userDetails.userBTCAddress;
-              var userBTCBalanceInDb = userDetails.BTCbalance;
+              var userBTCBalanceInDb = userDetails.BTCMainbalance;
               if (userBTCAmountToSend > userBTCBalanceInDb) {
                 console.log("User BTC balance is Insufficient");
                 return res.json({
@@ -170,7 +170,7 @@ module.exports = {
                   User.update({
                       email: userEmailAddress
                     }, {
-                      BTCbalance: parseFloat(updatedBTCbalance).toFixed(8)
+                      BTCMainbalance: parseFloat(updatedBTCbalance).toFixed(8)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -249,9 +249,9 @@ module.exports = {
           statusCode: 401
         });
       }
-      var userBCHBalanceInDb = parseFloat(userDetails.BCHbalance).toFixed(8);
+      var userBCHBalanceInDb = parseFloat(userDetails.BCHMainbalance).toFixed(8);
       var userBCHAddressInDb = userDetails.userBCHAddress;
-      console.log("UserAMount in database ::: " + userDetails.BCHbalance);
+      console.log("UserAMount in database ::: " + userDetails.BCHMainbalance);
       console.log("BCH Amount send by user ::: " + userBCHAmountToSend);
       if (userBCHAmountToSend > userBCHBalanceInDb) {
         console.log("BCH Amount amount Exceed !!!");
@@ -331,7 +331,7 @@ module.exports = {
               User.update({
                   email: userEmailAddress
                 }, {
-                  BCHbalance: updatedBCHbalance
+                  BCHMainbalance: updatedBCHbalance
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -369,552 +369,327 @@ module.exports = {
       });
     });
   },
-  sellBCH: function(req, res, next) {
-    console.log("Enter into sellBCHCoinByUserWithFeeBlockIO with ::: " + JSON.stringify(req.body));
-    var userEmailId = req.body.userMailId;
-    var usersellAmountBTC = parseFloat(req.body.sellAmountBTC).toFixed(8);
-    var usersellAmountBCH = parseFloat(req.body.sellAmountBCH).toFixed(8);
-    var userSpendingPassword = req.body.spendingPassword;
-    var userCommentForReciever = req.body.commentForReciever;
-    var userCommentForSender = req.body.commentForSender;
-    var minimumAmountBCHToSell = 0.008;
-
-    if (!userEmailId || !usersellAmountBTC || !usersellAmountBCH ||
-      !userSpendingPassword || !userCommentForReciever || !userCommentForSender) {
-      console.log("Invalid Parameter by user!!!");
-      return res.json({
-        "message": "Invalid Parameter",
-        statusCode: 400
-      });
-    }
-    if (usersellAmountBCH <= minimumAmountBCHToSell) {
-      console.log("amount in not less the " + minimumAmountBCHToSell);
-      return res.json({
-        "message": "BCH amount for sell is not less " + minimumAmountBCHToSell,
-        statusCode: 400
-      });
-    }
-    User.findOne({
-        email: userEmailId
-      })
-      .exec(function(err, userDetails) {
-        if (err) {
-          console.log("Error to get userDetails!!!");
-          return res.json({
-            "message": "Error to get user details",
-            statusCode: 400
-          });
-        }
-        if (!userDetails) {
-          return res.json({
-            "message": "Invalid email!",
-            statusCode: 401
-          });
-        }
-        var userBTCBalanceInDb = parseFloat(userDetails.BTCbalance).toFixed(8);
-        var userBCHBalanceInDb = parseFloat(userDetails.BCHbalance).toFixed(8);
-
-        var userBTCAddressInDb = userDetails.userBTCAddress;
-        var userBCHAddressInDb = userDetails.userBCHAddress;
-        var userAccount = userDetails.email;
-        console.log("userBCHBalanceInDb :: " + userBCHBalanceInDb);
-        console.log("usersellAmountBCH :: " + usersellAmountBCH);
-        if (usersellAmountBCH > userBCHBalanceInDb) {
-          console.log(" User have Insufficient fund!!! ");
-          return res.json({
-            "message": "Amount exceed for this transaction",
-            statusCode: 400
-          });
-        }
-        User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
-          if (err) {
-            console.log("Error to Compare Spedning password");
-            return res.json({
-              "message": err,
-              statusCode: 400
-            });
-          }
-          if (!valid) {
-            console.log("Invalid Spending password!!!");
-            return res.json({
-              "message": "Invalid spendingpassword",
-              statusCode: 400
-            });
-          } else {
-
-            console.log("User spendingpassword is valid::");
-            //Move from user account to companyBCHAccount Useing On BCH Server
-            clientBCH.cmd('move',
-              userAccount,
-              companyBCHAccount,
-              parseFloat(usersellAmountBCH).toFixed(8),
-              function(err, transactionBCH, resHeaders) {
-                if (err) {
-                  console.log("Error from sendFromBCHAccount:: ");
-                  if (err.code && err.code == "ECONNREFUSED") {
-                    console.log("BCH Server Refuse to connect App");
-                    return res.json({
-                      "message": "BCH Server Refuse to connect App",
-                      statusCode: 400
-                    });
-                  }
-                  if (err.code && err.code == -5) {
-                    console.log("Invalid BCH Address");
-                    return res.json({
-                      "message": "Invalid BCH Address",
-                      statusCode: 400
-                    });
-                  }
-                  if (err.code && err.code == -6) {
-                    console.log("Account has Insufficient funds");
-                    return res.json({
-                      "message": "Account has Insufficient funds",
-                      statusCode: 400
-                    });
-                  }
-                  if (err.code && err.code < 0) {
-                    console.log("Problem in BCH server");
-                    return res.json({
-                      "message": "Problem in BCH server",
-                      statusCode: 400
-                    });
-                  }
-                  console.log("Error in BCH Server");
-                  return res.json({
-                    "message": "Error in BCH Server",
-                    statusCode: 400
-                  });
-                } else {
-                  //Not error in BCH Transaction
-                  console.log("transactionBCH ::: " + transactionBCH);
-                  if (transactionBCH == true) {
-
-                    console.log("Transaction successfully for move user To Company BCHacc::: " + transactionBCH);
-                    clientBTC.cmd('move',
-                      companyBTCAccount,
-                      userAccount,
-                      usersellAmountBTC,
-                      function(err, transactionBTC, resHeaders) {
-                        if (err) {
-                          console.log("Error from sendFromBCHAccount:: ");
-                          if (err.code && err.code == "ECONNREFUSED") {
-                            console.log("BCH Server Refuse to connect App");
-                            return res.json({
-                              "message": "BCH Server Refuse to connect App",
-                              statusCode: 400
-                            });
-                          }
-                          if (err.code && err.code == -5) {
-                            console.log("Invalid BCH Address");
-                            return res.json({
-                              "message": "Invalid BCH Address",
-                              statusCode: 400
-                            });
-                          }
-                          if (err.code && err.code == -6) {
-                            console.log("Account has Insufficient funds");
-                            return res.json({
-                              "message": "Account has Insufficient funds",
-                              statusCode: 400
-                            });
-                          }
-                          if (err.code && err.code < 0) {
-                            console.log("Problem in BCH server");
-                            return res.json({
-                              "message": "Problem in BCH server",
-                              statusCode: 400
-                            });
-                          }
-                          console.log("Error in BCH Server");
-                          return res.json({
-                            "message": "Error in BCH Server",
-                            statusCode: 400
-                          });
-                        } else {
-                          //Not error in Send BCT
-                          console.log("transactionBTC ::: " + transactionBTC);
-                          if (transactionBTC == true) {
-                            console.log("Transaction successfully for move user To Company acc::: " + transactionBTC);
-                            var updatedBCHbalance = (parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(usersellAmountBCH).toFixed(8));
-                            var updatedBTCbalance =
-                              (parseFloat(userBTCBalanceInDb) +
-                                parseFloat(usersellAmountBTC)).toFixed(8);
-                            User.update({
-                                email: userEmailId
-                              }, {
-                                BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-                                BCHbalance: parseFloat(updatedBCHbalance).toFixed(8)
-                              })
-                              .exec(function(err, updatedUser) {
-                                if (err) {
-                                  console.log("Error to udpate .....");
-                                  return res.json({
-                                    "message": "Error to update User Details",
-                                    statusCode: 400
-                                  });
-                                }
-                                User.findOne({
-                                  email: userEmailId
-                                }).populateAll().exec(function(err, user) {
-                                  if (err) {
-                                    return res.json({
-                                      "message": "Error to find user",
-                                      statusCode: 401
-                                    });
-                                  }
-                                  if (!user) {
-                                    return res.json({
-                                      "message": "Invalid email!",
-                                      statusCode: 401
-                                    });
-                                  }
-                                  return res.json({
-                                    user: user,
-                                    statusCode: 200
-                                  });
-                                });
-                              });
-
-                          } else {
-                            return res.json({
-                              "message": "Transaction Failed BTC",
-                              statusCode: 400
-                            });
-                          }
-                        }
-
-                      });
-
-                  } else {
-                    //Error to send BCH From user account to companyBCH account
-                    console.log("Error to send BCH From user account to companyBCH account ");
-                    return res.json({
-                      "message": "Transaction Failed BCH",
-                      statusCode: 400
-                    });
-                  }
-                }
-
-              });
-
-          }
-        });
-      });
-  },
-  buyBCH: function(req, res, next) {
-
-    console.log("Enter into buyBCH with ::: ");
-    var userEmailId = req.body.userMailId;
-    var userbuyAmountBTC = parseFloat(req.body.buyAmountBTC).toFixed(8);
-    var userbuyAmountBCH = parseFloat(req.body.buyAmountBCH).toFixed(8);
+  sendEBT: function(req, res, next) {
+    console.log("Enter into sendEBT with ::: " + JSON.stringify(req.body));
+    var userEmailAddress = req.body.userMailId;
+    var userEBTAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userReceiverEBTAddress = req.body.recieverEBTCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
-    var minimumAmountBCHToBuy = 0.008;
-    minimumAmountBCHToBuy = parseFloat(minimumAmountBCHToBuy).toFixed(8);
+    var minimumAmountEBTSentByUser = 0.008;
+    miniEBTAmountSentByUser = parseFloat(minimumAmountEBTSentByUser).toFixed(8);
 
-    if (!userEmailId || !userbuyAmountBTC || !userbuyAmountBCH || !userSpendingPassword ||
-      !userCommentForReceiver || !userCommentForSender) {
+    if (!userEmailAddress || !userEBTAmountToSend || !userReceiverEBTAddress ||
+      !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Invalid Parameter by user!!!");
-      res.json({
+      return res.json({
         "message": "Invalid Parameter",
         statusCode: 400
       });
     }
-    console.log("userbuyAmountBCH :" + userbuyAmountBCH);
-    console.log("minimumAmountBCHToBuy :" + minimumAmountBCHToBuy);
-    if (userbuyAmountBCH < minimumAmountBCHToBuy) {
-      console.log("BCH buy amount in not less " + minimumAmountBCHToBuy);
+    if (userEBTAmountToSend < minimumAmountEBTSentByUser) {
+      console.log("amount in not less 0.08 !!!");
       return res.json({
-        "message": "BCH Amount to buy not less then " + minimumAmountBCHToBuy,
+        "message": "EBT Amount not less than " + minimumAmountEBTSentByUser,
         statusCode: 400
       });
     }
     User.findOne({
-        email: userEmailId
-      })
-      .exec(function(err, userDetails) {
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      var userEBTBalanceInDb = parseFloat(userDetails.EBTMainbalance).toFixed(8);
+      var userEBTAddressInDb = userDetails.userEBTAddress;
+      console.log("UserAMount in database ::: " + userDetails.EBTMainbalance);
+      console.log("EBT Amount send by user ::: " + userEBTAmountToSend);
+      if (userEBTAmountToSend > userEBTBalanceInDb) {
+        console.log("EBT Amount amount Exceed !!!");
+        return res.json({
+          "message": "You have Insufficient EBT balance",
+          statusCode: 401
+        });
+      }
+      if (userReceiverEBTAddress == userEBTAddressInDb) {
+        console.log("User address and recieverEBTCoinAddress Same !!!");
+        return res.json({
+          "message": "recieverEBTCoinAddress and Your EBT Address Same",
+          statusCode: 401
+        });
+      }
+      User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
         if (err) {
-          console.log("Error to get User Details");
+          console.log("Error to compare password");
           return res.json({
-            "message": "Error to get user details",
+            "message": err,
             statusCode: 400
           });
         }
-        if (!userDetails) {
+        if (!valid) {
+          console.log("Spending password is invalid !!!");
           return res.json({
-            "message": "Invalid email Id",
+            "message": "Please enter correct spending password",
             statusCode: 400
           });
-        }
-        var userBTCBalanceInDb = parseFloat(userDetails.BTCbalance).toFixed(8);
-        var userBCHBalanceInDb = parseFloat(userDetails.BCHbalance).toFixed(8);
-        var userBTCAddressInDb = userDetails.userBTCAddress;
-        var userBCHAddressInDb = userDetails.userBCHAddress;
-        var userAccount = userDetails.email;
-        console.log("User BTC balance in database ::: " + userBTCBalanceInDb);
-        console.log("User BTC amount send ::: " + userBTCBalanceInDb);
+        } else {
+          console.log("Spending password is valid!!!");
+          var minimumNumberOfConfirmation = 1;
+          var netAmountToSend = parseFloat(userEBTAmountToSend).toFixed(8) - parseFloat(transactionFeeEBT).toFixed(8);
+          console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
+          console.log(userEmailAddress + " transactionFeeEBT ::: " + transactionFeeEBT);
 
-        if (userBTCBalanceInDb < userbuyAmountBTC) {
-          console.log(" User have Insufficient fund in BTC Server !!!");
-          return res.json({
-            "message": "You have Insufficient",
-            statusCode: 400
-          });
-        }
-        var minimumAmountBCHToBCH = 0.008;
-        if (userbuyAmountBCH < minimumAmountBCHToBCH) {
-          return res.json({
-            "message": "Miimum buy BCH amount " + minimumAmountBCHToBCH,
-            statusCode: 401
-          });
-        }
-        User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
-          if (err) {
-            console.log("Error to Compare SpendingPassword!!!");
-            return res.json({
-              "message": "Error to compare password",
-              statusCode: 400
-            });
-          }
-          if (!valid) {
-            console.log("Invalid SpendingPassword!!!");
-            return res.json({
-              "message": "Pleae enter valid Spending Password",
-              statusCode: 400
-            });
-          } else {
-            console.log("User spendingpassword is valid ::");
-            //Move from user account to companyBCHAccount Useing On BCH Server
-            clientBTC.cmd('move',
-              userAccount,
-              companyBTCAccount,
-              userbuyAmountBTC,
-              function(err, transactionBuBCH, resHeaders) {
-                if (err) {
-                  console.log("Error from sendFromBCHAccount:: ");
-                  if (err.code && err.code == "ECONNREFUSED") {
-                    console.log("BCH Server Refuse to connect App");
-                    return res.json({
-                      "message": "BCH Server Refuse to connect App",
-                      statusCode: 400
-                    });
-                  }
-                  if (err.code && err.code == -6) {
-                    console.log("Account has Insufficient funds");
-                    return res.json({
-                      "message": "Account has Insufficient funds",
-                      statusCode: 400
-                    });
-                  }
-                  if (err.code && err.code < 0) {
-                    console.log("Problem in BCH server");
-                    return res.json({
-                      "message": "Problem in BCH server",
-                      statusCode: 400
-                    });
-                  }
-                  console.log("Error in BCH Server");
+          clientEBT.cmd('sendfrom', userEmailAddress, userReceiverEBTAddress, parseFloat(netAmountToSend).toFixed(8),
+            minimumNumberOfConfirmation, userReceiverEBTAddress, userReceiverEBTAddress,
+            function(err, TransactionDetails, resHeaders) {
+              if (err) {
+                console.log("Error from sendFromEBTAccount:: " + err);
+                if (err.code && err.code == "ECONNREFUSED") {
                   return res.json({
-                    "message": "Error in BCH Server",
+                    "message": "EBT Server Refuse to connect App",
                     statusCode: 400
                   });
-                } else {
-                  //Not error in BCH Transaction
-                  console.log("transactionBuBCH ::: " + transactionBuBCH);
-                  if (transactionBuBCH == true) {
+                }
+                if (err.code && err.code == -5) {
+                  return res.json({
+                    "message": "Invalid EBT Address",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code == -6) {
+                  return res.json({
+                    "message": "Account has Insufficient funds",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code < 0) {
+                  return res.json({
+                    "message": "Problem in EBT server",
+                    statusCode: 400
+                  });
+                }
+                return res.json({
+                  "message": "Error in EBT Server",
+                  statusCode: 400
+                });
+              }
+              console.log('TransactionDetails :', TransactionDetails);
+              console.log("User balance in db:: " + userEBTBalanceInDb);
+              console.log("UserEBTAmountToSend  :: " + userEBTAmountToSend);
 
-                    console.log("Transaction successfully for move user To Company BCHacc::: " + transactionBuBCH);
-                    clientBCH.cmd('move',
-                      companyBCHAccount,
-                      userAccount,
-                      userbuyAmountBCH,
-                      function(err, transactionBuyBTC, resHeaders) {
-                        if (err) {
-                          console.log("Error from sendFromBCHAccount:: ");
-                          if (err.code && err.code == "ECONNREFUSED") {
-                            console.log("BCH Server Refuse to connect App");
-                            return res.json({
-                              "message": "BCH Server Refuse to connect App",
-                              statusCode: 400
-                            });
-                          }
-
-                          if (err.code && err.code == -6) {
-                            console.log("Account has Insufficient funds");
-                            return res.json({
-                              "message": "Account has Insufficient funds",
-                              statusCode: 400
-                            });
-                          }
-                          if (err.code && err.code < 0) {
-                            console.log("Problem in BCH server");
-                            return res.json({
-                              "message": "Problem in BCH server",
-                              statusCode: 400
-                            });
-                          }
-                          console.log("Error in BCH Server");
-                          return res.json({
-                            "message": "Error in BCH Server",
-                            statusCode: 400
-                          });
-                        } else {
-                          //Not error in Send BCT
-                          console.log("transactionBuyBTC ::: " + transactionBuyBTC);
-                          if (transactionBuyBTC == true) {
-                            console.log("Transaction successfully for move user To Company acc::: " + transactionBuyBTC);
-                            var updatedBTCbalance = (parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userbuyAmountBTC).toFixed(8));
-                            var updatedBCHbalance = (parseFloat(userBCHBalanceInDb) +
-                              parseFloat(userbuyAmountBCH)).toFixed(8);
-
-                            User.update({
-                                email: userEmailId
-                              }, {
-                                BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-                                BCHbalance: parseFloat(updatedBCHbalance).toFixed(8)
-                              })
-                              .exec(function(err, updatedUser) {
-                                if (err) {
-                                  console.log("Error to udpate .....");
-                                  return res.json({
-                                    "message": "Error to update User Details",
-                                    statusCode: 400
-                                  });
-                                }
-                                User.findOne({
-                                  email: userEmailId
-                                }).populateAll().exec(function(err, user) {
-                                  if (err) {
-                                    return res.json({
-                                      "message": "Error to find user",
-                                      statusCode: 401
-                                    });
-                                  }
-                                  if (!user) {
-                                    return res.json({
-                                      "message": "Invalid email!",
-                                      statusCode: 401
-                                    });
-                                  }
-                                  return res.json({
-                                    user: user,
-                                    statusCode: 200
-                                  });
-                                });
-                              });
-
-                          } else {
-                            return res.json({
-                              "message": "Transaction Failed BTC",
-                              statusCode: 400
-                            });
-                          }
-                        }
-
-                      });
-
-                  } else {
-                    //Error to send BCH From user account to companyBCH account
-                    console.log("Error to send BCH From user account to companyBCH account ");
+              var updatedEBTbalance = parseFloat(userEBTBalanceInDb).toFixed(8) - parseFloat(userEBTAmountToSend).toFixed(8);
+              console.log("Update new Balance of user in DB ::" + updatedEBTbalance);
+              User.update({
+                  email: userEmailAddress
+                }, {
+                  EBTMainbalance: updatedEBTbalance
+                })
+                .exec(function(err, updatedUser) {
+                  if (err) {
                     return res.json({
-                      "message": "Transaction Failed BCH",
+                      "message": "Error to update User",
                       statusCode: 400
                     });
                   }
-                }
-
-              });
-
-
-            //
-            // var amountWithdrawnFromUserBTCAccount=withdrawTransactioDetails.data.amount_withdrawn;
-            // console.log("WithdrawTransactioDetails Amount: "+amountWithdrawnFromUserBTCAccount);
-            // var updatedBTCbalance = (parseFloat(userDetails.BTCbalance).toFixed(8) -
-            //                          parseFloat(amountWithdrawnFromUserBTCAccount).toFixed(8));
-            // var minimumNumberOfConfirmation=3;
-            // clientBCH.cmd('sendfrom',
-            //   companyBCHAccount,
-            //   userBCHAddressInDb,
-            //   userbuyAmountBCH,
-            //   minimumNumberOfConfirmation,
-            //   companyBCHAccountAddress,
-            //   companyBCHAccountAddress,
-            //   function(err, TransactionDetails, resHeaders) {
-            //     if (err){
-            //           console.log("Error from sendFromBCHAccount:: ");
-            //           if(err.code && err.code== "ECONNREFUSED"){
-            //               return res.json({"message":"BCH Server Refuse to connect App" ,statusCode: 400});
-            //           }
-            //           if(err.code && err.code== -5){
-            //               return res.json({"message":"Invalid BCH Address" ,statusCode: 400});
-            //           }
-            //           if(err.code && err.code== -6){
-            //               return res.json({"message":"Account has Insufficient funds" ,statusCode: 400});
-            //           }
-            //           if(err.code && err.code < 0){
-            //               return res.json({"message":"Problem in BCH server" ,statusCode: 400});
-            //           }
-            //           return res.json({"message":"Error in BCH Server",statusCode: 400});
-            //     }
-            //     console.log('Company BCH Sent Succesfully in UserBCHAddress txid: ', TransactionDetails);
-            //     clientBCH.cmd('gettransaction', TransactionDetails,
-            //       function(err, compleateTransactionDetails, resHeaders) {
-            //         if (err){
-            //
-            //               console.log("Error from gettransaction:: ");
-            //               if(err.code && err.code== "ECONNREFUSED"){
-            //                   return res.json({"message":"BCH Server Refuse to connect App" ,statusCode: 400});
-            //               }
-            //               if(err.code && err.code < 0){
-            //                   return res.json({"message":"Problem in getTransaction BCH server" ,statusCode: 400});
-            //               }
-            //               return res.json({"message":"Error in BCH Server",statusCode: 400});
-            //         }
-            //         var networkFeeByBCHServerForThisTransaction = parseFloat(Math.abs(compleateTransactionDetails.fee)).toFixed(8);
-            //         var updatedBCHbalance = (parseFloat(userBCHBalanceInDb) + parseFloat(userbuyAmountBCH)).toFixed(8);
-            //         updatedBCHbalance = parseFloat(updatedBCHbalance).toFixed(8) -  parseFloat(networkFeeByBCHServerForThisTransaction).toFixed(8);
-            //         console.log("User BCH balance In DB ::: "+userBCHBalanceInDb);
-            //         console.log("User BTC balance In DB ::: "+userBTCBalanceInDb);
-            //         console.log("Amount Withdrawn From User BTC Account ::: "+amountWithdrawnFromUserBTCAccount);
-            //         console.log("User BCH userbuyAmountBCH  ::: "+userbuyAmountBCH);
-            //         console.log("Fee :: " +networkFeeByBCHServerForThisTransaction);
-            //         console.log("UpdateUser BCH balance ::: "+updatedBCHbalance);
-            //         console.log("UpdateUser BTC balance ::: "+updatedBTCbalance);
-            //         User.update({
-            //             email: userEmailId
-            //           }, {
-            //             BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-            //             BCHbalance: parseFloat(updatedBCHbalance).toFixed(8)
-            //           })
-            //           .exec(function(err, updatedUser) {
-            //             if (err) {
-            //               res.json({
-            //                 "message": "Error to update User",
-            //                 statusCode: 400
-            //               });
-            //             }
-            //             User.findOne({
-            //               email: userEmailId
-            //             }).populateAll().exec(function (err, user){
-            //               if (err) {
-            //                 return res.json( {"message": "Error to find user",statusCode: 401});
-            //               }
-            //               if (!user) {
-            //                 return res.json( {"message": "Invalid email!",statusCode: 401});
-            //               }
-            //               console.log("Returned updated User!!! ");
-            //                 return  res.json({user: user,statusCode: 200});
-            //             });
-            //           });
-            //       });
-            //   });
-            //
-
-
-          }
-        });
+                  User.findOne({
+                      email: userEmailAddress
+                    }).populateAll()
+                    .exec(function(err, user) {
+                      if (err) {
+                        return res.json({
+                          "message": "Error to find user",
+                          statusCode: 401
+                        });
+                      }
+                      if (!user) {
+                        return res.json({
+                          "message": "Invalid email!",
+                          statusCode: 401
+                        });
+                      }
+                      console.log("Update User details of EBT " +
+                        JSON.stringify(user));
+                      res.json({
+                        user: user,
+                        statusCode: 200
+                      });
+                    });
+                });
+            });
+        }
       });
+    });
+  },
+  sendGDS: function(req, res, next) {
+    console.log("Enter into sendGDS with ::: " + JSON.stringify(req.body));
+    var userEmailAddress = req.body.userMailId;
+    var userGDSAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userReceiverGDSAddress = req.body.recieverGDSCoinAddress;
+    var userSpendingPassword = req.body.spendingPassword;
+    var userCommentForReceiver = req.body.commentForReciever;
+    var userCommentForSender = req.body.commentForSender;
+    var minimumAmountGDSSentByUser = 0.008;
+    miniGDSAmountSentByUser = parseFloat(minimumAmountGDSSentByUser).toFixed(8);
+
+    if (!userEmailAddress || !userGDSAmountToSend || !userReceiverGDSAddress ||
+      !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
+      console.log("Invalid Parameter by user!!!");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    if (userGDSAmountToSend < minimumAmountGDSSentByUser) {
+      console.log("amount in not less 0.08 !!!");
+      return res.json({
+        "message": "GDS Amount not less than " + minimumAmountGDSSentByUser,
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      var userGDSBalanceInDb = parseFloat(userDetails.GDSMainbalance).toFixed(8);
+      var userGDSAddressInDb = userDetails.userGDSAddress;
+      console.log("UserAMount in database ::: " + userDetails.GDSMainbalance);
+      console.log("GDS Amount send by user ::: " + userGDSAmountToSend);
+      if (userGDSAmountToSend > userGDSBalanceInDb) {
+        console.log("GDS Amount amount Exceed !!!");
+        return res.json({
+          "message": "You have Insufficient GDS balance",
+          statusCode: 401
+        });
+      }
+      if (userReceiverGDSAddress == userGDSAddressInDb) {
+        console.log("User address and recieverGDSCoinAddress Same !!!");
+        return res.json({
+          "message": "recieverGDSCoinAddress and Your GDS Address Same",
+          statusCode: 401
+        });
+      }
+      User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
+        if (err) {
+          console.log("Error to compare password");
+          return res.json({
+            "message": err,
+            statusCode: 400
+          });
+        }
+        if (!valid) {
+          console.log("Spending password is invalid !!!");
+          return res.json({
+            "message": "Please enter correct spending password",
+            statusCode: 400
+          });
+        } else {
+          console.log("Spending password is valid!!!");
+          var minimumNumberOfConfirmation = 1;
+          var netAmountToSend = parseFloat(userGDSAmountToSend).toFixed(8) - parseFloat(transactionFeeGDS).toFixed(8);
+          console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
+          console.log(userEmailAddress + " transactionFeeGDS ::: " + transactionFeeGDS);
+
+          clientGDS.cmd('sendfrom', userEmailAddress, userReceiverGDSAddress, parseFloat(netAmountToSend).toFixed(8),
+            minimumNumberOfConfirmation, userReceiverGDSAddress, userReceiverGDSAddress,
+            function(err, TransactionDetails, resHeaders) {
+              if (err) {
+                console.log("Error from sendFromGDSAccount:: " + err);
+                if (err.code && err.code == "ECONNREFUSED") {
+                  return res.json({
+                    "message": "GDS Server Refuse to connect App",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code == -5) {
+                  return res.json({
+                    "message": "Invalid GDS Address",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code == -6) {
+                  return res.json({
+                    "message": "Account has Insufficient funds",
+                    statusCode: 400
+                  });
+                }
+                if (err.code && err.code < 0) {
+                  return res.json({
+                    "message": "Problem in GDS server",
+                    statusCode: 400
+                  });
+                }
+                return res.json({
+                  "message": "Error in GDS Server",
+                  statusCode: 400
+                });
+              }
+              console.log('TransactionDetails :', TransactionDetails);
+              console.log("User balance in db:: " + userGDSBalanceInDb);
+              console.log("UserGDSAmountToSend  :: " + userGDSAmountToSend);
+
+              var updatedGDSbalance = parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userGDSAmountToSend).toFixed(8);
+              console.log("Update new Balance of user in DB ::" + updatedGDSbalance);
+              User.update({
+                  email: userEmailAddress
+                }, {
+                  GDSMainbalance: updatedGDSbalance
+                })
+                .exec(function(err, updatedUser) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to update User",
+                      statusCode: 400
+                    });
+                  }
+                  User.findOne({
+                      email: userEmailAddress
+                    }).populateAll()
+                    .exec(function(err, user) {
+                      if (err) {
+                        return res.json({
+                          "message": "Error to find user",
+                          statusCode: 401
+                        });
+                      }
+                      if (!user) {
+                        return res.json({
+                          "message": "Invalid email!",
+                          statusCode: 401
+                        });
+                      }
+                      console.log("Update User details of GDS " +
+                        JSON.stringify(user));
+                      res.json({
+                        user: user,
+                        statusCode: 200
+                      });
+                    });
+                });
+            });
+        }
+      });
+    });
   },
   getTxsListBCH: function(req, res, next) {
     console.log("Enter into getTransactionListBCH::: ");
