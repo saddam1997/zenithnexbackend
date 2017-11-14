@@ -80,6 +80,13 @@ module.exports = {
           statusCode: 401
         });
       }
+
+      if(user.userGDSAddress)
+        return res.json({
+          "message": "address already exists",
+          statusCode: 401
+        });
+
       clientGDS.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
@@ -125,6 +132,11 @@ module.exports = {
           statusCode: 401
         });
       }
+      if(user.userEBTAddress)
+        return res.json({
+          "message": "address already exists",
+          statusCode: 401
+        });
       clientEBT.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
@@ -170,6 +182,11 @@ module.exports = {
           statusCode: 401
         });
       }
+      if(user.userBTCAddress)
+        return res.json({
+          "message": "address already exists",
+          statusCode: 401
+        });
       clientBTC.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
@@ -215,6 +232,15 @@ module.exports = {
           statusCode: 401
         });
       }
+
+
+      if(user.userBCHAddress)
+        return res.json({
+          "message": "address already exists",
+          statusCode: 401
+        });
+
+
       clientBCH.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
