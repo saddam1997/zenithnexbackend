@@ -19,6 +19,12 @@ module.exports.company = {
   //Company BCH Account details
   companyBCHAccount: "pennybch@gmail.com",
   companyBCHAccountAddress: "mjnTqHDMoKwkNkdxvwSgxYSKVjkCkFpekG",
+
+
+
   txFeeBCH: 0.0008,
-  txFeeBTC: 0.0001
+  txFeeBTC: 0.0001,
+  txFeeEBT: 0.0008,
+  txFeeGDS: 0.0008
+
 }

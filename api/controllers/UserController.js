@@ -19,9 +19,6 @@ var clientBTC = new bitcoinBTC.Client({
   user: sails.config.company.clientBTCuser,
   pass: sails.config.company.clientBTCpass
 });
-var companyBTCAccount = sails.config.company.companyBTCAccount;
-var companyBTCAccountAddress = sails.config.company.companyBTCAccountAddress;
-
 //BCH Wallet Details
 var bitcoinBCH = require('bitcoin');
 var clientBCH = new bitcoinBCH.Client({
