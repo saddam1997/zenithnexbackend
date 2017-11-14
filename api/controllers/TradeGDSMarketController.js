@@ -5,6 +5,8 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
+import {BTC_ASK_ADDED,BTC_ASK_DESTROYED,BTC_BID_ADDED,BTC_BID_DESTROYED,BCH_ASK_ADDED, BCH_ASK_DESTROYED, BCH_BID_ADDED, BCH_BID_DESTROYED, EBT_ASK_ADDED, EBT_ASK_DESTROYED, EBT_BID_ADDED,EBT_BID_DESTROYED, GDS_ASK_ADDED,GDS_ASK_DESTROYED,GDS_BID_ADDED,GDS_BID_DESTROYED} from './../../config/constants'
+
 module.exports = {
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket :: " + JSON.stringify(req.body));
@@ -40,6 +42,7 @@ module.exports = {
       askRate: parseFloat(userAskRate).toFixed(8),
       askownerGDS: userIdInDb
     });
+    sails.sockets.blast(GDS_ASK_ADDED, askDetails);
     var updateUserGDSBalance = parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userAskAmountGDS).toFixed(8);
     var updateFreezedGDSBalance = (parseFloat(userFreezedGDSBalanceInDb) + parseFloat(userAskAmountGDS)).toFixed(8);
 
@@ -110,10 +113,18 @@ module.exports = {
               var bidDestroy = await BidGDS.destroy({
                 id: currentBidDetails.id
               });
+
+              sails.sockets.blast(GDS_BID_DESTROYED, bidDestroy);
+
+
               console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
               var askDestroy = await AskGDS.destroy({
                 id: askDetails.id
               });
+
+              sails.sockets.blast(GDS_ASK_DESTROYED, askDestroy);
+
+
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -141,6 +152,10 @@ module.exports = {
               var desctroyCurrentBid = await BidGDS.destroy({
                 id: currentBidDetails.id
               });
+
+              sails.sockets.blast(GDS_BID_DESTROYED, desctroyCurrentBid);
+
+
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
@@ -221,10 +236,17 @@ module.exports = {
                 var bidDestroy = await BidGDS.destroy({
                   id: currentBidDetails.id
                 });
+
+                sails.sockets.blast(GDS_BID_DESTROYED, bidDestroy);
+
                 console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
                 var askDestroy = await AskGDS.destroy({
                   id: askDetails.id
                 });
+
+                sails.sockets.blast(GDS_ASK_DESTROYED, askDestroy);
+
+
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -252,6 +274,9 @@ module.exports = {
                 var desctroyCurrentBid = await BidGDS.destroy({
                   id: currentBidDetails.id
                 });
+
+                sails.sockets.blast(GDS_BID_DESTROYED, desctroyCurrentBid);
+
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
             } else {
@@ -306,6 +331,9 @@ module.exports = {
               var askDestroy = await AskGDS.destroy({
                 id: askDetails.id
               });
+
+              sails.sockets.blast(GDS_ASK_DESTROYED, askDestroy);
+
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
@@ -367,6 +395,9 @@ module.exports = {
       bidRate: parseFloat(userBidRate),
       bidownerGDS: userIdInDb
     });
+
+    sails.sockets.blast(GDS_BID_ADDED, bidDetails);
+
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
@@ -443,10 +474,18 @@ module.exports = {
               var bidDestroy = await BidGDS.destroy({
                 id: bidDetails.bidownerGDS
               });
+
+              sails.sockets.blast(GDS_BID_DESTROYED, bidDestroy);
+
               console.log(currentAskDetails.id + " AskGDS.destroy bidDetails.id::: " + bidDetails.id);
               var askDestroy = await AskGDS.destroy({
                 id: currentAskDetails.askownerGDS
               });
+
+
+              sails.sockets.blast(GDS_ASK_DESTROYED, askDestroy);
+
+
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -475,6 +514,10 @@ module.exports = {
               var destroyCurrentAsk = await AskGDS.destroy({
                 id: currentAskDetails.id
               });
+
+              sails.sockets.blast(GDS_ASK_DESTROYED, destroyCurrentAsk);
+
+
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
 
             }
@@ -557,10 +600,17 @@ module.exports = {
                 var bidDestroy = await AskGDS.destroy({
                   id: currentAskDetails.id
                 });
+
+                sails.sockets.blast(GDS_ASK_DESTROYED, bidDestroy);
+
+
                 console.log(currentAskDetails.id + " AskGDS.destroy bidDetails.id::: " + bidDetails.id);
                 var bidDestroy = await BidGDS.destroy({
                   id: bidDetails.id
                 });
+
+                sails.sockets.blast(GDS_BID_DESTROYED, bidDestroy);
+
                 return res.json({
                   "message": "Bid Executed successfully",
                   statusCode: 200
@@ -588,6 +638,10 @@ module.exports = {
                 var destroyCurrentAsk = await AskGDS.destroy({
                   id: currentAskDetails.id
                 });
+
+                sails.sockets.blast(GDS_ASK_DESTROYED, destroyCurrentAsk);
+
+
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -639,6 +693,9 @@ module.exports = {
               var bidDestroy = await BidGDS.destroy({
                 id: bidDetails.id
               });
+
+              sails.sockets.blast(GDS_BID_DESTROYED, bidDestroy);
+
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
@@ -737,13 +794,16 @@ module.exports = {
             console.log("Removing bid !!!");
             BidGDS.destroy({
               id: userBidId
-            }).exec(function(err) {
+            }).exec(function(err, bid) {
               if (err) {
                 return res.json({
                   "message": "Error to remove bid",
                   statusCode: 400
                 });
               }
+
+              sails.sockets.blast(GDS_BID_DESTROYED, bid);
+
               console.log("Returning user details !!!");
               return res.json({
                 "message": "Bid removed successfully!!!",
@@ -844,13 +904,16 @@ module.exports = {
             console.log("Removing ask !!!");
             AskGDS.destroy({
               id: userAskId
-            }).exec(function(err) {
+            }).exec(function(err, ask) {
               if (err) {
                 return res.json({
                   "message": "Error to remove ask",
                   statusCode: 400
                 });
               }
+
+              sails.sockets.blast(GDS_ASK_DESTROYED, ask);
+
               console.log("Returning user details !!!");
               return res.json({
                 "message": "ask remove successfully!!",
