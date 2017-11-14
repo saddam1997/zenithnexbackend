@@ -6,7 +6,6 @@
  */
 
 module.exports = {
-
   addAskBchMarket: async function(req, res) {
     console.log("Enter into ask api addAskBchMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);

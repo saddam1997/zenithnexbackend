@@ -29,6 +29,23 @@ var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
 var transactionFeeBCH = sails.config.company.txFeeBCH;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
 
+//EBT Wallet Details
+var bitcoinEBT = require('bitcoin');
+var clientEBT = new bitcoinEBT.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+//GDS Wallet Details
+var bitcoinGDS = require('bitcoin');
+var clientGDS = new bitcoinGDS.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+
 module.exports = {
   sendBTC: function(req, res, next) {
     console.log("Enter into sendBTC");
@@ -1030,6 +1047,124 @@ module.exports = {
         });
     });
   },
+  getTxsListEBT: function(req, res, next) {
+    console.log("Enter into getTxsListEBT::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        console.log("Error to find user !!!");
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        console.log("Invalid Email !!!");
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientEBT.cmd(
+        'listtransactions',
+        userMailId,
+        function(err, transactionList) {
+          if (err) {
+            console.log("Error from sendFromBCHAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "BCH Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in BCH server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in BCH Server",
+              statusCode: 400
+            });
+          }
+          console.log("Return transactionList List !! ");
+
+          return res.json({
+            "tx": transactionList,
+            statusCode: 200
+          });
+        });
+    });
+  },
+  getTxsListGDS: function(req, res, next) {
+    console.log("Enter into getTxsListGDS::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        console.log("Error to find user !!!");
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        console.log("Invalid Email !!!");
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientGDS.cmd(
+        'listtransactions',
+        userMailId,
+        function(err, transactionList) {
+          if (err) {
+            console.log("Error from sendFromBCHAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "BCH Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in BCH server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in BCH Server",
+              statusCode: 400
+            });
+          }
+          console.log("Return transactionList List !! ");
+
+          return res.json({
+            "tx": transactionList,
+            statusCode: 200
+          });
+        });
+    });
+  },
   getBalBCH: function(req, res, next) {
     console.log("Enter into getBalBCH::: ");
     var userMailId = req.body.userMailId;
@@ -1056,13 +1191,13 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.BCHbalance);
-      var userBCHBalanceInDb = parseFloat(user.BCHbalance).toFixed(8);
-      var userFreezedBCHBalanceInDb = parseFloat(user.FreezedBCHbalance).toFixed(8);
+      console.log("UserBCH Balance ::" + user.BCHMainbalance);
+      var userBCHMainbalanceInDb = parseFloat(user.BCHMainbalance).toFixed(8);
+      var userFreezedBCHMainbalanceInDb = parseFloat(user.FreezedBCHbalance).toFixed(8);
       clientBCH.cmd(
         'getbalance',
         userMailId,
-        function(err, userBCHBalanceFromServer, resHeaders) {
+        function(err, userBCHMainbalanceFromServer, resHeaders) {
           if (err) {
             console.log("Error from sendFromBCHAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
@@ -1094,14 +1229,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalBCHBalance = (parseFloat(userFreezedBCHBalanceInDb) + parseFloat(userBCHBalanceInDb)).toFixed(8);
-          console.log(parseFloat(userBCHBalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalBCHBalance).toFixed(8));
-          if (parseFloat(userBCHBalanceFromServer).toFixed(8) > parseFloat(totalBCHBalance).toFixed(8)) {
+          var totalBCHMainbalance = (parseFloat(userBCHMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userBCHMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalBCHMainbalance).toFixed(8));
+          if (parseFloat(userBCHMainbalanceFromServer).toFixed(8) > parseFloat(totalBCHMainbalance).toFixed(8)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                BCHbalance: parseFloat(userBCHBalanceFromServer).toFixed(8)
+                BCHMainbalance: parseFloat(userBCHMainbalanceFromServer).toFixed(8)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1168,13 +1303,13 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.BTCbalance);
-      var userBTCBalanceInDb = parseFloat(user.BTCbalance).toFixed(8);
-      var userFreezedBTCBalanceInDb = parseFloat(user.FreezedBTCbalance).toFixed(8);
+      console.log("UserBCH Balance ::" + user.BTCMainbalance);
+      var userBTCMainbalanceInDb = parseFloat(user.BTCMainbalance).toFixed(8);
+      var userFreezedBTCMainbalanceInDb = parseFloat(user.FreezedBTCbalance).toFixed(8);
       clientBTC.cmd(
         'getbalance',
         userMailId,
-        function(err, userBTCBalanceFromServer, resHeaders) {
+        function(err, userBTCMainbalanceFromServer, resHeaders) {
           if (err) {
             console.log("Error from sendFromBCHAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
@@ -1194,14 +1329,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBTCBalanceInDb)).toFixed(8);
-          console.log(parseFloat(userBTCBalanceFromServer).toFixed(8) + " on server and in DB BTC + Freezed :: " + parseFloat(totalBTCBalance).toFixed(8));
-          if (parseFloat(userBTCBalanceFromServer).toFixed(8) > parseFloat(totalBTCBalance).toFixed(8)) {
+          var totalBTCMainbalance = (parseFloat(userBTCMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userBTCMainbalanceFromServer).toFixed(8) + " on server and in DB BTC + Freezed :: " + parseFloat(totalBTCMainbalance).toFixed(8));
+          if (parseFloat(userBTCMainbalanceFromServer).toFixed(8) > parseFloat(totalBTCMainbalance).toFixed(8)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                BTCbalance: parseFloat(userBTCBalanceFromServer).toFixed(8)
+                BTCMainbalance: parseFloat(userBTCMainbalanceFromServer).toFixed(8)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1242,6 +1377,230 @@ module.exports = {
             //   "message": "No need to update",
             //   statusCode: 201
             // });
+          }
+        });
+    });
+  },
+  getBalEBT: function(req, res, next) {
+    console.log("Enter into getBalEBT::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      console.log("Valid User :: " + JSON.stringify(user));
+      console.log("UserBCH Balance ::" + user.EBTMainbalance);
+      var userEBTMainbalanceInDb = parseFloat(user.EBTMainbalance).toFixed(8);
+      var userFreezedEBTMainbalanceInDb = parseFloat(user.FreezedEBTbalance).toFixed(8);
+      clientEBT.cmd(
+        'getbalance',
+        userMailId,
+        function(err, userEBTMainbalanceFromServer, resHeaders) {
+          if (err) {
+            console.log("Error from sendFromBCHAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "BCH Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -5) {
+              return res.json({
+                "message": "Invalid BCH Address",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -6) {
+              return res.json({
+                "message": "Account has Insufficient funds",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in BCH server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in BCH Server",
+              statusCode: 400
+            });
+          }
+          var totalEBTMainbalance = (parseFloat(userEBTMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userEBTMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalEBTMainbalance).toFixed(8));
+          if (parseFloat(userEBTMainbalanceFromServer).toFixed(8) > parseFloat(totalEBTMainbalance).toFixed(8)) {
+            console.log("UserBalance Need to update ............");
+            User.update({
+                email: userMailId
+              }, {
+                EBTMainbalance: parseFloat(userEBTMainbalanceFromServer).toFixed(8)
+              })
+              .exec(function(err, updatedUser) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to update User balance",
+                    statusCode: 400
+                  });
+                }
+                User.findOne({
+                  email: userMailId
+                }).populateAll().exec(function(err, user) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to find user",
+                      statusCode: 401
+                    });
+                  }
+                  if (!user) {
+                    return res.json({
+                      "message": "Invalid email!",
+                      statusCode: 401
+                    });
+                  }
+                  console.log("Return Update details for BCH balance :: " + user);
+                  res.json({
+                    user: user,
+                    statusCode: 200
+                  });
+                });
+              });
+          } else {
+            console.log("No need to update ");
+            res.json({
+              user: user,
+              statusCode: 200
+            });
+          }
+        });
+    });
+  },
+  getBalGDS: function(req, res, next) {
+    console.log("Enter into getBalBCH::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      console.log("Valid User :: " + JSON.stringify(user));
+      console.log("UserBCH Balance ::" + user.GDSMainbalance);
+      var userGDSMainbalanceInDb = parseFloat(user.GDSMainbalance).toFixed(8);
+      var userFreezedGDSMainbalanceInDb = parseFloat(user.FreezedGDSbalance).toFixed(8);
+      clientBCH.cmd(
+        'getbalance',
+        userMailId,
+        function(err, userGDSMainbalanceFromServer, resHeaders) {
+          if (err) {
+            console.log("Error from sendFromBCHAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "BCH Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -5) {
+              return res.json({
+                "message": "Invalid BCH Address",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -6) {
+              return res.json({
+                "message": "Account has Insufficient funds",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in BCH server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in BCH Server",
+              statusCode: 400
+            });
+          }
+          var totalGDSMainbalance = (parseFloat(userGDSMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userGDSMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalGDSMainbalance).toFixed(8));
+          if (parseFloat(userGDSMainbalanceFromServer).toFixed(8) > parseFloat(totalGDSMainbalance).toFixed(8)) {
+            console.log("UserBalance Need to update ............");
+            User.update({
+                email: userMailId
+              }, {
+                GDSMainbalance: parseFloat(userGDSMainbalanceFromServer).toFixed(8)
+              })
+              .exec(function(err, updatedUser) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to update User balance",
+                    statusCode: 400
+                  });
+                }
+                User.findOne({
+                  email: userMailId
+                }).populateAll().exec(function(err, user) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to find user",
+                      statusCode: 401
+                    });
+                  }
+                  if (!user) {
+                    return res.json({
+                      "message": "Invalid email!",
+                      statusCode: 401
+                    });
+                  }
+                  console.log("Return Update details for BCH balance :: " + user);
+                  res.json({
+                    user: user,
+                    statusCode: 200
+                  });
+                });
+              });
+          } else {
+            console.log("No need to update ");
+            res.json({
+              user: user,
+              statusCode: 200
+            });
           }
         });
     });

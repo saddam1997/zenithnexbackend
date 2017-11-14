@@ -6,7 +6,6 @@
  */
 
 module.exports = {
-
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
@@ -883,6 +882,5 @@ module.exports = {
           });
       });
     });
-  },
-
+  }
 };
