@@ -78,7 +78,7 @@ module.exports = {
         });
       }
 
-      if(user.userGDSAddress)
+      if (user.userGDSAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
@@ -92,8 +92,12 @@ module.exports = {
           });
 
         console.log('gds address generated', address);
-        User.update({email: userMailId}, {userGDSAddress:address}, function (err, response) {
-          if(err)
+        User.update({
+          email: userMailId
+        }, {
+          userGDSAddress: address
+        }, function(err, response) {
+          if (err)
             return res.json({
               "message": "Failed to update new address in database",
               statusCode: 401
@@ -106,7 +110,7 @@ module.exports = {
         })
       });
     });
-},
+  },
   getNewEBTAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
@@ -129,7 +133,7 @@ module.exports = {
           statusCode: 401
         });
       }
-      if(user.userEBTAddress)
+      if (user.userEBTAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
@@ -142,8 +146,12 @@ module.exports = {
           });
 
         console.log('ebt address generated', address);
-        User.update({email: userMailId}, {userEBTAddress:address}, function (err, response) {
-          if(err)
+        User.update({
+          email: userMailId
+        }, {
+          userEBTAddress: address
+        }, function(err, response) {
+          if (err)
             return res.json({
               "message": "Failed to update new address in database",
               statusCode: 401
@@ -156,7 +164,7 @@ module.exports = {
         })
       });
     });
-},
+  },
   getNewBTCAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
@@ -179,7 +187,7 @@ module.exports = {
           statusCode: 401
         });
       }
-      if(user.userBTCAddress)
+      if (user.userBTCAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
@@ -192,8 +200,12 @@ module.exports = {
           });
 
         console.log('btc address generated', address);
-        User.update({email: userMailId}, {userBTCAddress:address}, function (err, response) {
-          if(err)
+        User.update({
+          email: userMailId
+        }, {
+          userBTCAddress: address
+        }, function(err, response) {
+          if (err)
             return res.json({
               "message": "Failed to update new address in database",
               statusCode: 401
@@ -206,7 +218,7 @@ module.exports = {
         })
       });
     });
-},
+  },
   getNewBCHAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
@@ -231,7 +243,7 @@ module.exports = {
       }
 
 
-      if(user.userBCHAddress)
+      if (user.userBCHAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
@@ -246,8 +258,12 @@ module.exports = {
           });
 
         console.log('bch address generated', address);
-        User.update({email: userMailId}, {userBCHAddress:address}, function (err, response) {
-          if(err)
+        User.update({
+          email: userMailId
+        }, {
+          userBCHAddress: address
+        }, function(err, response) {
+          if (err)
             return res.json({
               "message": "Failed to update new address in database",
               statusCode: 401
@@ -260,8 +276,8 @@ module.exports = {
         })
       });
     });
-},
-createNewUser: function(req, res) {
+  },
+  createNewUser: function(req, res) {
     console.log("Enter into createNewUser :: ");
     var useremailaddress = req.body.email;
     var userpassword = req.body.password;
@@ -737,6 +753,92 @@ createNewUser: function(req, res) {
                 email: userMailId
               }, {
                 encryptedPassword: newEncryptedPass
+              })
+              .exec(function(err, updatedUser) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to update passoword!",
+                    statusCode: 401
+                  });
+                }
+                console.log("Update current passoword succesfully!!!");
+                return res.json({
+                  "message": "Your passoword updated succesfully",
+                  statusCode: 200
+                });
+              });
+          });
+        }
+      });
+
+    });
+  },
+  updateCurrentSpendingPassword: function(req, res, next) {
+    console.log("Enter into updateCurrentSpendingPassword");
+    var userMailId = req.body.userMailId;
+    var currentSpendingPassword = req.body.currentSpendingPassword;
+    var newSpendingPassword = req.body.newSpendingPassword;
+    var confirmNewSpendingPassword = req.body.confirmNewPassword;
+    if (!userMailId || !currentSpendingPassword || !newSpendingPassword || !confirmNewSpendingPassword) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 401
+      });
+    }
+    if (currentSpendingPassword == newSpendingPassword) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Current password is not same as newSpendingPassword",
+        statusCode: 401
+      });
+    }
+    if (newSpendingPassword != confirmNewSpendingPassword) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "New SpendingPassword and Confirm New SpendingPassword not match",
+        statusCode: 401
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      User.compareSpendingpassword(currentSpendingPassword, user, function(err, valid) {
+        if (err) {
+          console.log("Error to compare password");
+          return res.json({
+            "message": "Error to compare password",
+            statusCode: 401
+          });
+        }
+        if (!valid) {
+          return res.json({
+            "message": "Please enter correct currentSpendingPassword",
+            statusCode: 401
+          });
+        } else {
+          bcrypt.hash(confirmNewSpendingPassword, 10, function(err, hash) {
+            if (err) res.json({
+              "message": "Errot to bcrypt passoword",
+              statusCode: 401
+            });
+            var newEncryptedPass = hash;
+            User.update({
+                email: userMailId
+              }, {
+                encryptedSpendingpassword: newEncryptedPass
               })
               .exec(function(err, updatedUser) {
                 if (err) {
