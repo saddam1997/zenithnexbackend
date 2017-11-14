@@ -1,11 +1,12 @@
 /**
- * TradebchmarketController
+ * TradeBCHMarketController
  *
  * @description :: Server-side logic for managing tradebchmarkets
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
 module.exports = {
+
   addAskBchMarket: async function(req, res) {
     console.log("Enter into ask api addAskBchMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
@@ -34,7 +35,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    var askDetails = await Ask.create({
+    var askDetails = await AskBCH.create({
       askAmountBTC: userAskAmountBTC,
       askAmountBCH: userAskAmountBCH,
       askRate: parseFloat(userAskRate).toFixed(8),
@@ -49,7 +50,7 @@ module.exports = {
       FreezedBCHbalance: updateFreezedBCHBalance,
       BCHbalance: updateUserBCHBalance,
     });
-    var allBidsFromdb = await Bid.find({
+    var allBidsFromdb = await BidBCH.find({
       bidRate: {
         'like': parseFloat(userAskRate)
       }
@@ -106,12 +107,12 @@ module.exports = {
                 BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
               });
-              console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
+              var bidDestroy = await BidBCH.destroy({
                 id: currentBidDetails.id
               });
-              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await AskBCH.destroy({
                 id: askDetails.id
               });
               return res.json({
@@ -137,7 +138,7 @@ module.exports = {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
               });
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-              var desctroyCurrentBid = await Bid.destroy({
+              var desctroyCurrentBid = await BidBCH.destroy({
                 id: currentBidDetails.id
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
@@ -163,7 +164,7 @@ module.exports = {
               console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
               console.log(currentBidDetails.id + " Update In last Ask askAmountBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
               console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
-              var updatedaskDetails = await Ask.update({
+              var updatedaskDetails = await AskBCH.update({
                 id: askDetails.id
               }, {
                 askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
@@ -213,12 +214,12 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                   FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
                 });
-                console.log(currentBidDetails.id + " Bid.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                var bidDestroy = await Bid.destroy({
+                console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
+                var bidDestroy = await BidBCH.destroy({
                   id: currentBidDetails.id
                 });
-                console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-                var askDestroy = await Ask.destroy({
+                console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
+                var askDestroy = await AskBCH.destroy({
                   id: askDetails.id
                 });
                 return res.json({
@@ -245,7 +246,7 @@ module.exports = {
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                var desctroyCurrentBid = await Bid.destroy({
+                var desctroyCurrentBid = await BidBCH.destroy({
                   id: currentBidDetails.id
                 });
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
@@ -263,7 +264,7 @@ module.exports = {
               var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedBidAmountBCH = (parseFloat(currentBidDetails.bidAmountBCH) - parseFloat(totoalAskRemainingBCH)).toFixed(8);
 
-              var updatedaskDetails = await Bid.update({
+              var updatedaskDetails = await BidBCH.update({
                 id: currentBidDetails.id
               }, {
                 bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
@@ -298,8 +299,8 @@ module.exports = {
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
               });
               //Destroy Ask===========================================
-              console.log(currentBidDetails.id + " Ask.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
+              var askDestroy = await AskBCH.destroy({
                 id: askDetails.id
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
@@ -357,7 +358,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    var bidDetails = await Bid.create({
+    var bidDetails = await BidBCH.create({
       bidAmountBTC: userBidAmountBTC,
       bidAmountBCH: userBidAmountBCH,
       bidRate: parseFloat(userBidRate),
@@ -374,7 +375,7 @@ module.exports = {
       BTCbalance: updateUserBTCBalance,
     });
     console.log("Bid created .........");
-    var allAsksFromdb = await Ask.find({
+    var allAsksFromdb = await AskBCH.find({
       askRate: {
         'like': parseFloat(userBidRate)
       }
@@ -435,12 +436,12 @@ module.exports = {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
-              console.log(currentAskDetails.id + " Bid.destroy currentAskDetails.id::: " + currentAskDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentAskDetails.id + " BidBCH.destroy currentAskDetails.id::: " + currentAskDetails.id);
+              var bidDestroy = await BidBCH.destroy({
                 id: bidDetails.bidowner
               });
-              console.log(currentAskDetails.id + " Ask.destroy bidDetails.id::: " + bidDetails.id);
-              var askDestroy = await Ask.destroy({
+              console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
+              var askDestroy = await AskBCH.destroy({
                 id: currentAskDetails.askowner
               });
               return res.json({
@@ -468,7 +469,7 @@ module.exports = {
                 BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
               });
               console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-              var destroyCurrentAsk = await Ask.destroy({
+              var destroyCurrentAsk = await AskBCH.destroy({
                 id: currentAskDetails.id
               });
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
@@ -498,7 +499,7 @@ module.exports = {
               console.log(currentAskDetails.id + " Update In last Ask askAmountBTC totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " Update In last Ask askAmountBCH totoalBidRemainingBCH " + totoalBidRemainingBCH);
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
-              var updatedbidDetails = await Bid.update({
+              var updatedbidDetails = await BidBCH.update({
                 id: bidDetails.bidowner
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
@@ -549,12 +550,12 @@ module.exports = {
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8),
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
                 });
-                console.log(currentAskDetails.id + " Bid.destroy currentAskDetails.id::: " + currentAskDetails.id);
-                var bidDestroy = await Ask.destroy({
+                console.log(currentAskDetails.id + " BidBCH.destroy currentAskDetails.id::: " + currentAskDetails.id);
+                var bidDestroy = await AskBCH.destroy({
                   id: currentAskDetails.id
                 });
-                console.log(currentAskDetails.id + " Ask.destroy bidDetails.id::: " + bidDetails.id);
-                var bidDestroy = await Bid.destroy({
+                console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
+                var bidDestroy = await BidBCH.destroy({
                   id: bidDetails.id
                 });
                 return res.json({
@@ -581,7 +582,7 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
                 });
                 console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-                var destroyCurrentAsk = await Ask.destroy({
+                var destroyCurrentAsk = await AskBCH.destroy({
                   id: currentAskDetails.id
                 });
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
@@ -597,7 +598,7 @@ module.exports = {
               var updatedAskAmountBCH = (parseFloat(currentAskDetails.askAmountBCH).toFixed(8) - parseFloat(totoalBidRemainingBCH).toFixed(8));
               var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC)).toFixed(8);
 
-              var updatedaskDetails = await Ask.update({
+              var updatedaskDetails = await AskBCH.update({
                 id: currentAskDetails.id
               }, {
                 askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
@@ -631,8 +632,8 @@ module.exports = {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
               });
               //Destroy Bid===========================================Working
-              console.log(currentAskDetails.id + " Bid.destroy bidDetails.id::: " + bidDetails.id);
-              var bidDestroy = await Bid.destroy({
+              console.log(currentAskDetails.id + " BidBCH.destroy bidDetails.id::: " + bidDetails.id);
+              var bidDestroy = await BidBCH.destroy({
                 id: bidDetails.id
               });
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
@@ -670,7 +671,7 @@ module.exports = {
         statusCode: 400
       });
     }
-    Bid.findOne({
+    BidBCH.findOne({
       bidowner: bidownerId,
       id: userBidId
     }).exec(function(err, bidDetails) {
@@ -731,7 +732,7 @@ module.exports = {
               });
             }
             console.log("Removing bid !!!");
-            Bid.destroy({
+            BidBCH.destroy({
               id: userBidId
             }).exec(function(err) {
               if (err) {
@@ -779,7 +780,7 @@ module.exports = {
         statusCode: 400
       });
     }
-    Ask.findOne({
+    AskBCH.findOne({
       askowner: askownerId,
       id: userAskId
     }).exec(function(err, askDetails) {
@@ -834,7 +835,7 @@ module.exports = {
               });
             }
             console.log("Removing ask !!!");
-            Ask.destroy({
+            AskBCH.destroy({
               id: userAskId
             }).exec(function(err) {
               if (err) {
@@ -870,5 +871,5 @@ module.exports = {
           });
       });
     });
-  },
+  }
 };

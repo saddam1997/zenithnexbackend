@@ -489,7 +489,7 @@ module.exports = {
                 id: bidDetails.bidowner
               });
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askowner");
-              var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidGDS.GDSbalance) + parseFloat(userBidAmountGDS)).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8);
+              var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBid.GDSbalance) + parseFloat(userBidAmountGDS)).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
