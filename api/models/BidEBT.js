@@ -7,8 +7,7 @@
 
 module.exports = {
 
-  autoCreatedAt: false,
-  autoUpdatedAt: false,
+
   schema: true,
   attributes: {
     bidAmountBTC: {
@@ -26,6 +25,12 @@ module.exports = {
       type: 'float',
       required: true,
       defaultsTo: 0
+    },
+    status: {
+      type: 'integer'
+    },
+    statusName: {
+      type: 'string'
     },
     bidownerEBT: {
       model: 'user'

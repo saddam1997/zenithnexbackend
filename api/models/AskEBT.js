@@ -8,8 +8,7 @@
 module.exports = {
 
   schema: true,
-  autoCreatedAt: false,
-  autoUpdatedAt: false,
+
   attributes: {
     askAmountBTC: {
       type: 'float',
@@ -25,6 +24,12 @@ module.exports = {
       type: 'float',
       required: true,
       defaultsTo: 0
+    },
+    status: {
+      type: 'integer'
+    },
+    statusName: {
+      type: 'string'
     },
     askownerEBT: {
       model: 'user'

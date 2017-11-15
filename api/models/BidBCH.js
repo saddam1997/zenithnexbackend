@@ -7,8 +7,7 @@
 
 module.exports = {
 
-  autoCreatedAt: false,
-  autoUpdatedAt: false,
+
   schema: true,
   attributes: {
 
@@ -27,6 +26,12 @@ module.exports = {
       type: 'float',
       required: true,
       defaultsTo: 0
+    },
+    status: {
+      type: 'integer'
+    },
+    statusName: {
+      type: 'string'
     },
     bidownerBCH: {
       model: 'user'

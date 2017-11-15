@@ -6,12 +6,8 @@
  */
 
 module.exports = {
-
   schema: true,
-  autoCreatedAt: false,
-  autoUpdatedAt: false,
   attributes: {
-
     askAmountBTC: {
       type: 'float',
       defaultsTo: 0.00,
@@ -26,6 +22,12 @@ module.exports = {
       type: 'float',
       required: true,
       defaultsTo: 0
+    },
+    status: {
+      type: 'integer'
+    },
+    statusName: {
+      type: 'string'
     },
     askownerBCH: {
       model: 'user'
