@@ -127,8 +127,15 @@ module.exports = {
                 FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
               });
               console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
-              var bidDestroy = await BidBCH.destroy({
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: currentBidDetails.id
+              // });
+
+              var bidDestroy = await BidBCH.update({
                 id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskBCH.destroy({
@@ -163,8 +170,15 @@ module.exports = {
                 BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
               });
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-              var desctroyCurrentBid = await BidBCH.destroy({
+              // var desctroyCurrentBid = await BidBCH.destroy({
+              //   id: currentBidDetails.id
+              // });
+
+              var desctroyCurrentBid = await BidBCH.update({
                 id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
@@ -242,8 +256,14 @@ module.exports = {
                   FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                var bidDestroy = await BidBCH.destroy({
+                // var bidDestroy = await BidBCH.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var bidDestroy = await BidBCH.update({
                   id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskBCH.destroy({
@@ -255,7 +275,6 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
-
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -280,8 +299,14 @@ module.exports = {
                   BCHbalance: parseFloat(updatedBCHbalanceBidder).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                var desctroyCurrentBid = await BidBCH.destroy({
+                // var desctroyCurrentBid = await BidBCH.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var desctroyCurrentBid = await BidBCH.update({
                   id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
@@ -302,7 +327,9 @@ module.exports = {
                 id: currentBidDetails.id
               }, {
                 bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
-                bidAmountBCH: parseFloat(updatedBidAmountBCH).toFixed(8)
+                bidAmountBCH: parseFloat(updatedBidAmountBCH).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
 
               //Update Bidder===========================================
@@ -491,8 +518,14 @@ module.exports = {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
               console.log(currentAskDetails.id + " BidBCH.destroy currentAskDetails.id::: " + currentAskDetails.id);
-              var bidDestroy = await BidBCH.destroy({
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: bidDetails.bidownerBCH
+              // });
+              var bidDestroy = await BidBCH.update({
                 id: bidDetails.bidownerBCH
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskBCH.destroy({
@@ -569,11 +602,11 @@ module.exports = {
                 id: bidDetails.bidownerBCH
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8)
+                bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
-
             }
-
           }
         } else {
           for (var i = 0; i < allAsksFromdb.length; i++) {
