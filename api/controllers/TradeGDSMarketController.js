@@ -33,9 +33,6 @@ module.exports = {
     var userAsker = await User.findOne({
       id: userAskownerId
     });
-    var userAsker = await User.findOne({
-      id: userBid1ownerId
-    });
     try {
       var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
 
@@ -60,7 +57,11 @@ module.exports = {
     var askDetails = await AskGDS.create({
       askAmountBTC: userAskAmountBTC,
       askAmountGDS: userAskAmountGDS,
+      totalaskAmountBTC: userAskAmountBTC,
+      totalaskAmountGDS: userAskAmountGDS,
       askRate: parseFloat(userAskRate).toFixed(8),
+      status: statusTwo,
+      statusName: statusTwoPending,
       askownerGDS: userIdInDb
     });
     sails.sockets.blast(constants.GDS_ASK_ADDED, askDetails);
@@ -469,12 +470,14 @@ module.exports = {
     var bidDetails = await BidGDS.create({
       bidAmountBTC: userBidAmountBTC,
       bidAmountGDS: userBidAmountGDS,
+      totalbidAmountBTC: userBidAmountBTC,
+      totalbidAmountGDS: userBidAmountGDS,
       bidRate: parseFloat(userBidRate),
+      status: statusTwo,
+      statusName: statusTwoPending,
       bidownerGDS: userIdInDb
     });
-
     sails.sockets.blast(constants.GDS_BID_ADDED, bidDetails);
-
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
@@ -1072,6 +1075,7 @@ module.exports = {
   getAllBidGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
     BidGDS.find()
+      .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
@@ -1100,6 +1104,7 @@ module.exports = {
   getAllAskGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
     AskGDS.find()
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
