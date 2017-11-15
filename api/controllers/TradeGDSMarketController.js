@@ -12,8 +12,9 @@ module.exports = {
     var userAskAmountGDS = req.body.askAmountGDS;
     var userAskRate = req.body.askRate;
     var userAskownerId = req.body.askownerId;
+    var userSpendingPassword = req.body.spendingPassword;
     if (!userAskAmountGDS || !userAskAmountBTC ||
-      !userAskRate || !userAskownerId) {
+      !userAskRate || !userAskownerId || !userSpendingPassword) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -23,6 +24,19 @@ module.exports = {
     var userAsker = await User.findOne({
       id: userAskownerId
     });
+    var userAsker = await User.findOne({
+      id: userBid1ownerId
+    });
+    try {
+      var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
+
+    } catch (e) {
+      console.log("Eeeeeeeeeeee", e);
+      return res.json({
+        "message": 'Enter valid spending password',
+        statusCode: 401
+      });
+    }
     console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userGDSBalanceInDb = parseFloat(userAsker.GDSbalance).toFixed(8);
@@ -337,9 +351,9 @@ module.exports = {
     var userBidAmountGDS = req.body.bidAmountGDS;
     var userBidRate = req.body.bidRate;
     var userBidownerId = req.body.bidownerId;
-
+    var userSpendingPassword = req.body.spendingPassword;
     if (!userBidAmountGDS || !userBidAmountBTC ||
-      !userBidRate || !userBidownerId) {
+      !userBidRate || !userBidownerId || !userSpendingPassword) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -349,6 +363,16 @@ module.exports = {
     var userBidder = await User.findOne({
       id: userBidownerId
     });
+    try {
+      var valid = await User.compareSpendingpassword(userSpendingPassword, userBidder);
+
+    } catch (e) {
+      console.log("Eeeeeeeeeeee", e);
+      return res.json({
+        "message": 'Enter valid spending password',
+        statusCode: 401
+      });
+    }
     console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance).toFixed(8);
@@ -882,5 +906,61 @@ module.exports = {
           });
       });
     });
+  },
+  getAllBidGDS: function(req, res) {
+    console.log("Enter into ask api getAllBid :: ");
+    BidGDS.find()
+      .exec(function(err, allBidDetailsToExecute) {
+        if (err) {
+          console.log("Error to find ask");
+        }
+        if (!allBidDetailsToExecute) {
+          return res.json({
+            "message": "No Bid Found!!",
+            statusCode: 401
+          });
+        }
+        if (allBidDetailsToExecute) {
+          if (allBidDetailsToExecute.length >= 1) {
+            return res.json({
+              bidsGDS: allBidDetailsToExecute,
+              statusCode: 200
+            });
+          } else {
+            return res.json({
+              "message": "No Bid Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
+  getAllAskGDS: function(req, res) {
+    console.log("Enter into ask api getAllBid :: ");
+    AskGDS.find()
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          console.log("Error to find ask");
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No Bid Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            return res.json({
+              asksGDS: allAskDetailsToExecute,
+              statusCode: 200
+            });
+          } else {
+            return res.json({
+              "message": "No Ask Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
   }
 };

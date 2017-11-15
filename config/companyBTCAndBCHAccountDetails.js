@@ -2,7 +2,7 @@ module.exports.company = {
 
   //BCH Server details
   clientBTChost: '162.213.252.66',
-  clientBTCport: 18332,
+  clientBTCport: 18336,
   clientBTCuser: 'test',
   clientBTCpass: 'test123',
 
@@ -12,7 +12,7 @@ module.exports.company = {
 
   //BCH Server details
   clientBCHhost: '162.213.252.66',
-  clientBCHport: 18332,
+  clientBCHport: 18336,
   clientBCHuser: 'test',
   clientBCHpass: 'test123',
 
