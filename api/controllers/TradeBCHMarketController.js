@@ -108,6 +108,9 @@ module.exports = {
       var allBidsFromdb = await BidBCH.find({
         bidRate: {
           'like': parseFloat(userAskRate)
+        },
+        status: {
+          '!': statusOne
         }
       });
     } catch (e) {
@@ -119,6 +122,7 @@ module.exports = {
       });
 
     }
+    console.log("allBidsFromdb :: " + JSON.stringify(allBidsFromdb));
     if (allBidsFromdb) {
       if (allBidsFromdb.length >= 1) {
         //Find exact bid if available in db
@@ -136,14 +140,13 @@ module.exports = {
             console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
             console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
 
-            console.log("in total_bid <= totoalAskRemainingBCH");
+            console.log("Enter into total_bid <= totoalAskRemainingBCH");
             console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
             //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
             totoalAskRemainingBCH = (parseFloat(totoalAskRemainingBCH).toFixed(8) - parseFloat(currentBidDetails.bidAmountBCH).toFixed(8));
             totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
             console.log("start from here totoalAskRemainingBCH == 0::: " + totoalAskRemainingBCH);
             if (totoalAskRemainingBCH == 0) {
-              //need emit bid_destroyed event here
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingBCH == 0");
 
@@ -200,20 +203,16 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
-              try {
-                var bidDestroy = await BidBCH.destroy({
-                  id: currentBidDetails.id
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed to destroy BCHBid',
-                  statusCode: 401
-                });
-              }
-//emitting event of destruction of bch_bid
-              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: currentBidDetails.id
+              // });
 
+              var bidDestroy = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
               console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: askDetails.id
@@ -265,22 +264,18 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-              try {
-                var desctroyCurrentBid = await BidBCH.destroy({
-                  id: currentBidDetails.id
-                });
-              } catch (e) {
-                return res.json({
-                  error:e,
-                  message: 'Failed to destroy BCH Bid',
-                  statusCode: 401
-                });
-              }
-//emitting event of destruction of bch_bid
-              sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
+              // var desctroyCurrentBid = await BidBCH.destroy({
+              //   id: currentBidDetails.id
+              // });
+
+              var desctroyCurrentBid = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
-
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
             if (i == allBidsFromdb.length - 1) {
               console.log(currentBidDetails.id + " userAll Details :: ");
@@ -403,40 +398,25 @@ module.exports = {
                   });
                 }
                 console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                try {
-                  var bidDestroy = await BidBCH.destroy({
-                    id: currentBidDetails.id
-                  });
-                } catch (e) {
-                  return res.json({
-                    error:e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-//emitting event for destruction of bch_bid
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+                // var bidDestroy = await BidBCH.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var bidDestroy = await BidBCH.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
                 console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskBCH.destroy({
                 //   id: askDetails.id
                 // });
-                try {
-                  var askDestroy = await AskBCH.update({
-                    id: askDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull
-                  });
-                } catch (e) {
-                  return res.json({
-                    error:e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-//emtting event for destruction of bch_ask
-                sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
-
+                var askDestroy = await AskBCH.update({
+                  id: askDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -477,20 +457,15 @@ module.exports = {
                   })
                 }
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                try {
-                  var desctroyCurrentBid = await BidBCH.destroy({
-                    id: currentBidDetails.id
-                  });
-                } catch (e) {
-                  return res.json({
-                    error:e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-//emtting event for bid destruction
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
-
+                // var desctroyCurrentBid = await BidBCH.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var desctroyCurrentBid = await BidBCH.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
             } else {
@@ -519,7 +494,9 @@ module.exports = {
                   id: currentBidDetails.id
                 }, {
                   bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
-                  bidAmountBCH: parseFloat(updatedBidAmountBCH).toFixed(8)
+                  bidAmountBCH: parseFloat(updatedBidAmountBCH).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending,
                 });
               } catch (e) {
                 return res.json({
@@ -626,7 +603,7 @@ module.exports = {
       });
     }
   },
-  addBidBchMarket: async function (req, res) {
+  addBidBchMarket: async function(req, res) {
     console.log("Enter into ask api addBidBchMarket :: " + JSON.stringify(req.body));
     var userBidAmountBTC = req.body.bidAmountBTC;
     var userBidAmountBCH = req.body.bidAmountBCH;
@@ -679,6 +656,8 @@ module.exports = {
         bidAmountBTC: userBidAmountBTC,
         bidAmountBCH: userBidAmountBCH,
         bidRate: parseFloat(userBidRate),
+        status: statusZero,
+        statusName: statusZeroCreated,
         bidownerBCH: userIdInDb
       });
     } catch (e) {
@@ -815,20 +794,15 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " BidBCH.destroy currentAskDetails.id::: " + currentAskDetails.id);
-              try {
-                var bidDestroy = await BidBCH.destroy({
-                  id: bidDetails.bidownerBCH
-                });
-              } catch (e) {
-                return res.json({
-                  error:e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-
-              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
-
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: bidDetails.bidownerBCH
+              // });
+              var bidDestroy = await BidBCH.update({
+                id: bidDetails.bidownerBCH
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
               console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: currentAskDetails.askownerBCH
@@ -959,7 +933,9 @@ module.exports = {
                   id: bidDetails.bidownerBCH
                 }, {
                   bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                  bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8)
+                  bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending
                 });
               } catch (e) {
                 return res.json({
@@ -969,14 +945,7 @@ module.exports = {
                 });
               }
 
-              var updatedbidDetails = await BidBCH.update({
-                id: bidDetails.bidownerBCH
-              }, {
-                bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8),
-                status: statusTwo,
-                statusName: statusTwoPending,
-              });
+
             }
 
           }
@@ -1075,19 +1044,15 @@ module.exports = {
                 sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
                 console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
-                try {
-                  var bidDestroy = await BidBCH.destroy({
-                    id: bidDetails.id
-                  });
-                } catch (e) {
-                  return res.json({
-                    error:e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+                // var bidDestroy = await BidBCH.destroy({
+                //   id: bidDetails.id
+                // });
+                var bidDestroy = await BidBCH.update({
+                  id: bidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
 
                 return res.json({
                   "message": "Bid Executed successfully",
@@ -1129,23 +1094,15 @@ module.exports = {
                   });
                 }
                 console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-                try {
-                  var destroyCurrentAsk = await AskBCH.destroy({
-                    id: currentAskDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull,
-                  });
-                } catch (e) {
-                  return res.json({
-                    error:e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-
-                sails.sockets.blast(constants.BCH_ASK_DESTROYED, destroyCurrentAsk);
-
+                // var destroyCurrentAsk = await AskBCH.destroy({
+                //   id: currentAskDetails.id
+                // });
+                var destroyCurrentAsk = await AskBCH.update({
+                  id: currentAskDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull,
+                });
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -1239,19 +1196,15 @@ module.exports = {
 
               //Destroy Bid===========================================Working
               console.log(currentAskDetails.id + " BidBCH.destroy bidDetails.id::: " + bidDetails.id);
-              try {
-                var bidDestroy = await BidBCH.destroy({
-                  id: bidDetails.id
-                });
-              } catch (e) {
-                return res.json({
-                  error:e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-
-              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: bidDetails.id
+              // });
+              var bidDestroy = await BidBCH.update({
+                id: bidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
 
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
@@ -1275,7 +1228,7 @@ module.exports = {
       });
     }
   },
-  removeBidBCHMarket: function (req, res) {
+  removeBidBCHMarket: function(req, res) {
     console.log("Enter into bid api removeBid :: ");
     var userBidId = req.body.bidIdBCH;
     var bidownerId = req.body.bidownerId;
@@ -1289,7 +1242,7 @@ module.exports = {
     BidBCH.findOne({
       bidownerBCH: bidownerId,
       id: userBidId
-    }).exec(function (err, bidDetails) {
+    }).exec(function(err, bidDetails) {
       if (err) {
         return res.json({
           "message": "Error to find bid",
@@ -1305,7 +1258,7 @@ module.exports = {
       console.log("Valid bid details !!!" + JSON.stringify(bidDetails));
       User.findOne({
         id: bidownerId
-      }).exec(function (err, user) {
+      }).exec(function(err, user) {
         if (err) {
           return res.json({
             "message": "Error to find user",
@@ -1330,12 +1283,12 @@ module.exports = {
         console.log("updateUserBTCBalance :" + updateUserBTCBalance);
 
         User.update({
-          id: bidownerId
-        }, {
-          BTCbalance: parseFloat(updateUserBTCBalance).toFixed(8),
-          FreezedBTCbalance: parseFloat(updateFreezedBalance).toFixed(8)
-        })
-          .exec(function (err, updatedUser) {
+            id: bidownerId
+          }, {
+            BTCbalance: parseFloat(updateUserBTCBalance).toFixed(8),
+            FreezedBTCbalance: parseFloat(updateFreezedBalance).toFixed(8)
+          })
+          .exec(function(err, updatedUser) {
             if (err) {
               console.log("Error to update user BTC balance");
               return res.json({
@@ -1346,7 +1299,7 @@ module.exports = {
             console.log("Removing bid !!!");
             BidBCH.destroy({
               id: userBidId
-            }).exec(function (err, bid) {
+            }).exec(function(err) {
               if (err) {
                 return res.json({
                   "message": "Error to remove bid",
