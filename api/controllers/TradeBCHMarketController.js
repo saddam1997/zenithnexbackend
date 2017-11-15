@@ -209,12 +209,20 @@ module.exports = {
               //   id: currentBidDetails.id
               // });
 
-              var bidDestroy = await BidBCH.update({
-                id: currentBidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidBCH.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
               console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: askDetails.id
@@ -270,12 +278,20 @@ module.exports = {
               //   id: currentBidDetails.id
               // });
 
-              var desctroyCurrentBid = await BidBCH.update({
-                id: currentBidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var desctroyCurrentBid = await BidBCH.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
@@ -349,9 +365,17 @@ module.exports = {
               if (totoalAskRemainingBCH == 0) {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalAskRemainingBCH == 0");
-                var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidownerBCH
-                });
+                try {
+                  var userAllDetailsInDBBidder = await User.findOne({
+                    id: currentBidDetails.bidownerBCH
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    "message": "Failed with an error",
+                    statusCode: 200
+                  });
+                }
                 try {
                   var userAllDetailsInDBAsker = await User.findOne({
                     id: askDetails.askownerBCH
@@ -403,22 +427,38 @@ module.exports = {
                 // var bidDestroy = await BidBCH.destroy({
                 //   id: currentBidDetails.id
                 // });
-                var bidDestroy = await BidBCH.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var bidDestroy = await BidBCH.update({
+                    id: currentBidDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    "message": "Failed with an error",
+                    statusCode: 200
+                  });
+                }
                 console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskBCH.destroy({
                 //   id: askDetails.id
                 // });
-                var askDestroy = await AskBCH.update({
-                  id: askDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var askDestroy = await AskBCH.update({
+                    id: askDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    "message": "Failed with an error",
+                    statusCode: 200
+                  });
+                }
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -801,12 +841,20 @@ module.exports = {
               // var bidDestroy = await BidBCH.destroy({
               //   id: bidDetails.bidownerBCH
               // });
-              var bidDestroy = await BidBCH.update({
-                id: bidDetails.bidownerBCH
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidBCH.update({
+                  id: bidDetails.bidownerBCH
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
               console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: currentAskDetails.askownerBCH
@@ -1101,12 +1149,20 @@ module.exports = {
                 // var destroyCurrentAsk = await AskBCH.destroy({
                 //   id: currentAskDetails.id
                 // });
-                var destroyCurrentAsk = await AskBCH.update({
-                  id: currentAskDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull,
-                });
+                try {
+                  var destroyCurrentAsk = await AskBCH.update({
+                    id: currentAskDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull,
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    "message": "Failed with an error",
+                    statusCode: 200
+                  });
+                }
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -1203,12 +1259,20 @@ module.exports = {
               // var bidDestroy = await BidBCH.destroy({
               //   id: bidDetails.id
               // });
-              var bidDestroy = await BidBCH.update({
-                id: bidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidBCH.update({
+                  id: bidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
 
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
@@ -1303,7 +1367,7 @@ module.exports = {
             console.log("Removing bid !!!");
             BidBCH.destroy({
               id: userBidId
-            }).exec(function(err) {
+            }).exec(function(err, bid) {
               if (err) {
                 return res.json({
                   "message": "Error to remove bid",

@@ -212,12 +212,21 @@ module.exports = {
               // var askDestroy = await AskGDS.destroy({
               //   id: askDetails.id
               // });
-              var askDestroy = await AskGDS.update({
-                id: askDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var askDestroy = await AskGDS.update({
+                  id: askDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error:e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+
+              }
 
               sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
 
