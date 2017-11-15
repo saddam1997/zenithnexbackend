@@ -8,8 +8,7 @@
 module.exports = {
 
   schema: true,
-  autoCreatedAt: false,
-  autoUpdatedAt: false,
+
   attributes: {
 
     askAmountBTC: {
@@ -26,6 +25,12 @@ module.exports = {
       type: 'float',
       required: true,
       defaultsTo: 0
+    },
+    status: {
+      type: 'integer'
+    },
+    statusName: {
+      type: 'string'
     },
     askownerGDS: {
       model: 'user'

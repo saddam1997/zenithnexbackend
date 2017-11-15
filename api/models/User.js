@@ -104,6 +104,11 @@ module.exports = {
       type: "boolean",
       defaultsTo: false
     },
+    //Tradebalanceorder
+    tradebalanceorderDetails: {
+      collection: 'tradebalanceorder',
+      via: 'tradebalanceorderowner'
+    },
     //BCH
     bidsBCH: {
       collection: 'bidBCH',

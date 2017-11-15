@@ -4,9 +4,15 @@
  * @description :: Server-side logic for managing depositeintrades
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var currencyNameBTC = "BTC";
+var currencyNameBCH = "BCH";
+var currencyNameGDS = "GDS";
+var currencyNameEBT = "EBT";
+
+var actionNameDeposit = "Deposit";
+var actionNameWithdrawal = "Withdrawal";
 
 module.exports = {
-
   depositeInWalletBTC: function(req, res) {
     console.log("Enter into depositeInWalletBTC");
     var userEmailAddress = req.body.userMailId;
@@ -78,10 +84,55 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: userBTCAmountToDeposite,
+                      currencyName: currencyNameBTC,
+                      action: actionNameDeposit,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+                  // User.findOne({
+                  //     email: userEmailAddress
+                  //   })
+                  //   .exec(function(err, userDetails) {
+                  //     if (err) {
+                  //       console.log("Error to find user");
+                  //     }
+                  //     if (!userDetails) {
+                  //       console.log("Invalid email!");
+                  //     } else {
+                  //       return res.json({
+                  //         user: userDetails,
+                  //         statusCode: 200
+                  //       });
+                  //     }
+                  //   });
+
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -161,10 +212,38 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: currencyNameWithdrawal,
+                      currencyName: currencyNameBTC,
+                      action: actionNameWithdrawal,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -243,10 +322,39 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: userBTCAmountToDeposite,
+                      currencyName: currencyNameBCH,
+                      action: actionNameDeposit,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -324,10 +432,39 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: currencyNameWithdrawal,
+                      currencyName: currencyNameBCH,
+                      action: actionNameWithdrawal,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -404,10 +541,38 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: userBTCAmountToDeposite,
+                      currencyName: currencyNameEBT,
+                      action: actionNameDeposit,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -484,10 +649,39 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: currencyNameWithdrawal,
+                      currencyName: currencyNameEBT,
+                      action: actionNameWithdrawal,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -568,10 +762,39 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: userBTCAmountToDeposite,
+                      currencyName: currencyNameGDS,
+                      action: actionNameDeposit,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
@@ -649,16 +872,42 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  return res.json({
-                    "message": "Balance Updated successfully!!!",
-                    statusCode: 200
-                  });
+                  Tradebalanceorder.create({
+                      amount: currencyNameWithdrawal,
+                      currencyName: currencyNameGDS,
+                      action: actionNameWithdrawal,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        })
+                        .exec(function(err, userDetails) {
+                          if (err) {
+                            console.log("Error to find user");
+                          }
+                          if (!userDetails) {
+                            console.log("Invalid email!");
+                          } else {
+                            return res.json({
+                              user: userDetails,
+                              statusCode: 200
+                            });
+                          }
+                        });
+                    });
+                  // return res.json({
+                  //   "message": "Balance Updated successfully!!!",
+                  //   statusCode: 200
+                  // });
                 });
             }
           });
       }
     });
   },
-
-
 };
