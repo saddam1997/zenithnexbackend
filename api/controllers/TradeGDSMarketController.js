@@ -1074,7 +1074,11 @@ module.exports = {
   },
   getAllBidGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidGDS.find()
+    BidGDS.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
@@ -1103,7 +1107,11 @@ module.exports = {
   },
   getAllAskGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskGDS.find()
+    AskGDS.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {

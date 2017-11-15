@@ -1072,7 +1072,11 @@ module.exports = {
   },
   getAllBidEBT: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidEBT.find()
+    BidEBT.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
@@ -1101,7 +1105,11 @@ module.exports = {
   },
   getAllAskEBT: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskEBT.find()
+    AskEBT.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {

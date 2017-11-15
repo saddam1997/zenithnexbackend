@@ -1456,7 +1456,11 @@ module.exports = {
   },
   getAllBidBCH: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidBCH.find()
+    BidBCH.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
@@ -1485,7 +1489,11 @@ module.exports = {
   },
   getAllAskBCH: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskBCH.find()
+    AskBCH.find({
+        status: {
+          '!': statusOne
+        }
+      })
       .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
