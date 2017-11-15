@@ -112,27 +112,6 @@ module.exports = {
                           }
                         });
                     });
-                  // User.findOne({
-                  //     email: userEmailAddress
-                  //   })
-                  //   .exec(function(err, userDetails) {
-                  //     if (err) {
-                  //       console.log("Error to find user");
-                  //     }
-                  //     if (!userDetails) {
-                  //       console.log("Invalid email!");
-                  //     } else {
-                  //       return res.json({
-                  //         user: userDetails,
-                  //         statusCode: 200
-                  //       });
-                  //     }
-                  //   });
-
-                  // return res.json({
-                  //   "message": "Balance Updated successfully!!!",
-                  //   statusCode: 200
-                  // });
                 });
             }
           });
@@ -240,10 +219,6 @@ module.exports = {
                           }
                         });
                     });
-                  // return res.json({
-                  //   "message": "Balance Updated successfully!!!",
-                  //   statusCode: 200
-                  // });
                 });
             }
           });
