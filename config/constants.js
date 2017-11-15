@@ -1,0 +1,16 @@
+export const BTC_ASK_ADDED      = 'BTC_ASK_ADDED';
+export const BTC_ASK_DESTROYED  = 'BTC_ASK_DESTROYED';
+export const BTC_BID_ADDED      = 'BTC_BID_ADDED';
+export const BTC_BID_DESTROYED  = 'BTC_BID_DESTROYED';
+export const BCH_ASK_ADDED      = 'BCH_ASK_ADDED';
+export const BCH_ASK_DESTROYED  = 'BCH_ASK_DESTROYED';
+export const BCH_BID_ADDED      = 'BCH_BID_ADDED';
+export const BCH_BID_DESTROYED  = 'BCH_BID_DESTROYED';
+export const EBT_ASK_ADDED      = 'EBT_ASK_ADDED';
+export const EBT_ASK_DESTROYED  = 'EBT_ASK_DESTROYED';
+export const EBT_BID_ADDED      = 'EBT_BID_ADDED';
+export const EBT_BID_DESTROYED  = 'EBT_BID_DESTROYED';
+export const GDS_ASK_ADDED      = 'GDS_ASK_ADDED';
+export const GDS_ASK_DESTROYED  = 'GDS_ASK_DESTROYED';
+export const GDS_BID_ADDED      = 'GDS_BID_ADDED';
+export const GDS_BID_DESTROYED  = 'GDS_BID_DESTROYED';

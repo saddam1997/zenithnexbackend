@@ -12,6 +12,10 @@ var statusZeroCreated = sails.config.company.statusZeroCreated;
 var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
 
+
+import {BTC_ASK_ADDED,BTC_ASK_DESTROYED,BTC_BID_ADDED,BTC_BID_DESTROYED,BCH_ASK_ADDED, BCH_ASK_DESTROYED, BCH_BID_ADDED, BCH_BID_DESTROYED, EBT_ASK_ADDED, EBT_ASK_DESTROYED, EBT_BID_ADDED,EBT_BID_DESTROYED, GDB_ASK_ADDED,GDB_ASK_DESTROYED,GDB_BID_ADDED,GDB_BID_DESTROYED} from './../../config/constants'
+import {GDS_BID_DESTROYED} from "../../config/constants";
+
 module.exports = {
 
   addAskEBTMarket: async function(req, res) {
@@ -60,6 +64,10 @@ module.exports = {
       statusName: statusZeroCreated,
       askownerBCH: userIdInDb
     });
+
+    sails.sockets.blast(EBT_ASK_ADDED, askDetails);
+
+
     var updateUserEBTBalance = parseFloat(userEBTBalanceInDb).toFixed(8) - parseFloat(userAskAmountEBT).toFixed(8);
     var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT)).toFixed(8);
 
@@ -136,6 +144,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
               console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskEBT.destroy({
               //   id: askDetails.id
@@ -147,6 +158,10 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_ASK_DESTROYED, askDestroy);
+
+
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -180,6 +195,11 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+
+              sails.sockets.blast(EBT_BID_DESTROYED, desctroyCurrentBid);
+
+
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
@@ -268,6 +288,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
                 console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskEBT.destroy({
                 //   id: askDetails.id
@@ -279,6 +302,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_ASK_DESTROYED, askDestroy);
+
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -312,6 +338,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_BID_DESTROYED, desctroyCurrentBid);
+
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
             } else {
@@ -374,6 +403,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_ASK_DESTROYED, askDestroy);
+
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
@@ -446,6 +478,9 @@ module.exports = {
       bidRate: parseFloat(userBidRate),
       bidownerEBT: userIdInDb
     });
+
+    sails.sockets.blast(EBT_BID_ADDED, bidDetails);
+
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
@@ -528,6 +563,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
               console.log(currentAskDetails.id + " AskEBT.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskEBT.destroy({
               //   id: currentAskDetails.askownerEBT
@@ -538,6 +576,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_ASK_DESTROYED, askDestro);
+
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -572,6 +613,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_ASK_DESTROYED, destroyCurrentAsk);
+
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
 
             }
@@ -659,6 +703,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
                 console.log(currentAskDetails.id + " AskEBT.destroy bidDetails.id::: " + bidDetails.id);
                 // var bidDestroy = await BidEBT.destroy({
                 //   id: bidDetails.id
@@ -669,6 +716,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
                 return res.json({
                   "message": "Bid Executed successfully",
                   statusCode: 200
@@ -702,6 +752,9 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+
+                sails.sockets.blast(EBT_ASK_DESTROYED, destroyCurrentAsk);
+
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -761,6 +814,9 @@ module.exports = {
                 status: statusOne,
                 statusName: statusOneSuccessfull
               });
+
+              sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
@@ -858,13 +914,16 @@ module.exports = {
             console.log("Removing bid !!!");
             BidEBT.destroy({
               id: userBidId
-            }).exec(function(err) {
+            }).exec(function(err, bidDestroy) {
               if (err) {
                 return res.json({
                   "message": "Error to remove bid",
                   statusCode: 400
                 });
               }
+
+              sails.sockets.blast(EBT_BID_DESTROYED, bidDestroy);
+
               console.log("Returning user details !!!");
               return res.json({
                 "message": "Bid removed successfully!!",
@@ -965,13 +1024,16 @@ module.exports = {
             console.log("Removing ask !!!");
             AskEBT.destroy({
               id: userAskId
-            }).exec(function(err) {
+            }).exec(function(err, ask) {
               if (err) {
                 return res.json({
                   "message": "Error to remove ask",
                   statusCode: 400
                 });
               }
+
+              sails.sockets.blast(EBT_ASK_DESTROYED, ask);
+
               console.log("Returning user details !!!");
               return res.json({
                 "message": "Ask removed successfully!!",
