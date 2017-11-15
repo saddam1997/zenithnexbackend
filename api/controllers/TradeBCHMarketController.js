@@ -72,8 +72,12 @@ module.exports = {
     var allBidsFromdb = await BidBCH.find({
       bidRate: {
         'like': parseFloat(userAskRate)
+      },
+      status: {
+        '!': statusOne
       }
     });
+    console.log("allBidsFromdb :: " + JSON.stringify(allBidsFromdb));
     if (allBidsFromdb) {
       if (allBidsFromdb.length >= 1) {
         //Find exact bid if available in db
@@ -440,6 +444,8 @@ module.exports = {
       bidAmountBTC: userBidAmountBTC,
       bidAmountBCH: userBidAmountBCH,
       bidRate: parseFloat(userBidRate),
+      status: statusZero,
+      statusName: statusZeroCreated,
       bidownerBCH: userIdInDb
     });
     console.log("Bid created .........");
@@ -660,9 +666,16 @@ module.exports = {
                   statusName: statusOneSuccessfull
                 });
                 console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
-                var bidDestroy = await BidBCH.destroy({
+                // var bidDestroy = await BidBCH.destroy({
+                //   id: bidDetails.id
+                // });
+                var bidDestroy = await BidBCH.update({
                   id: bidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
+
                 return res.json({
                   "message": "Bid Executed successfully",
                   statusCode: 200
@@ -746,9 +759,16 @@ module.exports = {
               });
               //Destroy Bid===========================================Working
               console.log(currentAskDetails.id + " BidBCH.destroy bidDetails.id::: " + bidDetails.id);
-              var bidDestroy = await BidBCH.destroy({
+              // var bidDestroy = await BidBCH.destroy({
+              //   id: bidDetails.id
+              // });
+              var bidDestroy = await BidBCH.update({
                 id: bidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
+
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",

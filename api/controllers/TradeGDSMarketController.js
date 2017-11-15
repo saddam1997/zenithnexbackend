@@ -4,6 +4,13 @@
  * @description :: Server-side logic for managing tradegdsmarkets
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var statusZero = sails.config.company.statusZero;
+var statusOne = sails.config.company.statusOne;
+var statusTwo = sails.config.company.statusTwo;
+
+var statusZeroCreated = sails.config.company.statusZeroCreated;
+var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
+var statusTwoPending = sails.config.company.statusTwoPending;
 
 module.exports = {
   addAskGDSMarket: async function(req, res) {
@@ -121,12 +128,24 @@ module.exports = {
                 FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
               });
               console.log(currentBidDetails.id + " BidGDS.destroy currentBidDetails.id::: " + currentBidDetails.id);
-              var bidDestroy = await BidGDS.destroy({
+              // var bidDestroy = await BidGDS.destroy({
+              //   id: currentBidDetails.id
+              // });
+              var bidDestroy = await BidGDS.update({
                 id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await AskGDS.destroy({
+              // var askDestroy = await AskGDS.destroy({
+              //   id: askDetails.id
+              // });
+              var askDestroy = await AskGDS.update({
                 id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               return res.json({
                 "message": "Ask Executed successfully",
@@ -152,8 +171,14 @@ module.exports = {
                 GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
               });
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-              var desctroyCurrentBid = await BidGDS.destroy({
+              // var desctroyCurrentBid = await BidGDS.destroy({
+              //   id: currentBidDetails.id
+              // });
+              var desctroyCurrentBid = await BidGDS.update({
                 id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
@@ -184,7 +209,9 @@ module.exports = {
                 id: askDetails.id
               }, {
                 askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
-                askAmountGDS: parseFloat(totoalAskRemainingGDS).toFixed(8)
+                askAmountGDS: parseFloat(totoalAskRemainingGDS).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
             }
 
@@ -232,12 +259,24 @@ module.exports = {
                   FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " BidGDS.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                var bidDestroy = await BidGDS.destroy({
+                // var bidDestroy = await BidGDS.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var bidDestroy = await BidGDS.update({
                   id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
-                var askDestroy = await AskGDS.destroy({
+                // var askDestroy = await AskGDS.destroy({
+                //   id: askDetails.id
+                // });
+                var askDestroy = await AskGDS.update({
                   id: askDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 return res.json({
                   "message": "Ask Executed successfully",
@@ -263,8 +302,14 @@ module.exports = {
                   GDSbalance: parseFloat(updatedGDSbalanceBidder).toFixed(8)
                 });
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                var desctroyCurrentBid = await BidGDS.destroy({
+                // var desctroyCurrentBid = await BidGDS.destroy({
+                //   id: currentBidDetails.id
+                // });
+                var desctroyCurrentBid = await BidGDS.update({
                   id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
@@ -285,7 +330,9 @@ module.exports = {
                 id: currentBidDetails.id
               }, {
                 bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
-                bidAmountGDS: parseFloat(updatedBidAmountGDS).toFixed(8)
+                bidAmountGDS: parseFloat(updatedBidAmountGDS).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
 
               //Update Bidder===========================================
@@ -317,8 +364,14 @@ module.exports = {
               });
               //Destroy Ask===========================================
               console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
-              var askDestroy = await AskGDS.destroy({
+              // var askDestroy = await AskGDS.destroy({
+              //   id: askDetails.id
+              // });
+              var askDestroy = await AskGDS.update({
                 id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
@@ -464,12 +517,24 @@ module.exports = {
                 FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
               });
               console.log(currentAskDetails.id + " BidGDS.destroy currentAskDetails.id::: " + currentAskDetails.id);
-              var bidDestroy = await BidGDS.destroy({
+              // var bidDestroy = await BidGDS.destroy({
+              //   id: bidDetails.bidownerGDS
+              // });
+              var bidDestroy = await BidGDS.update({
                 id: bidDetails.bidownerGDS
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentAskDetails.id + " AskGDS.destroy bidDetails.id::: " + bidDetails.id);
-              var askDestroy = await AskGDS.destroy({
+              // var askDestroy = await AskGDS.destroy({
+              //   id: currentAskDetails.askownerGDS
+              // });
+              var askDestroy = await AskGDS.update({
                 id: currentAskDetails.askownerGDS
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               return res.json({
                 "message": "Ask Executed successfully",
@@ -496,8 +561,14 @@ module.exports = {
                 BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
               });
               console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-              var destroyCurrentAsk = await AskGDS.destroy({
+              // var destroyCurrentAsk = await AskGDS.destroy({
+              //   id: currentAskDetails.id
+              // });
+              var destroyCurrentAsk = await AskGDS.update({
                 id: currentAskDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
 
@@ -530,7 +601,9 @@ module.exports = {
                 id: bidDetails.bidownerGDS
               }, {
                 bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                bidAmountGDS: parseFloat(totoalBidRemainingGDS).toFixed(8)
+                bidAmountGDS: parseFloat(totoalBidRemainingGDS).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
 
             }
@@ -578,12 +651,24 @@ module.exports = {
                   FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
                 });
                 console.log(currentAskDetails.id + " BidGDS.destroy currentAskDetails.id::: " + currentAskDetails.id);
-                var bidDestroy = await AskGDS.destroy({
+                // var bidDestroy = await AskGDS.destroy({
+                //   id: currentAskDetails.id
+                // });
+                var bidDestroy = await AskGDS.update({
                   id: currentAskDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentAskDetails.id + " AskGDS.destroy bidDetails.id::: " + bidDetails.id);
-                var bidDestroy = await BidGDS.destroy({
+                // var bidDestroy = await BidGDS.destroy({
+                //   id: bidDetails.id
+                // });
+                var bidDestroy = await BidGDS.update({
                   id: bidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 return res.json({
                   "message": "Bid Executed successfully",
@@ -609,8 +694,14 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
                 });
                 console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
-                var destroyCurrentAsk = await AskGDS.destroy({
+                // var destroyCurrentAsk = await AskGDS.destroy({
+                //   id: currentAskDetails.id
+                // });
+                var destroyCurrentAsk = await AskGDS.update({
                   id: currentAskDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
                 });
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
@@ -629,7 +720,9 @@ module.exports = {
                 id: currentAskDetails.id
               }, {
                 askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
-                askAmountGDS: parseFloat(updatedAskAmountGDS).toFixed(8)
+                askAmountGDS: parseFloat(updatedAskAmountGDS).toFixed(8),
+                status: statusTwo,
+                statusName: statusTwoPending,
               });
 
               //Update Asker===========================================11
@@ -660,8 +753,14 @@ module.exports = {
               });
               //Destroy Bid===========================================Working
               console.log(currentAskDetails.id + " BidGDS.destroy bidDetails.id::: " + bidDetails.id);
-              var bidDestroy = await BidGDS.destroy({
+              // var bidDestroy = await BidGDS.destroy({
+              //   id: bidDetails.id
+              // });
+              var bidDestroy = await BidGDS.update({
                 id: bidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
               });
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({

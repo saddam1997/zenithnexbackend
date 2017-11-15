@@ -162,51 +162,22 @@ module.exports = {
         if (err) {
           cb(err);
           return reject(err);
-
         }
         cb(null, match)
         resolve(match);
       })
-      // return new Promise(function(resolve, reject) {
-      //     if (err)
-      //       return reject(err);
-      //     resolve(match);
-      //   }
-      //   // if (err) {
-      //   //   console.log(" cb(err).. findOne.authenticated called.........");
-      //   //   cb(err);
-      //   // }
-      //   // if (match) {
-      //   //   cb(null, true);
-      //   // } else {
-      //   //   console.log(" cb(else).. findOne.authenticated called.........");
-      //   //   cb(err);
-      //   // }
-      // );
     })
   },
-
   compareSpendingpassword: function(spendingpassword, user, cb = () => {}) {
     bcrypt.compare(spendingpassword, user.encryptedSpendingpassword, function(err, match) {
       return new Promise(function(resolve, reject) {
         if (err) {
           cb(err);
           return reject(err);
-
         }
         cb(null, match)
         resolve(match);
       })
-      // if (err) {
-      //   console.log(" cb(err).. findOne.authenticated called.........");
-      //   cb(err);
-      // }
-      // if (match) {
-      //   cb(null, true);
-      // } else {
-      //   console.log("not match.....");
-      //   cb(err);
-      // }
     })
   },
   compareForgotpasswordOTP: function(otp, user, cb) {
@@ -251,5 +222,4 @@ module.exports = {
       }
     })
   }
-
 };

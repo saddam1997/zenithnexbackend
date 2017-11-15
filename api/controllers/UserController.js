@@ -55,6 +55,7 @@ var transporter = nodemailer.createTransport({
 });
 
 module.exports = {
+
   getNewGDSAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
@@ -1239,4 +1240,5 @@ module.exports = {
 
       });
   }
+
 };

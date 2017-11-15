@@ -213,7 +213,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: currencyNameWithdrawal,
+                      amount: userBTCAmountToWithDraw,
                       currencyName: currencyNameBTC,
                       action: actionNameWithdrawal,
                       tradebalanceorderowner: userDetails.id
@@ -323,7 +323,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: userBTCAmountToDeposite,
+                      amount: userBCHAmountToDeposite,
                       currencyName: currencyNameBCH,
                       action: actionNameDeposit,
                       tradebalanceorderowner: userDetails.id
@@ -433,7 +433,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: currencyNameWithdrawal,
+                      amount: userBCHAmountToWithDraw,
                       currencyName: currencyNameBCH,
                       action: actionNameWithdrawal,
                       tradebalanceorderowner: userDetails.id
@@ -542,7 +542,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: userBTCAmountToDeposite,
+                      amount: userEBTAmountToDeposite,
                       currencyName: currencyNameEBT,
                       action: actionNameDeposit,
                       tradebalanceorderowner: userDetails.id
@@ -650,7 +650,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: currencyNameWithdrawal,
+                      amount: userEBTAmountToWithDraw,
                       currencyName: currencyNameEBT,
                       action: actionNameWithdrawal,
                       tradebalanceorderowner: userDetails.id
@@ -763,7 +763,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: userBTCAmountToDeposite,
+                      amount: userGDSAmountToDeposite,
                       currencyName: currencyNameGDS,
                       action: actionNameDeposit,
                       tradebalanceorderowner: userDetails.id
@@ -873,7 +873,7 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: currencyNameWithdrawal,
+                      amount: userGDSAmountToWithDraw,
                       currencyName: currencyNameGDS,
                       action: actionNameWithdrawal,
                       tradebalanceorderowner: userDetails.id
