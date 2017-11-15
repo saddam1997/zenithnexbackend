@@ -16,7 +16,7 @@ var constants = require('./../../config/constants');
 
 
 module.exports = {
-  addAskBchMarket: async function (req, res) {
+  addAskBchMarket: async function(req, res) {
     console.log("Enter into ask api addAskBchMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
     var userAskAmountBCH = req.body.askAmountBCH;
@@ -70,9 +70,11 @@ module.exports = {
       var askDetails = await AskBCH.create({
         askAmountBTC: userAskAmountBTC,
         askAmountBCH: userAskAmountBCH,
+        totalaskAmountBTC: userAskAmountBTC,
+        totalaskAmountBCH: userAskAmountBCH,
         askRate: parseFloat(userAskRate).toFixed(8),
-        status: statusZero,
-        statusName: statusZeroCreated,
+        status: statusTwo,
+        statusName: statusTwoPending,
         askownerBCH: userIdInDb
       });
     } catch (e) {
@@ -231,7 +233,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-//emitting event of destruction of bch_ask
+              //emitting event of destruction of bch_ask
               sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
               return res.json({
                 "message": "Ask Executed successfully",
@@ -286,7 +288,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -356,7 +358,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -374,7 +376,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -392,7 +394,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -431,7 +433,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -451,7 +453,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   })
@@ -480,7 +482,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -500,7 +502,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -513,7 +515,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -531,7 +533,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -552,7 +554,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -571,12 +573,12 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
               }
-//emitting event for bch_ask destruction
+              //emitting event for bch_ask destruction
               sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
@@ -624,7 +626,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -655,20 +657,22 @@ module.exports = {
       var bidDetails = await BidBCH.create({
         bidAmountBTC: userBidAmountBTC,
         bidAmountBCH: userBidAmountBCH,
+        totalbidAmountBTC: userBidAmountBTC,
+        totalbidAmountBCH: userBidAmountBCH,
         bidRate: parseFloat(userBidRate),
-        status: statusZero,
-        statusName: statusZeroCreated,
+        status: statusTwo,
+        statusName: statusTwoPending,
         bidownerBCH: userIdInDb
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
     }
 
-//emitting event for bid creation
+    //emitting event for bid creation
     sails.sockets.blast(constants.BCH_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
@@ -684,7 +688,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -700,7 +704,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -737,7 +741,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -748,7 +752,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -768,7 +772,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -788,7 +792,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -816,7 +820,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -839,7 +843,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -859,7 +863,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -877,13 +881,13 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
               }
 
-              sails.sockets.blast(constants.BCH_ASK_DESTROYED,  destroyCurrentAsk);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, destroyCurrentAsk);
 
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
 
@@ -900,7 +904,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -919,7 +923,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -939,7 +943,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -970,7 +974,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -981,7 +985,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -999,7 +1003,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1017,7 +1021,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1035,7 +1039,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1068,7 +1072,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1088,7 +1092,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1115,7 +1119,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1135,7 +1139,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1148,7 +1152,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1167,7 +1171,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1188,7 +1192,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1341,7 +1345,7 @@ module.exports = {
       });
     });
   },
-  removeAskBCHMarket: function (req, res) {
+  removeAskBCHMarket: function(req, res) {
     console.log("Enter into ask api removeAsk :: ");
     var userAskId = req.body.askIdBCH;
     var askownerId = req.body.askownerId;
@@ -1355,7 +1359,7 @@ module.exports = {
     AskBCH.findOne({
       askownerBCH: askownerId,
       id: userAskId
-    }).exec(function (err, askDetails) {
+    }).exec(function(err, askDetails) {
       if (err) {
         return res.json({
           "message": "Error to find ask",
@@ -1371,7 +1375,7 @@ module.exports = {
       console.log("Valid ask details !!!" + JSON.stringify(askDetails));
       User.findOne({
         id: askownerId
-      }).exec(function (err, user) {
+      }).exec(function(err, user) {
         if (err) {
           return res.json({
             "message": "Error to find user",
@@ -1393,12 +1397,12 @@ module.exports = {
         var updateFreezedBCHBalance = userFreezedBCHbalanceInDB - askAmountOfBCHInAskTableDB;
         var updateUserBCHBalance = (parseFloat(userBCHBalanceInDb) + parseFloat(askAmountOfBCHInAskTableDB)).toFixed(8);
         User.update({
-          id: askownerId
-        }, {
-          BCHbalance: parseFloat(updateUserBCHBalance).toFixed(8),
-          FreezedBCHbalance: parseFloat(updateFreezedBCHBalance).toFixed(8)
-        })
-          .exec(function (err, updatedUser) {
+            id: askownerId
+          }, {
+            BCHbalance: parseFloat(updateUserBCHBalance).toFixed(8),
+            FreezedBCHbalance: parseFloat(updateFreezedBCHBalance).toFixed(8)
+          })
+          .exec(function(err, updatedUser) {
             if (err) {
               console.log("Error to update user BTC balance");
               return res.json({
@@ -1409,7 +1413,7 @@ module.exports = {
             console.log("Removing ask !!!");
             AskBCH.destroy({
               id: userAskId
-            }).exec(function (err, ask) {
+            }).exec(function(err, ask) {
               if (err) {
                 return res.json({
                   "message": "Error to remove ask",
@@ -1452,7 +1456,12 @@ module.exports = {
   },
   getAllBidBCH: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidBCH.find()
+    BidBCH.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
@@ -1480,7 +1489,12 @@ module.exports = {
   },
   getAllAskBCH: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskBCH.find()
+    AskBCH.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");

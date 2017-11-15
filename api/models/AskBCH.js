@@ -18,6 +18,16 @@ module.exports = {
       defaultsTo: 0.00,
       required: true
     },
+    totalaskAmountBTC: {
+      type: 'float',
+      defaultsTo: 0.00,
+      required: true
+    },
+    totalaskAmountBCH: {
+      type: 'float',
+      defaultsTo: 0.00,
+      required: true
+    },
     askRate: {
       type: 'float',
       required: true,

@@ -62,14 +62,17 @@ module.exports = {
         statusCode: 401
       });
     }
+
     try {
       var askDetails = await AskEBT.create({
         askAmountBTC: userAskAmountBTC,
         askAmountEBT: userAskAmountEBT,
+        totalaskAmountBTC: userAskAmountBTC,
+        totalaskAmountEBT: userAskAmountEBT,
         askRate: parseFloat(userAskRate).toFixed(8),
-        askownerEBT: userIdInDb,
-        statusName: statusZeroCreated,
-        askownerBCH: userIdInDb
+        status: statusTwo,
+        statusName: statusTwoPending,
+        askownerEBT: userIdInDb
       });
     } catch (e) {
       return res.json({
@@ -711,10 +714,15 @@ module.exports = {
       });
     }
     console.log("BidEBT.create ............");
+
     try {
       var bidDetails = await BidEBT.create({
         bidAmountBTC: userBidAmountBTC,
         bidAmountEBT: userBidAmountEBT,
+        totalbidAmountBTC: userBidAmountBTC,
+        totalbidAmountEBT: userBidAmountEBT,
+        status: statusTwo,
+        statusName: statusTwoPending,
         bidRate: parseFloat(userBidRate),
         bidownerEBT: userIdInDb
       });
@@ -1531,7 +1539,12 @@ module.exports = {
   },
   getAllBidEBT: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidEBT.find()
+    BidEBT.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
@@ -1559,7 +1572,12 @@ module.exports = {
   },
   getAllAskEBT: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskEBT.find()
+    AskEBT.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");

@@ -72,11 +72,16 @@ module.exports = {
         statusCode: 401
       });
     }
+
     try {
       var askDetails = await AskGDS.create({
         askAmountBTC: userAskAmountBTC,
         askAmountGDS: userAskAmountGDS,
+        totalaskAmountBTC: userAskAmountBTC,
+        totalaskAmountGDS: userAskAmountGDS,
         askRate: parseFloat(userAskRate).toFixed(8),
+        status: statusTwo,
+        statusName: statusTwoPending,
         askownerGDS: userIdInDb
       });
     } catch (e) {
@@ -691,11 +696,16 @@ module.exports = {
         statusCode: 401
       });
     }
+
     try {
       var bidDetails = await BidGDS.create({
         bidAmountBTC: userBidAmountBTC,
         bidAmountGDS: userBidAmountGDS,
+        totalbidAmountBTC: userBidAmountBTC,
+        totalbidAmountGDS: userBidAmountGDS,
         bidRate: parseFloat(userBidRate),
+        status: statusTwo,
+        statusName: statusTwoPending,
         bidownerGDS: userIdInDb
       });
     } catch (e) {
@@ -707,7 +717,6 @@ module.exports = {
     }
 
     sails.sockets.blast(constants.GDS_BID_ADDED, bidDetails);
-
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
@@ -1520,7 +1529,12 @@ module.exports = {
   },
   getAllBidGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    BidGDS.find()
+    BidGDS.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
@@ -1548,7 +1562,12 @@ module.exports = {
   },
   getAllAskGDS: function(req, res) {
     console.log("Enter into ask api getAllBid :: ");
-    AskGDS.find()
+    AskGDS.find({
+        status: {
+          '!': statusOne
+        }
+      })
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           console.log("Error to find ask");
