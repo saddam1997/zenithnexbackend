@@ -309,7 +309,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error, e,
+                  error: e,
                   message: 'Failed to update user',
                   statusCode: 401
                 });
