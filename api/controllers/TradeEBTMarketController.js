@@ -31,9 +31,17 @@ module.exports = {
         statusCode: 400
       });
     }
-    var userAsker = await User.findOne({
-      id: userAskownerId
-    });
+    try {
+      var userAsker = await User.findOne({
+        id: userAskownerId
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
     try {
       var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
     } catch (e) {
@@ -54,14 +62,22 @@ module.exports = {
         statusCode: 401
       });
     }
-    var askDetails = await AskEBT.create({
-      askAmountBTC: userAskAmountBTC,
-      askAmountEBT: userAskAmountEBT,
-      askRate: parseFloat(userAskRate).toFixed(8),
-      askownerEBT: userIdInDb,
-      statusName: statusZeroCreated,
-      askownerBCH: userIdInDb
-    });
+    try {
+      var askDetails = await AskEBT.create({
+        askAmountBTC: userAskAmountBTC,
+        askAmountEBT: userAskAmountEBT,
+        askRate: parseFloat(userAskRate).toFixed(8),
+        askownerEBT: userIdInDb,
+        statusName: statusZeroCreated,
+        askownerBCH: userIdInDb
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
 
     sails.sockets.blast(constants.EBT_ASK_ADDED, askDetails);
 
@@ -69,17 +85,33 @@ module.exports = {
     var updateUserEBTBalance = parseFloat(userEBTBalanceInDb).toFixed(8) - parseFloat(userAskAmountEBT).toFixed(8);
     var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT)).toFixed(8);
 
-    var userUpdateAsk = await User.update({
-      id: userIdInDb
-    }, {
-      FreezedEBTbalance: updateFreezedEBTBalance,
-      EBTbalance: updateUserEBTBalance,
-    });
-    var allBidsFromdb = await BidEBT.find({
-      bidRate: {
-        'like': parseFloat(userAskRate)
-      }
-    });
+    try {
+      var userUpdateAsk = await User.update({
+        id: userIdInDb
+      }, {
+        FreezedEBTbalance: updateFreezedEBTBalance,
+        EBTbalance: updateUserEBTBalance,
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
+    try {
+      var allBidsFromdb = await BidEBT.find({
+        bidRate: {
+          'like': parseFloat(userAskRate)
+        }
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
     if (allBidsFromdb) {
       if (allBidsFromdb.length >= 1) {
         //Find exact bid if available in db
@@ -106,42 +138,74 @@ module.exports = {
             if (totoalAskRemainingEBT == 0) {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingEBT == 0");
-              var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidownerEBT
-              });
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askownerEBT
-              })
+              try {
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidownerEBT
+                });
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: askDetails.askownerEBT
+                })
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log("userAll askDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
-              var userUpdateBidder = await User.update({
-                id: currentBidDetails.bidownerEBT
-              }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-              });
+              try {
+                var userUpdateBidder = await User.update({
+                  id: currentBidDetails.bidownerEBT
+                }, {
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
               var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-              var updatedUser = await User.update({
-                id: askDetails.askownerEBT
-              }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: askDetails.askownerEBT
+                }, {
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " BidEBT.destroy currentBidDetails.id::: " + currentBidDetails.id);
               // var bidDestroy = await BidEBT.destroy({
               //   id: currentBidDetails.id
               // });
-              var bidDestroy = await BidEBT.update({
-                id: currentBidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidEBT.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
@@ -150,12 +214,20 @@ module.exports = {
               //   id: askDetails.id
               // });
 
-              var askDestroy = await AskEBT.update({
-                id: askDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var askDestroy = await AskEBT.update({
+                  id: askDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, askDestroy);
 
@@ -168,31 +240,55 @@ module.exports = {
               //destroy bid
               console.log(currentBidDetails.id + " enter into else of totoalAskRemainingEBT == 0");
               console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerEBT " + currentBidDetails.bidownerEBT);
-              var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidownerEBT
-              });
+              try {
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
 
-              var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidownerEBT
-              }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-              });
+              try {
+                var userAllDetailsInDBBidderUpdate = await User.update({
+                  id: currentBidDetails.bidownerEBT
+                }, {
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
               // var desctroyCurrentBid = await BidEBT.destroy({
               //   id: currentBidDetails.id
               // });
-              var desctroyCurrentBid = await BidEBT.update({
-                id: currentBidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var desctroyCurrentBid = await BidEBT.update({
+                  id: currentBidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
 
               sails.sockets.blast(constants.EBT_BID_DESTROYED, desctroyCurrentBid);
@@ -205,32 +301,56 @@ module.exports = {
               console.log(currentBidDetails.id + " userAll Details :: ");
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askownerEBT
-              });
+              try {
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: askDetails.askownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
               var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-              var updatedUser = await User.update({
-                id: askDetails.askownerEBT
-              }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: askDetails.askownerEBT
+                }, {
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
               console.log(currentBidDetails.id + " Update In last Ask askAmountEBT totoalAskRemainingEBT " + totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
-              var updatedaskDetails = await AskEBT.update({
-                id: askDetails.id
-              }, {
-                askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
-                askAmountEBT: parseFloat(totoalAskRemainingEBT).toFixed(8),
-                status: statusTwo,
-                statusName: statusTwoPending,
-              });
+              try {
+                var updatedaskDetails = await AskEBT.update({
+                  id: askDetails.id
+                }, {
+                  askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
+                  askAmountEBT: parseFloat(totoalAskRemainingEBT).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending,
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
             }
 
           }
@@ -250,42 +370,82 @@ module.exports = {
               if (totoalAskRemainingEBT == 0) {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalAskRemainingEBT == 0");
-                var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidownerEBT
-                });
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askownerEBT
-                });
+                try {
+                  var userAllDetailsInDBBidder = await User.findOne({
+                    id: currentBidDetails.bidownerEBT
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
+                try {
+                  var userAllDetailsInDBAsker = await User.findOne({
+                    id: askDetails.askownerEBT
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log("userAll askDetails.askownerEBT :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
                 var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
-                var userUpdateBidder = await User.update({
-                  id: currentBidDetails.bidownerEBT
-                }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-                });
+                try {
+                  var userUpdateBidder = await User.update({
+                    id: currentBidDetails.bidownerEBT
+                  }, {
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
                 var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-                var updatedUser = await User.update({
-                  id: askDetails.askownerEBT
-                }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
-                });
+                try {
+                  var updatedUser = await User.update({
+                    id: askDetails.askownerEBT
+                  }, {
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentBidDetails.id + " BidEBT.destroy currentBidDetails.id::: " + currentBidDetails.id);
                 // var bidDestroy = await BidEBT.destroy({
                 //   id: currentBidDetails.id
                 // });
-                var bidDestroy = await BidEBT.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var bidDestroy = await BidEBT.update({
+                    id: currentBidDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
@@ -294,12 +454,20 @@ module.exports = {
                 //   id: askDetails.id
                 // });
 
-                var askDestroy = await AskEBT.update({
-                  id: askDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var askDestroy = await AskEBT.update({
+                    id: askDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_ASK_DESTROYED, askDestroy);
 
@@ -311,31 +479,55 @@ module.exports = {
                 //destroy bid
                 console.log(currentBidDetails.id + " enter into else of totoalAskRemainingEBT == 0");
                 console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerEBT " + currentBidDetails.bidownerEBT);
-                var userAllDetailsInDBBidder = await User.findOne({
-                  id: currentBidDetails.bidownerEBT
-                });
+                try {
+                  var userAllDetailsInDBBidder = await User.findOne({
+                    id: currentBidDetails.bidownerEBT
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
                 var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
                 console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
                 console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
 
-                var userAllDetailsInDBBidderUpdate = await User.update({
-                  id: currentBidDetails.bidownerEBT
-                }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-                });
+                try {
+                  var userAllDetailsInDBBidderUpdate = await User.update({
+                    id: currentBidDetails.bidownerEBT
+                  }, {
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
                 // var desctroyCurrentBid = await BidEBT.destroy({
                 //   id: currentBidDetails.id
                 // });
-                var desctroyCurrentBid = await BidEBT.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var desctroyCurrentBid = await BidEBT.update({
+                    id: currentBidDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_BID_DESTROYED, desctroyCurrentBid);
 
@@ -347,36 +539,68 @@ module.exports = {
               console.log(currentBidDetails.id + " userAll Details :: ");
               console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: askDetails.askownerEBT
-              });
+              try {
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: askDetails.askownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Update Bid
               var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT)).toFixed(8);
 
-              var updatedaskDetails = await BidEBT.update({
-                id: currentBidDetails.id
-              }, {
-                bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
-                bidAmountEBT: parseFloat(updatedBidAmountEBT).toFixed(8),
-                status: statusTwo,
-                statusName: statusTwoPending,
-              });
+              try {
+                var updatedaskDetails = await BidEBT.update({
+                  id: currentBidDetails.id
+                }, {
+                  bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
+                  bidAmountEBT: parseFloat(updatedBidAmountEBT).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending,
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               //Update Bidder===========================================
-              var userAllDetailsInDBBiddder = await User.findOne({
-                id: currentBidDetails.bidownerEBT
-              });
+              try {
+                var userAllDetailsInDBBiddder = await User.findOne({
+                  id: currentBidDetails.bidownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.EBTbalance) + parseFloat(totoalAskRemainingEBT)).toFixed(8);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
-              var userAllDetailsInDBBidderUpdate = await User.update({
-                id: currentBidDetails.bidownerEBT
-              }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-              });
+              try {
+                var userAllDetailsInDBBidderUpdate = await User.update({
+                  id: currentBidDetails.bidownerEBT
+                }, {
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Update asker ===========================================
 
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
@@ -384,23 +608,39 @@ module.exports = {
               var updatedFreezedEBTbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(userAskAmountEBT).toFixed(8);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-              var updatedUser = await User.update({
-                id: askDetails.askownerEBT
-              }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: askDetails.askownerEBT
+                }, {
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Destroy Ask===========================================
               console.log(currentBidDetails.id + " AskEBT.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskEBT.destroy({
               //   id: askDetails.id
               // });
-              var askDestroy = await AskEBT.update({
-                id: askDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var askDestroy = await AskEBT.update({
+                  id: askDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, askDestroy);
 
@@ -444,10 +684,11 @@ module.exports = {
         statusCode: 400
       });
     }
-    var userBidder = await User.findOne({
-      id: userBidownerId
-    });
+
     try {
+      var userBidder = await User.findOne({
+        id: userBidownerId
+      });
       var valid = await User.compareSpendingpassword(userSpendingPassword, userBidder);
 
     } catch (e) {
@@ -470,12 +711,20 @@ module.exports = {
       });
     }
     console.log("BidEBT.create ............");
-    var bidDetails = await BidEBT.create({
-      bidAmountBTC: userBidAmountBTC,
-      bidAmountEBT: userBidAmountEBT,
-      bidRate: parseFloat(userBidRate),
-      bidownerEBT: userIdInDb
-    });
+    try {
+      var bidDetails = await BidEBT.create({
+        bidAmountBTC: userBidAmountBTC,
+        bidAmountEBT: userBidAmountEBT,
+        bidRate: parseFloat(userBidRate),
+        bidownerEBT: userIdInDb
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
 
     sails.sockets.blast(constants.EBT_BID_ADDED, bidDetails);
 
@@ -483,18 +732,34 @@ module.exports = {
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
     console.log("Updating ");
-    var userUpdateBidDetails = await User.update({
-      id: userIdInDb
-    }, {
-      FreezedBTCbalance: updateFreezedBTCBalance,
-      BTCbalance: updateUserBTCBalance,
-    });
+    try {
+      var userUpdateBidDetails = await User.update({
+        id: userIdInDb
+      }, {
+        FreezedBTCbalance: updateFreezedBTCBalance,
+        BTCbalance: updateUserBTCBalance,
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
     console.log("Bid created .........");
-    var allAsksFromdb = await AskEBT.find({
-      askRate: {
-        'like': parseFloat(userBidRate)
-      }
-    });
+    try {
+      var allAsksFromdb = await AskEBT.find({
+        askRate: {
+          'like': parseFloat(userBidRate)
+        }
+      });
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
     console.log("Getting all bids details.............");
     if (allAsksFromdb) {
       if (allAsksFromdb.length >= 1) {
@@ -521,46 +786,78 @@ module.exports = {
 
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalBidRemainingEBT == 0");
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askownerEBT
-              });
-              var BidderuserAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidownerEBT
-              });
+              try {
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: currentAskDetails.askownerEBT
+                });
+                var BidderuserAllDetailsInDBBidder = await User.findOne({
+                  id: bidDetails.bidownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log("userAll bidDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
               //current ask details of Asker  updated
               //Ask FreezedEBTbalance balance of asker deducted and BTC to give asker
-              var userUpdateAsker = await User.update({
-                id: currentAskDetails.askownerEBT
-              }, {
-                FreezedEBTbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                BTCbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
-              });
+              try {
+                var userUpdateAsker = await User.update({
+                  id: currentAskDetails.askownerEBT
+                }, {
+                  FreezedEBTbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
+                  BTCbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and EBT  give to bidder
               var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalAskRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-              var updatedUser = await User.update({
-                id: bidDetails.bidownerEBT
-              }, {
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: bidDetails.bidownerEBT
+                }, {
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentAskDetails.id + " BidEBT.destroy currentAskDetails.id::: " + currentAskDetails.id);
               // var bidDestroy = await BidEBT.destroy({
               //   id: bidDetails.bidownerEBT
               // });
-              var bidDestroy = await BidEBT.update({
-                id: bidDetails.bidownerEBT
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidEBT.update({
+                  id: bidDetails.bidownerEBT
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
@@ -568,12 +865,20 @@ module.exports = {
               // var askDestroy = await AskEBT.destroy({
               //   id: currentAskDetails.askownerEBT
               // });
-              var askDestroy = await AskEBT.update({
-                id: currentAskDetails.askownerEBT
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var askDestroy = await AskEBT.update({
+                  id: currentAskDetails.askownerEBT
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, askDestro);
 
@@ -586,31 +891,55 @@ module.exports = {
               //destroy bid
               console.log(currentAskDetails.id + " enter into else of totoalBidRemainingEBT == 0");
               console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerEBT " + currentAskDetails.bidownerEBT);
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askownerEBT
-              });
+              try {
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: currentAskDetails.askownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
               var updatedFreezedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
               var updatedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceBidder:: " + updatedFreezedEBTbalanceBidder);
               console.log(currentAskDetails.id + " updatedBTCbalanceBidder:: " + updatedBTCbalanceBidder);
 
-              var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askownerEBT
-              }, {
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceBidder).toFixed(8),
-                BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
-              });
+              try {
+                var userAllDetailsInDBAskerUpdate = await User.update({
+                  id: currentAskDetails.askownerEBT
+                }, {
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceBidder).toFixed(8),
+                  BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
               // var destroyCurrentAsk = await AskEBT.destroy({
               //   id: currentAskDetails.id
               // });
-              var destroyCurrentAsk = await AskEBT.update({
-                id: currentAskDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var destroyCurrentAsk = await AskEBT.update({
+                  id: currentAskDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, destroyCurrentAsk);
 
@@ -623,31 +952,55 @@ module.exports = {
               console.log(currentAskDetails.id + " userAll Details :: ");
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
 
-              var userAllDetailsInDBBid = await User.findOne({
-                id: bidDetails.bidownerEBT
-              });
+              try {
+                var userAllDetailsInDBBid = await User.findOne({
+                  id: bidDetails.bidownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-              var updatedUser = await User.update({
-                id: bidDetails.bidownerEBT
-              }, {
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: bidDetails.bidownerEBT
+                }, {
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentAskDetails.id + " Update In last Ask askAmountBTC totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " Update In last Ask askAmountEBT totoalBidRemainingEBT " + totoalBidRemainingEBT);
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
-              var updatedbidDetails = await BidEBT.update({
-                id: bidDetails.bidownerEBT
-              }, {
-                bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                bidAmountEBT: parseFloat(totoalBidRemainingEBT).toFixed(8),
-                status: statusTwo,
-                statusName: statusTwoPending,
-              });
+              try {
+                var updatedbidDetails = await BidEBT.update({
+                  id: bidDetails.bidownerEBT
+                }, {
+                  bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
+                  bidAmountEBT: parseFloat(totoalBidRemainingEBT).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending,
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
             }
           }
         } else {
@@ -665,42 +1018,74 @@ module.exports = {
               if (totoalBidRemainingEBT == 0) {
                 //destroy bid and ask and update bidder and asker balances and break
                 console.log("Enter into totoalBidRemainingEBT == 0");
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askownerEBT
-                });
-                var userAllDetailsInDBBidder = await User.findOne({
-                  id: bidDetails.bidownerEBT
-                });
+                try {
+                  var userAllDetailsInDBAsker = await User.findOne({
+                    id: currentAskDetails.askownerEBT
+                  });
+                  var userAllDetailsInDBBidder = await User.findOne({
+                    id: bidDetails.bidownerEBT
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log("userAll bidDetails.askownerEBT :: ");
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
-                var userUpdateAsker = await User.update({
-                  id: currentAskDetails.askownerEBT
-                }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
-                });
+                try {
+                  var userUpdateAsker = await User.update({
+                    id: currentAskDetails.askownerEBT
+                  }, {
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
                 var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
-                var updatedUser = await User.update({
-                  id: bidDetails.bidownerEBT
-                }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
-                });
+                try {
+                  var updatedUser = await User.update({
+                    id: bidDetails.bidownerEBT
+                  }, {
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentAskDetails.id + " BidEBT.destroy currentAskDetails.id::: " + currentAskDetails.id);
                 // var bidDestroy = await AskEBT.destroy({
                 //   id: currentAskDetails.id
                 // });
-                var askDestroy = await AskEBT.update({
-                  id: currentAskDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var askDestroy = await AskEBT.update({
+                    id: currentAskDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
@@ -708,12 +1093,20 @@ module.exports = {
                 // var bidDestroy = await BidEBT.destroy({
                 //   id: bidDetails.id
                 // });
-                var bidDestroy = await BidEBT.update({
-                  id: bidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var bidDestroy = await BidEBT.update({
+                    id: bidDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
@@ -725,31 +1118,55 @@ module.exports = {
                 //destroy bid
                 console.log(currentAskDetails.id + " enter into else of totoalBidRemainingEBT == 0");
                 console.log(currentAskDetails.id + " start User.findOne currentAskDetails.bidownerEBT " + currentAskDetails.bidownerEBT);
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: currentAskDetails.askownerEBT
-                });
+                try {
+                  var userAllDetailsInDBAsker = await User.findOne({
+                    id: currentAskDetails.askownerEBT
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
                 var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
                 console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
                 console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
-                var userAllDetailsInDBAskerUpdate = await User.update({
-                  id: currentAskDetails.askownerEBT
-                }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
-                });
+                try {
+                  var userAllDetailsInDBAskerUpdate = await User.update({
+                    id: currentAskDetails.askownerEBT
+                  }, {
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
                 console.log(currentAskDetails.id + " userAllDetailsInDBAskerUpdate ::" + userAllDetailsInDBAskerUpdate);
                 // var destroyCurrentAsk = await AskEBT.destroy({
                 //   id: currentAskDetails.id
                 // });
-                var destroyCurrentAsk = await AskEBT.update({
-                  id: currentAskDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
+                try {
+                  var destroyCurrentAsk = await AskEBT.update({
+                    id: currentAskDetails.id
+                  }, {
+                    status: statusOne,
+                    statusName: statusOneSuccessfull
+                  });
+                } catch (e) {
+                  return res.json({
+                    error: e,
+                    message: 'Failed with an error',
+                    statusCode: 401
+                  });
+                }
 
                 sails.sockets.blast(constants.EBT_ASK_DESTROYED, destroyCurrentAsk);
 
@@ -759,59 +1176,107 @@ module.exports = {
               //destroy ask and update bid and  update asker and bidder and break
               console.log(currentAskDetails.id + " userAll Details :: ");
               console.log(currentAskDetails.id + " enter into i == allBidsFromdb.length - 1");
-              var userAllDetailsInDBBidder = await User.findOne({
-                id: bidDetails.bidownerEBT
-              });
+              try {
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: bidDetails.bidownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Update Ask
               var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8));
               var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC)).toFixed(8);
 
-              var updatedaskDetails = await AskEBT.update({
-                id: currentAskDetails.id
-              }, {
-                askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
-                askAmountEBT: parseFloat(updatedAskAmountEBT).toFixed(8),
-                status: statusTwo,
-                statusName: statusTwoPending,
-              });
+              try {
+                var updatedaskDetails = await AskEBT.update({
+                  id: currentAskDetails.id
+                }, {
+                  askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
+                  askAmountEBT: parseFloat(updatedAskAmountEBT).toFixed(8),
+                  status: statusTwo,
+                  statusName: statusTwoPending,
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               //Update Asker===========================================11
-              var userAllDetailsInDBAsker = await User.findOne({
-                id: currentAskDetails.askownerEBT
-              });
+              try {
+                var userAllDetailsInDBAsker = await User.findOne({
+                  id: currentAskDetails.askownerEBT
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8));
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC)).toFixed(8);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
-              var userAllDetailsInDBAskerUpdate = await User.update({
-                id: currentAskDetails.askownerEBT
-              }, {
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
-              });
+              try {
+                var userAllDetailsInDBAskerUpdate = await User.update({
+                  id: currentAskDetails.askownerEBT
+                }, {
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Update bidder =========================================== 11
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8);
               var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedEBTbalanceBidder);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
-              var updatedUser = await User.update({
-                id: bidDetails.bidownerEBT
-              }, {
-                EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
-              });
+              try {
+                var updatedUser = await User.update({
+                  id: bidDetails.bidownerEBT
+                }, {
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               //Destroy Bid===========================================Working
               console.log(currentAskDetails.id + " BidEBT.destroy bidDetails.id::: " + bidDetails.id);
               // var bidDestroy = await BidEBT.destroy({
               //   id: bidDetails.id
               // });
-              var bidDestroy = await BidEBT.update({
-                id: bidDetails.id
-              }, {
-                status: statusOne,
-                statusName: statusOneSuccessfull
-              });
+              try {
+                var bidDestroy = await BidEBT.update({
+                  id: bidDetails.id
+                }, {
+                  status: statusOne,
+                  statusName: statusOneSuccessfull
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
 
               sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
 
