@@ -12,7 +12,8 @@ var statusZeroCreated = sails.config.company.statusZeroCreated;
 var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
 
-import {BTC_ASK_ADDED,BTC_ASK_DESTROYED,BTC_BID_ADDED,BTC_BID_DESTROYED,BCH_ASK_ADDED, BCH_ASK_DESTROYED, BCH_BID_ADDED, BCH_BID_DESTROYED, EBT_ASK_ADDED, EBT_ASK_DESTROYED, EBT_BID_ADDED,EBT_BID_DESTROYED, GDB_ASK_ADDED,GDB_ASK_DESTROYED,GDB_BID_ADDED,GDB_BID_DESTROYED} from './../../config/constants'
+var constants = require('./../../config/constants');
+
 
 module.exports = {
   addAskBchMarket: async function (req, res) {
@@ -82,7 +83,7 @@ module.exports = {
       });
     }
     //blasting the bid creation event
-    sails.sockets.blast(BCH_ASK_ADDED, askDetails);
+    sails.sockets.blast(constants.BCH_ASK_ADDED, askDetails);
 
     var updateUserBCHBalance = parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userAskAmountBCH).toFixed(8);
     var updateFreezedBCHBalance = (parseFloat(userFreezedBCHBalanceInDb) + parseFloat(userAskAmountBCH)).toFixed(8);
@@ -211,7 +212,7 @@ module.exports = {
                 });
               }
 //emitting event of destruction of bch_bid
-              sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
               console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskBCH.destroy({
@@ -232,7 +233,7 @@ module.exports = {
                 });
               }
 //emitting event of destruction of bch_ask
-              sails.sockets.blast(BCH_ASK_DESTROYED, askDestroy);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -276,7 +277,7 @@ module.exports = {
                 });
               }
 //emitting event of destruction of bch_bid
-              sails.sockets.blast(BCH_BID_DESTROYED, desctroyCurrentBid);
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
 
@@ -414,7 +415,7 @@ module.exports = {
                   });
                 }
 //emitting event for destruction of bch_bid
-                sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
                 console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskBCH.destroy({
                 //   id: askDetails.id
@@ -434,7 +435,7 @@ module.exports = {
                   });
                 }
 //emtting event for destruction of bch_ask
-                sails.sockets.blast(BCH_ASK_DESTROYED, askDestroy);
+                sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
 
                 return res.json({
                   "message": "Ask Executed successfully",
@@ -488,7 +489,7 @@ module.exports = {
                   });
                 }
 //emtting event for bid destruction
-                sails.sockets.blast(BCH_BID_DESTROYED, desctroyCurrentBid);
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
 
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
@@ -599,7 +600,7 @@ module.exports = {
                 });
               }
 //emitting event for bch_ask destruction
-              sails.sockets.blast(BCH_ASK_DESTROYED, askDestroy);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
@@ -689,7 +690,7 @@ module.exports = {
     }
 
 //emitting event for bid creation
-    sails.sockets.blast(BCH_BID_ADDED, bidDetails);
+    sails.sockets.blast(constants.BCH_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
     var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
@@ -826,7 +827,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
               console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskBCH.destroy({
@@ -847,7 +848,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_ASK_DESTROYED, askDestroy);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
 
               return res.json({
                 "message": "Ask Executed successfully",
@@ -908,7 +909,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_ASK_DESTROYED,  destroyCurrentAsk);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED,  destroyCurrentAsk);
 
               console.log(currentAskDetails.id + " Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
 
@@ -1071,7 +1072,7 @@ module.exports = {
                   });
                 }
 
-                sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
                 console.log(currentAskDetails.id + " AskBCH.destroy bidDetails.id::: " + bidDetails.id);
                 try {
@@ -1086,7 +1087,7 @@ module.exports = {
                   });
                 }
 
-                sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
                 return res.json({
                   "message": "Bid Executed successfully",
@@ -1143,7 +1144,7 @@ module.exports = {
                   });
                 }
 
-                sails.sockets.blast(BCH_ASK_DESTROYED, destroyCurrentAsk);
+                sails.sockets.blast(constants.BCH_ASK_DESTROYED, destroyCurrentAsk);
 
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
@@ -1250,7 +1251,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_BID_DESTROYED, bidDestroy);
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
 
               console.log(currentAskDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
@@ -1353,7 +1354,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_BID_DESTROYED, bid);
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bid);
 
 
               return res.json({
@@ -1463,7 +1464,7 @@ module.exports = {
                 });
               }
 
-              sails.sockets.blast(BCH_ASK_DESTROYED, ask);
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, ask);
 
               return res.json({
                 "message": "Ask removed successfully!!",
