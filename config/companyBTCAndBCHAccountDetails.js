@@ -17,6 +17,11 @@ module.exports.company = {
   txFeeEBT: 0.0008,
   txFeeGDS: 0.0008,
 
+  companyBTCAccount: "pennybtc@gmail.com",
+  companyBCHAccount: "pennybch@gmail.com",
+  companyEBTAccount: "pennyebt@gmail.com",
+  companyGDSAccount: "pennygds@gmail.com",
+
   statusZero: 0, //Created
   statusOne: 1, //Successfull
   statusTwo: 2, //Pending

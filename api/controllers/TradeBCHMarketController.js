@@ -11,13 +11,10 @@ var statusTwo = sails.config.company.statusTwo;
 var statusZeroCreated = sails.config.company.statusZeroCreated;
 var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
-
 var constants = require('./../../config/constants');
-
-
 module.exports = {
   addAskBchMarket: async function(req, res) {
-    console.log("Enter into ask api addAskBchMarket :: " + JSON.stringify(req.body));
+    console.log("Enter into ask api addAskBchMarket :: ");
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
     var userAskAmountBCH = req.body.askAmountBCH;
     var userAskRate = req.body.askRate;
@@ -36,13 +33,11 @@ module.exports = {
         id: userAskownerId
       });
     } catch (e) {
-
       return res.json({
         error: e,
         message: 'Error in fetching user',
         statusCode: 401
       });
-
     }
     console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
@@ -86,10 +81,8 @@ module.exports = {
     }
     //blasting the bid creation event
     sails.sockets.blast(constants.BCH_ASK_ADDED, askDetails);
-
     var updateUserBCHBalance = parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userAskAmountBCH).toFixed(8);
     var updateFreezedBCHBalance = (parseFloat(userFreezedBCHBalanceInDb) + parseFloat(userAskAmountBCH)).toFixed(8);
-
     try {
       var userUpdateAsk = await User.update({
         id: userIdInDb
@@ -116,13 +109,11 @@ module.exports = {
         }
       });
     } catch (e) {
-
       return res.json({
         error: e,
         message: 'Failed to find bch bid like user ask rate',
         statusCode: 401
       });
-
     }
     console.log("allBidsFromdb :: " + JSON.stringify(allBidsFromdb));
     if (allBidsFromdb) {

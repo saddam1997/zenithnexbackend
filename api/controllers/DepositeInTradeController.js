@@ -4,6 +4,50 @@
  * @description :: Server-side logic for managing depositeintrades
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+
+//BTC Wallet Details
+var bitcoinBTC = require('bitcoin');
+var clientBTC = new bitcoinBTC.Client({
+  host: sails.config.company.clientBTChost,
+  port: sails.config.company.clientBTCport,
+  user: sails.config.company.clientBTCuser,
+  pass: sails.config.company.clientBTCpass
+});
+//BCH Wallet Details
+var bitcoinBCH = require('bitcoin');
+var clientBCH = new bitcoinBCH.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+//EBT Wallet Details
+var bitcoinEBT = require('bitcoin');
+var clientEBT = new bitcoinEBT.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+//GDS Wallet Details
+var bitcoinGDS = require('bitcoin');
+var clientGDS = new bitcoinGDS.Client({
+  host: sails.config.company.clientBCHhost,
+  port: sails.config.company.clientBCHport,
+  user: sails.config.company.clientBCHuser,
+  pass: sails.config.company.clientBCHpass
+});
+var transactionFeeBCH = sails.config.company.txFeeBCH;
+var transactionFeeBTC = sails.config.company.txFeeBTC;
+var transactionFeeEBT = sails.config.company.txFeeEBT;
+var transactionFeeGDS = sails.config.company.txFeeGDS;
+
+var companyBTCAccount = sails.config.company.companyBTCAccount;
+var companyBCHAccount = sails.config.company.companyBCHAccount;
+var companyGDSAccount = sails.config.company.companyGDSAccount;
+var companyEBTAccount = sails.config.company.companyEBTAccount;
+
+
 var currencyNameBTC = "BTC";
 var currencyNameBCH = "BCH";
 var currencyNameGDS = "GDS";
@@ -202,20 +246,61 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
-                      User.findOne({
-                          email: userEmailAddress
-                        })
-                        .exec(function(err, userDetails) {
+
+                      //Move BTC Company account to User Account on Withdrawal
+                      clientBTC.cmd('move',
+                        companyBTCAccount,
+                        userEmailAddress,
+                        userBTCAmountToWithDraw,
+                        function(err, moveBTCTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error to find user");
-                          }
-                          if (!userDetails) {
-                            console.log("Invalid email!");
-                          } else {
+                            console.log("Error from WithdrawalBTC :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("BTC Server Refuse to connect App");
+                              return res.json({
+                                "message": "BTC Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyBTCAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyBTCAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in BTC server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in BTC server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in BTC Server");
                             return res.json({
-                              user: userDetails,
-                              statusCode: 200
+                              "message": "Error in BTC Server",
+                              statusCode: 400
                             });
+                          } else {
+                            console.log("moveBTCTransaction status " + moveBTCTransaction);
+                            if (moveBTCTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
                           }
                         });
                     });
@@ -418,28 +503,63 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
-                      User.findOne({
-                          email: userEmailAddress
-                        })
-                        .exec(function(err, userDetails) {
+                      //Move BCH Company account to User Account on Withdrawal
+                      clientBCH.cmd('move',
+                        companyBCHAccount,
+                        userEmailAddress,
+                        userBCHAmountToWithDraw,
+                        function(err, moveBCHTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error to find user");
-                          }
-                          if (!userDetails) {
-                            console.log("Invalid email!");
-                          } else {
+                            console.log("Error from WithdrawalBCH :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("BCH Server Refuse to connect App");
+                              return res.json({
+                                "message": "BCH Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyBCHAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyBCHAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in BCH server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in BCH server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in BCH Server");
                             return res.json({
-                              user: userDetails,
-                              statusCode: 200
+                              "message": "Error in BCH Server",
+                              statusCode: 400
                             });
+                          } else {
+                            console.log("moveBCHTransaction status " + moveBCHTransaction);
+                            if (moveBCHTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
                           }
                         });
                     });
-
-                  // return res.json({
-                  //   "message": "Balance Updated successfully!!!",
-                  //   statusCode: 200
-                  // });
                 });
             }
           });
@@ -635,28 +755,63 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
-                      User.findOne({
-                          email: userEmailAddress
-                        })
-                        .exec(function(err, userDetails) {
+                      //Move EBT Company account to User Account on Withdrawal
+                      clientEBT.cmd('move',
+                        companyEBTAccount,
+                        userEmailAddress,
+                        userEBTAmountToWithDraw,
+                        function(err, moveEBTTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error to find user");
-                          }
-                          if (!userDetails) {
-                            console.log("Invalid email!");
-                          } else {
+                            console.log("Error from WithdrawalEBT :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("EBT Server Refuse to connect App");
+                              return res.json({
+                                "message": "EBT Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyEBTAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyEBTAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in EBT server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in EBT server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in EBT Server");
                             return res.json({
-                              user: userDetails,
-                              statusCode: 200
+                              "message": "Error in EBT Server",
+                              statusCode: 400
                             });
+                          } else {
+                            console.log("moveEBTTransaction status " + moveEBTTransaction);
+                            if (moveEBTTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
                           }
                         });
                     });
-
-                  // return res.json({
-                  //   "message": "Balance Updated successfully!!!",
-                  //   statusCode: 200
-                  // });
                 });
             }
           });
@@ -858,27 +1013,63 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
-                      User.findOne({
-                          email: userEmailAddress
-                        })
-                        .exec(function(err, userDetails) {
+                      //Move GDS Company account to User Account on Withdrawal
+                      clientGDS.cmd('move',
+                        companyGDSAccount,
+                        userEmailAddress,
+                        userGDSAmountToWithDraw,
+                        function(err, moveGDSTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error to find user");
-                          }
-                          if (!userDetails) {
-                            console.log("Invalid email!");
-                          } else {
+                            console.log("Error from WithdrawalGDS :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("GDS Server Refuse to connect App");
+                              return res.json({
+                                "message": "GDS Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyGDSAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyGDSAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in GDS server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in GDS server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in GDS Server");
                             return res.json({
-                              user: userDetails,
-                              statusCode: 200
+                              "message": "Error in GDS Server",
+                              statusCode: 400
                             });
+                          } else {
+                            console.log("moveGDSTransaction status " + moveGDSTransaction);
+                            if (moveGDSTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
                           }
                         });
                     });
-                  // return res.json({
-                  //   "message": "Balance Updated successfully!!!",
-                  //   statusCode: 200
-                  // });
                 });
             }
           });

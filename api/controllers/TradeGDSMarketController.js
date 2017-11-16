@@ -15,6 +15,7 @@ var statusTwoPending = sails.config.company.statusTwoPending;
 var constants = require('./../../config/constants');
 
 module.exports = {
+
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
@@ -36,25 +37,24 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
     }
-    try {
-      var userAsker = await User.findOne({
-        id: userBid1ownerId
-      });
-    } catch (e) {
-      return res.json({
-        error:e,
-        message: 'Failed with an error',
-        statusCode: 401
-      });
-    }
+    // try {
+    //   var userAsker = await User.findOne({
+    //     id: userBid1ownerId
+    //   });
+    // } catch (e) {
+    //   return res.json({
+    //     error:e,
+    //     message: 'Failed with an error',
+    //     statusCode: 401
+    //   });
+    // }
     try {
       var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
-
     } catch (e) {
       return res.json({
         "message": 'Enter valid spending password',
@@ -86,7 +86,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -105,7 +105,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -118,7 +118,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -158,7 +158,7 @@ module.exports = {
                 })
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -176,7 +176,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -192,8 +192,7 @@ module.exports = {
                   BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
                   FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker).toFixed(8)
                 });
-              } catch (e) {
-              }
+              } catch (e) {}
               console.log(currentBidDetails.id + " BidGDS.destroy currentBidDetails.id::: " + currentBidDetails.id);
               // var bidDestroy = await BidGDS.destroy({
               //   id: currentBidDetails.id
@@ -221,16 +220,13 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   "message": "Failed with an error",
                   statusCode: 200
                 });
 
               }
-
               sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
-
-
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
@@ -245,7 +241,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -265,7 +261,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -283,7 +279,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -305,7 +301,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -324,7 +320,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -344,7 +340,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -377,7 +373,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -395,7 +391,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -413,7 +409,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -431,7 +427,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -452,7 +448,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -475,7 +471,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -495,7 +491,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -513,7 +509,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -535,7 +531,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -555,7 +551,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -568,7 +564,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -586,7 +582,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -607,7 +603,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -626,7 +622,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -680,7 +676,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -719,7 +715,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -739,7 +735,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -753,7 +749,7 @@ module.exports = {
       });
     } catch (e) {
       return res.json({
-        error:e,
+        error: e,
         message: 'Failed with an error',
         statusCode: 401
       });
@@ -793,7 +789,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -813,7 +809,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -833,7 +829,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -851,7 +847,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -872,7 +868,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -897,7 +893,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -917,7 +913,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -935,7 +931,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -959,7 +955,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -978,7 +974,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -998,7 +994,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1031,7 +1027,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1049,7 +1045,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1067,7 +1063,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1085,7 +1081,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1107,7 +1103,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1129,7 +1125,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1149,7 +1145,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1167,7 +1163,7 @@ module.exports = {
                   });
                 } catch (e) {
                   return res.json({
-                    error:e,
+                    error: e,
                     message: 'Failed with an error',
                     statusCode: 401
                   });
@@ -1188,7 +1184,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1208,7 +1204,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1221,7 +1217,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1239,7 +1235,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1259,7 +1255,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
@@ -1278,7 +1274,7 @@ module.exports = {
                 });
               } catch (e) {
                 return res.json({
-                  error:e,
+                  error: e,
                   message: 'Failed with an error',
                   statusCode: 401
                 });
