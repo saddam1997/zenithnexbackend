@@ -12,6 +12,18 @@ module.exports.company = {
   clientBCHuser: 'test',
   clientBCHpass: 'test123',
 
+  //GDS Server details
+  clientGDShost: '162.213.252.66',
+  clientGDSport: 18336,
+  clientGDSuser: 'test',
+  clientGDSpass: 'test123',
+
+  //EBT Server details
+  clientEBThost: '162.213.252.66',
+  clientEBTport: 18336,
+  clientEBTuser: 'test',
+  clientEBTpass: 'test123',
+
   txFeeBCH: 0.0008,
   txFeeBTC: 0.0001,
   txFeeEBT: 0.0008,

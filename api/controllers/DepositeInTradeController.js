@@ -24,18 +24,18 @@ var clientBCH = new bitcoinBCH.Client({
 //EBT Wallet Details
 var bitcoinEBT = require('bitcoin');
 var clientEBT = new bitcoinEBT.Client({
-  host: sails.config.company.clientBCHhost,
-  port: sails.config.company.clientBCHport,
-  user: sails.config.company.clientBCHuser,
-  pass: sails.config.company.clientBCHpass
+  host: sails.config.company.clientEBThost,
+  port: sails.config.company.clientEBTport,
+  user: sails.config.company.clientEBTuser,
+  pass: sails.config.company.clientEBTpass
 });
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
 var clientGDS = new bitcoinGDS.Client({
-  host: sails.config.company.clientBCHhost,
-  port: sails.config.company.clientBCHport,
-  user: sails.config.company.clientBCHuser,
-  pass: sails.config.company.clientBCHpass
+  host: sails.config.company.clientGDShost,
+  port: sails.config.company.clientGDSport,
+  user: sails.config.company.clientGDSuser,
+  pass: sails.config.company.clientGDSpass
 });
 var transactionFeeBCH = sails.config.company.txFeeBCH;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
