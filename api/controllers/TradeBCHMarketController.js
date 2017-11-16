@@ -627,16 +627,13 @@ module.exports = {
               });
             }
           }
-
         }
-
       }
       console.log("Total Bid ::: " + total_bid);
       return res.json({
         "message": "Your ask placed successfully!!",
         statusCode: 200
       });
-
     } else {
       //No bid match on this rate Ask and Ask placed successfully
       return res.json({
