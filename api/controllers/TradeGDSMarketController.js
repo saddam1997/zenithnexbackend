@@ -11,11 +11,9 @@ var statusTwo = sails.config.company.statusTwo;
 var statusZeroCreated = sails.config.company.statusZeroCreated;
 var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
-
 var constants = require('./../../config/constants');
 
 module.exports = {
-
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
@@ -1322,7 +1320,10 @@ module.exports = {
     }
     BidGDS.findOne({
       bidownerGDS: bidownerId,
-      id: userBidId
+      id: userBidId,
+      status: {
+        '!': statusOne
+      }
     }).exec(function(err, bidDetails) {
       if (err) {
         return res.json({
@@ -1390,9 +1391,7 @@ module.exports = {
                   statusCode: 400
                 });
               }
-
               sails.sockets.blast(constants.GDS_BID_DESTROYED, bid);
-
               console.log("Returning user details !!!");
               return res.json({
                 "message": "Bid removed successfully!!!",
@@ -1416,7 +1415,10 @@ module.exports = {
     }
     AskGDS.findOne({
       askownerGDS: askownerId,
-      id: userAskId
+      id: userAskId,
+      status: {
+        '!': statusOne
+      }
     }).exec(function(err, askDetails) {
       if (err) {
         return res.json({

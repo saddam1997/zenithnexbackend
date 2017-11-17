@@ -1297,7 +1297,10 @@ module.exports = {
     }
     BidBCH.findOne({
       bidownerBCH: bidownerId,
-      id: userBidId
+      id: userBidId,
+      status: {
+        '!': statusOne
+      }
     }).exec(function(err, bidDetails) {
       if (err) {
         return res.json({
@@ -1388,7 +1391,10 @@ module.exports = {
     }
     AskBCH.findOne({
       askownerBCH: askownerId,
-      id: userAskId
+      id: userAskId,
+      status: {
+        '!': statusOne
+      }
     }).exec(function(err, askDetails) {
       if (err) {
         return res.json({
