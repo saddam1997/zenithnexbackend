@@ -114,6 +114,9 @@ module.exports = {
       var allBidsFromdb = await BidGDS.find({
         bidRate: {
           'like': parseFloat(userAskRate)
+        },
+        status: {
+          '!': statusOne
         }
       });
     } catch (e) {
@@ -1395,28 +1398,6 @@ module.exports = {
                 "message": "Bid removed successfully!!!",
                 statusCode: 400
               });
-              // User.findOne({
-              //     id: bidownerId
-              //   })
-              //   .populateAll()
-              //   .exec(function(err, userDetailsReturn) {
-              //     if (err) {
-              //       return res.json({
-              //         "message": "Error to find user",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     if (!userDetailsReturn) {
-              //       return res.json({
-              //         "message": "Invalid Id!",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     return res.json(200, {
-              //       user: userDetailsReturn,
-              //       statusCode: 200
-              //     });
-              //   });
             });
           });
       });
@@ -1505,28 +1486,6 @@ module.exports = {
                 "message": "ask remove successfully!!",
                 statusCode: 200
               });
-              // User.findOne({
-              //     id: askownerId
-              //   })
-              //   .populateAll()
-              //   .exec(function(err, userDetailsReturn) {
-              //     if (err) {
-              //       return res.json({
-              //         "message": "Error to find user",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     if (!userDetailsReturn) {
-              //       return res.json({
-              //         "message": "Invalid Id!",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     return res.json({
-              //       user: userDetailsReturn,
-              //       statusCode: 200
-              //     });
-              //   });
             });
           });
       });
@@ -1597,5 +1556,24 @@ module.exports = {
           }
         }
       });
+  },
+  getVolumeAskGDS: async function(req, res) {
+    console.log("Enter into ask api getVolumeAskGDS :: ");
+    // var allAskDetailsToExecute = AskGDS.find();
+    // console.log(JSON.stringify(allAskDetailsToExecute));
+    try {
+      var toTatalBidAmountBTCSuccess = await BidGDS.find().sum('bidAmountBTC');
+      var toTatalBidAmountBTCSuccess = await BidGDS.find().sum('bidAmountBTC');
+    } catch (e) {
+      return res.json({
+        error: e,
+        message: 'Failed with an error',
+        statusCode: 401
+      });
+    }
+    return res.json({
+      userAsker: userAsker,
+      statusCode: 400
+    });
   }
 };

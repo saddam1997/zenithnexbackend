@@ -13,9 +13,7 @@ var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
 var constants = require('./../../config/constants');
 
-
 module.exports = {
-
   addAskEBTMarket: async function(req, res) {
     console.log("Enter into ask api addAskEBTMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
@@ -106,6 +104,9 @@ module.exports = {
       var allBidsFromdb = await BidEBT.find({
         bidRate: {
           'like': parseFloat(userAskRate)
+        },
+        status: {
+          '!': statusOne
         }
       });
     } catch (e) {
@@ -759,6 +760,9 @@ module.exports = {
       var allAsksFromdb = await AskEBT.find({
         askRate: {
           'like': parseFloat(userBidRate)
+        },
+        status: {
+          '!': statusOne
         }
       });
     } catch (e) {
@@ -1400,28 +1404,6 @@ module.exports = {
                 "message": "Bid removed successfully!!",
                 statusCode: 200
               });
-              // User.findOne({
-              //     id: bidownerId
-              //   })
-              //   .populateAll()
-              //   .exec(function(err, userDetailsReturn) {
-              //     if (err) {
-              //       return res.json({
-              //         "message": "Error to find user",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     if (!userDetailsReturn) {
-              //       return res.json({
-              //         "message": "Invalid Id!",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     return res.json(200, {
-              //       user: userDetailsReturn,
-              //       statusCode: 200
-              //     });
-              //   });
             });
           });
       });
@@ -1502,36 +1484,12 @@ module.exports = {
                   statusCode: 400
                 });
               }
-
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, ask);
-
               console.log("Returning user details !!!");
               return res.json({
                 "message": "Ask removed successfully!!",
                 statusCode: 200
               });
-              // User.findOne({
-              //     id: askownerId
-              //   })
-              //   .populateAll()
-              //   .exec(function(err, userDetailsReturn) {
-              //     if (err) {
-              //       return res.json({
-              //         "message": "Error to find user",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     if (!userDetailsReturn) {
-              //       return res.json({
-              //         "message": "Invalid Id!",
-              //         statusCode: 401
-              //       });
-              //     }
-              //     return res.json({
-              //       user: userDetailsReturn,
-              //       statusCode: 200
-              //     });
-              //   });
             });
           });
       });
