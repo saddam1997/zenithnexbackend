@@ -35,9 +35,7 @@ module.exports.routes = {
   // '/': {
   //   view: 'homepage'
   // }
-  "GET /user/": {response: 'forbidden'},
-  "DELETE /user/": {response: 'forbidden'},
-  "PUT /user/": {response: 'forbidden'}
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *
