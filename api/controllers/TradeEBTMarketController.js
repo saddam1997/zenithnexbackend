@@ -994,7 +994,7 @@ module.exports = {
               console.log(currentAskDetails.id + " bidDetails.id ::: " + bidDetails.id);
               try {
                 var updatedbidDetails = await BidEBT.update({
-                  id: bidDetails.bidownerEBT
+                  id: bidDetails.id
                 }, {
                   bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
                   bidAmountEBT: parseFloat(totoalBidRemainingEBT).toFixed(8),

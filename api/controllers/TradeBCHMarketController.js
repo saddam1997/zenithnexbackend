@@ -202,6 +202,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
               console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: askDetails.id
@@ -271,6 +272,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
@@ -420,6 +422,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
                 console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskBCH.destroy({
                 //   id: askDetails.id
@@ -487,6 +490,7 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
             } else {
@@ -526,7 +530,8 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              //Update socket.io
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
               //Update Bidder===========================================
               try {
                 var userAllDetailsInDBBiddder = await User.findOne({
@@ -822,6 +827,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
               console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0AskBCH.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskBCH.destroy({
               //   id: currentAskDetails.askownerBCH
@@ -949,7 +955,7 @@ module.exports = {
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1bidDetails.id ::: " + bidDetails.id);
               try {
                 var updatedbidDetails = await BidBCH.update({
-                  id: bidDetails.bidownerBCH
+                  id: bidDetails.id
                 }, {
                   bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
                   bidAmountBCH: parseFloat(totoalBidRemainingBCH).toFixed(8),
@@ -963,7 +969,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, updatedbidDetails);
 
             }
 
@@ -1066,8 +1072,6 @@ module.exports = {
                   });
                 }
 
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
-
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 AskBCH.destroy bidDetails.id::: " + bidDetails.id);
                 // var bidDestroy = await BidBCH.destroy({
                 //   id: bidDetails.id
@@ -1078,7 +1082,7 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
-
+                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
                 return res.json({
                   "message": "Bid Executed successfully",
                   statusCode: 200
@@ -1246,6 +1250,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",
