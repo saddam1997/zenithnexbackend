@@ -809,6 +809,7 @@ module.exports = {
               }
               console.log("userAll bidDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
+
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
               //current ask details of Asker  updated
@@ -829,7 +830,8 @@ module.exports = {
               }
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and EBT  give to bidder
-              var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)).toFixed(8) - parseFloat(totoalBidRemainingBTC).toFixed(8);
+              //var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)).toFixed(8) - parseFloat(totoalBidRemainingBTC).toFixed(8);
+              var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -853,7 +855,7 @@ module.exports = {
               // });
               try {
                 var bidDestroy = await BidEBT.update({
-                  id: bidDetails.bidownerEBT
+                  id: bidDetails.id
                 }, {
                   status: statusOne,
                   statusName: statusOneSuccessfull
@@ -874,7 +876,7 @@ module.exports = {
               // });
               try {
                 var askDestroy = await AskEBT.update({
-                  id: currentAskDetails.askownerEBT
+                  id: currentAskDetails.id
                 }, {
                   status: statusOne,
                   statusName: statusOneSuccessfull

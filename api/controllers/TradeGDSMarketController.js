@@ -788,7 +788,8 @@ module.exports = {
               }
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and GDS  give to bidder
-              var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(totoalBidRemainingGDS)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
+              //var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(totoalBidRemainingGDS)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
+              var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)).toFixed(8) - parseFloat(totoalBidRemainingGDS).toFixed(8);
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalAskRemainingBTC).toFixed(8);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
