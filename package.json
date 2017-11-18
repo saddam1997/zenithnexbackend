@@ -12,6 +12,7 @@
     "include-all": "^1.0.0",
     "jsonwebtoken": "^7.4.2",
     "merge-json": "0.1.0-b.3",
+    "moment": "^2.19.2",
     "nodemailer": "^4.0.1",
     "rc": "1.0.1",
     "request": "^2.81.0",

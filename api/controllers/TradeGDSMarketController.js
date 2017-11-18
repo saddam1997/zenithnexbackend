@@ -17,7 +17,7 @@ module.exports = {
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket :: " + JSON.stringify(req.body));
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
-    var userAskAmountGDS = req.body.askAmountGDS;
+    var userAskAmountGDS = parseFloat(req.body.askAmountGDS);
     var userAskRate = req.body.askRate;
     var userAskownerId = req.body.askownerId;
 
