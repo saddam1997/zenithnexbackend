@@ -40,17 +40,6 @@ module.exports = {
         statusCode: 401
       });
     }
-    // try {
-    //   var userAsker = await User.findOne({
-    //     id: userBid1ownerId
-    //   });
-    // } catch (e) {
-    //   return res.json({
-    //     error:e,
-    //     message: 'Failed with an error',
-    //     statusCode: 401
-    //   });
-    // }
     try {
       var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
     } catch (e) {
@@ -1561,8 +1550,6 @@ module.exports = {
   },
   getVolumeAskGDS: async function(req, res) {
     console.log("Enter into ask api getVolumeAskGDS :: ");
-    // var allAskDetailsToExecute = AskGDS.find();
-    // console.log(JSON.stringify(allAskDetailsToExecute));
     try {
       var toTatalBidAmountBTCSuccess = await BidGDS.find().sum('bidAmountBTC');
       var toTatalBidAmountBTCSuccess = await BidGDS.find().sum('bidAmountBTC');
