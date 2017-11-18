@@ -19,9 +19,9 @@ module.exports = {
     var userAskAmountBCH = req.body.askAmountBCH;
     var userAskRate = req.body.askRate;
     var userAskownerId = req.body.askownerId;
-    var userSpendingPassword = req.body.spendingPassword;
+
     if (!userAskAmountBCH || !userAskAmountBTC ||
-      !userAskRate || !userAskownerId || !userSpendingPassword) {
+      !userAskRate || !userAskownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -39,22 +39,10 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userBCHBalanceInDb = parseFloat(userAsker.BCHbalance).toFixed(8);
     var userFreezedBCHBalanceInDb = parseFloat(userAsker.FreezedBCHbalance).toFixed(8);
     var userIdInDb = parseFloat(userAsker.id).toFixed(8);
-    try {
-      var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
-
-    } catch (e) {
-      console.log("Error in comparing spending password", e);
-      return res.json({
-        error: e,
-        message: 'Password did not match',
-        statusCode: 401
-      });
-    }
     if (userAskAmountBCH >= userBCHBalanceInDb) {
       return res.json({
         "message": "You have insufficient BCH Balance",
@@ -639,9 +627,9 @@ module.exports = {
     var userBidAmountBCH = req.body.bidAmountBCH;
     var userBidRate = req.body.bidRate;
     var userBid1ownerId = req.body.bidownerId;
-    var userSpendingPassword = req.body.spendingPassword;
+
     if (!userBidAmountBCH || !userBidAmountBTC ||
-      !userBidRate || !userBid1ownerId || !userSpendingPassword) {
+      !userBidRate || !userBid1ownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -659,17 +647,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    try {
-      var valid = await User.compareSpendingpassword(userSpendingPassword, userBidder);
 
-    } catch (e) {
-      console.log("Eeeeeeeeeeee", e);
-      return res.json({
-        "message": 'Enter valid spending password',
-        statusCode: 401
-      });
-    }
-    console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance).toFixed(8);
     var userFreezedBTCBalanceInDb = parseFloat(userBidder.FreezedBTCbalance).toFixed(8);

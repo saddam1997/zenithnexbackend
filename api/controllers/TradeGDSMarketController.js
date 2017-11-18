@@ -20,9 +20,9 @@ module.exports = {
     var userAskAmountGDS = req.body.askAmountGDS;
     var userAskRate = req.body.askRate;
     var userAskownerId = req.body.askownerId;
-    var userSpendingPassword = req.body.spendingPassword;
+
     if (!userAskAmountGDS || !userAskAmountBTC ||
-      !userAskRate || !userAskownerId || !userSpendingPassword) {
+      !userAskRate || !userAskownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -40,15 +40,6 @@ module.exports = {
         statusCode: 401
       });
     }
-    try {
-      var valid = await User.compareSpendingpassword(userSpendingPassword, userAsker);
-    } catch (e) {
-      return res.json({
-        "message": 'Enter valid spending password',
-        statusCode: 401
-      });
-    }
-    console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userGDSBalanceInDb = parseFloat(userAsker.GDSbalance).toFixed(8);
     var userFreezedGDSBalanceInDb = parseFloat(userAsker.FreezedGDSbalance).toFixed(8);
@@ -651,9 +642,9 @@ module.exports = {
     var userBidAmountGDS = req.body.bidAmountGDS;
     var userBidRate = req.body.bidRate;
     var userBidownerId = req.body.bidownerId;
-    var userSpendingPassword = req.body.spendingPassword;
+
     if (!userBidAmountGDS || !userBidAmountBTC ||
-      !userBidRate || !userBidownerId || !userSpendingPassword) {
+      !userBidRate || !userBidownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
         "message": "Invalid parameter!!!!",
@@ -671,15 +662,6 @@ module.exports = {
         statusCode: 401
       });
     }
-    try {
-      var valid = await User.compareSpendingpassword(userSpendingPassword, userBidder);
-    } catch (e) {
-      return res.json({
-        "message": 'Enter valid spending password',
-        statusCode: 401
-      });
-    }
-    console.log("Valid spending password !!!");
     console.log("Getting user details !!!");
     var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance).toFixed(8);
     var userFreezedBTCBalanceInDb = parseFloat(userBidder.FreezedBTCbalance).toFixed(8);
