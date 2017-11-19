@@ -1359,10 +1359,7 @@ module.exports = {
                   statusCode: 400
                 });
               }
-
               sails.sockets.blast(constants.GDS_BID_DESTROYED, bid);
-
-
               return res.json({
                 "message": "Bid removed successfully!!!",
                 statusCode: 200
@@ -1494,7 +1491,7 @@ module.exports = {
       });
   },
   getAllAskGDS: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
+    console.log("Enter into ask api getAllAskGDS :: ");
     AskGDS.find({
         status: {
           '!': statusOne
@@ -1507,7 +1504,7 @@ module.exports = {
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No Bid Found!!",
+            "message": "No Ask Found!!",
             statusCode: 401
           });
         }

@@ -1541,7 +1541,7 @@ module.exports = {
       });
   },
   getAllAskEBT: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
+    console.log("Enter into ask api getAllAskEBT :: ");
     AskEBT.find({
         status: {
           '!': statusOne
@@ -1566,7 +1566,7 @@ module.exports = {
             });
           } else {
             return res.json({
-              "message": "No Bid Found!!",
+              "message": "No Ask Found!!",
               statusCode: 401
             });
           }

@@ -47,7 +47,6 @@ var companyBCHAccount = sails.config.company.companyBCHAccount;
 var companyGDSAccount = sails.config.company.companyGDSAccount;
 var companyEBTAccount = sails.config.company.companyEBTAccount;
 
-
 var currencyNameBTC = "BTC";
 var currencyNameBCH = "BCH";
 var currencyNameGDS = "GDS";
@@ -216,6 +215,7 @@ module.exports = {
         statusCode: 400
       });
     }
+
     User.findOne({
       email: userEmailAddress
     }).exec(function(err, userDetails) {

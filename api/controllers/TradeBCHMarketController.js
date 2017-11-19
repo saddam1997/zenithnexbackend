@@ -1505,7 +1505,7 @@ module.exports = {
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No Bid Found!!",
+            "message": "No Ask Found!!",
             statusCode: 401
           });
         }
