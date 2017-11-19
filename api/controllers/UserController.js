@@ -55,7 +55,7 @@ var transporter = nodemailer.createTransport({
 });
 
 module.exports = {
-  getNewGDSAddress: function (req, res) {
+  getNewGDSAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
       return res.json({
@@ -64,7 +64,7 @@ module.exports = {
       });
     User.findOne({
       email: userMailId
-    }).populateAll().exec(function (err, user) {
+    }).populateAll().exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -84,7 +84,7 @@ module.exports = {
           statusCode: 401
         });
 
-      clientGDS.cmd('getnewaddress', userMailId, function (err, address) {
+      clientGDS.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
             "message": "Failed to get new address from gds server",
@@ -120,7 +120,7 @@ module.exports = {
       });
     User.findOne({
       email: userMailId
-    }).populateAll().exec(function (err, user) {
+    }).populateAll().exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -138,7 +138,7 @@ module.exports = {
           "message": "address already exists",
           statusCode: 401
         });
-      clientEBT.cmd('getnewaddress', userMailId, function (err, address) {
+      clientEBT.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
             "message": "Failed to get new address from ebt server",
@@ -174,7 +174,7 @@ module.exports = {
       });
     User.findOne({
       email: userMailId
-    }).populateAll().exec(function (err, user) {
+    }).populateAll().exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -192,7 +192,7 @@ module.exports = {
           "message": "address already exists",
           statusCode: 401
         });
-      clientBTC.cmd('getnewaddress', userMailId, function (err, address) {
+      clientBTC.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
             "message": "Failed to get new address from btc server",
@@ -228,7 +228,7 @@ module.exports = {
       });
     User.findOne({
       email: userMailId
-    }).populateAll().exec(function (err, user) {
+    }).populateAll().exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -243,7 +243,7 @@ module.exports = {
       }
 
 
-      if(user.userBCHAddress)
+      if (user.userBCHAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
@@ -276,8 +276,8 @@ module.exports = {
         })
       });
     });
-},
-createNewUser: function(req, res) {
+  },
+  createNewUser: function(req, res) {
     console.log("Enter into createNewUser :: ");
     var useremailaddress = req.body.email;
     var userpassword = req.body.password;
@@ -305,7 +305,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: useremailaddress
-    }, function (err, user) {
+    }, function(err, user) {
       if (err) {
         console.log("Error to find user from database");
         return res.json({
@@ -329,7 +329,7 @@ createNewUser: function(req, res) {
       }
       if (!user) {
 
-        clientBTC.cmd('getnewaddress', useremailaddress, function (err, newBTCAddressForUser, resHeaders) {
+        clientBTC.cmd('getnewaddress', useremailaddress, function(err, newBTCAddressForUser, resHeaders) {
           if (err) {
             console.log("Error from sendFromBCHAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
@@ -350,7 +350,7 @@ createNewUser: function(req, res) {
             });
           }
           console.log('New address created from newBTCAddressForUser :: ', newBTCAddressForUser);
-          clientBCH.cmd('getnewaddress', useremailaddress, function (err, newBCHAddressForUser, resHeaders) {
+          clientBCH.cmd('getnewaddress', useremailaddress, function(err, newBCHAddressForUser, resHeaders) {
             if (err) {
               console.log("Error from sendFromBCHAccount:: ");
               if (err.code && err.code == "ECONNREFUSED") {
@@ -371,7 +371,7 @@ createNewUser: function(req, res) {
               });
             }
             console.log('New address created from BCHServer :: ', newBCHAddressForUser);
-            clientEBT.cmd('getnewaddress', useremailaddress, function (err, newEBTAddressForUser, resHeaders) {
+            clientEBT.cmd('getnewaddress', useremailaddress, function(err, newEBTAddressForUser, resHeaders) {
               if (err) {
                 console.log("Error from sendFromBCHAccount:: ");
                 if (err.code && err.code == "ECONNREFUSED") {
@@ -392,7 +392,7 @@ createNewUser: function(req, res) {
                 });
               }
               console.log('New address created from newEBTAddressForUser :: ', newEBTAddressForUser);
-              clientGDS.cmd('getnewaddress', useremailaddress, function (err, newGDSAddressForUser, resHeaders) {
+              clientGDS.cmd('getnewaddress', useremailaddress, function(err, newGDSAddressForUser, resHeaders) {
                 if (err) {
                   console.log("Error from sendFromBCHAccount:: ");
                   if (err.code && err.code == "ECONNREFUSED") {
@@ -414,7 +414,7 @@ createNewUser: function(req, res) {
                 }
                 console.log('New address created from newEBTAddressForUser :: ', newGDSAddressForUser);
                 console.log('New address created from BCHServer :: ', newBCHAddressForUser);
-                bcrypt.hash(userspendingpassword, 10, function (err, hashspendingpassword) {
+                bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
                   if (err) {
                     console.log("Error To bcrypt spendingpassword");
                     return res.json({
@@ -424,7 +424,7 @@ createNewUser: function(req, res) {
                   }
                   var otpForEmail = Math.floor(100000 + Math.random() * 900000);
                   console.log("otpForEmail :: " + otpForEmail);
-                  bcrypt.hash(otpForEmail.toString(), 10, function (err, hash) {
+                  bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
                     if (err) return next(err);
                     var encOtpForEmail = hash;
                     var userObj = {
@@ -437,7 +437,7 @@ createNewUser: function(req, res) {
                       userGDSAddress: newGDSAddressForUser,
                       encryptedEmailVerificationOTP: encOtpForEmail
                     }
-                    User.create(userObj).exec(function (err, userAddDetails) {
+                    User.create(userObj).exec(function(err, userAddDetails) {
                       if (err) {
                         console.log("Error to Create New user !!!");
                         console.log(err);
@@ -447,25 +447,32 @@ createNewUser: function(req, res) {
                         });
                       }
                       console.log("User Create Succesfully...........");
-                      var mailOptions = {
-                        from: 'wallet.bcc@gmail.com',
-                        to: useremailaddress,
-                        subject: 'Sending Email using Node.js',
-                        text: 'Otp Password for Verify email  ' + otpForEmail
-                      };
-                      transporter.sendMail(mailOptions, function (error, info) {
-                        if (error) {
-                          console.log(error);
-                        } else {
-                          console.log('Email sent: ' + info.response);
 
-                          return res.json(200, {
-                            "message": "Otp sent on user mail id",
-                            "userMailId": useremailaddress,
-                            statusCode: 200
-                          });
-                        }
+                      return res.json(200, {
+                        "message": "Your account created Succesfully",
+                        "userMailId": useremailaddress,
+                        statusCode: 200
                       });
+
+                      // var mailOptions = {
+                      //   from: 'wallet.bcc@gmail.com',
+                      //   to: useremailaddress,
+                      //   subject: 'Sending Email using Node.js',
+                      //   text: 'Otp Password for Verify email  ' + otpForEmail
+                      // };
+                      // transporter.sendMail(mailOptions, function (error, info) {
+                      //   if (error) {
+                      //     console.log(error);
+                      //   } else {
+                      //     console.log('Email sent: ' + info.response);
+                      //
+                      //     return res.json(200, {
+                      //       "message": "Otp sent on user mail id",
+                      //       "userMailId": useremailaddress,
+                      //       statusCode: 200
+                      //     });
+                      //   }
+                      // });
 
                     });
                   });
@@ -478,7 +485,7 @@ createNewUser: function(req, res) {
       }
     });
   },
-  sendEmail: function (req, res, next) {
+  sendEmail: function(req, res, next) {
     console.log("Enter into sendEmailTest::: " + JSON.stringify(req.body));
     var transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -493,7 +500,7 @@ createNewUser: function(req, res) {
       subject: 'Sending Email using Node.js',
       text: 'That was easy!'
     };
-    transporter.sendMail(mailOptions, function (error, info) {
+    transporter.sendMail(mailOptions, function(error, info) {
       if (error) {
         console.log(error);
       } else {
@@ -502,7 +509,7 @@ createNewUser: function(req, res) {
       }
     });
   },
-  sentOtpToEmailForgotPassword: function (req, res, next) {
+  sentOtpToEmailForgotPassword: function(req, res, next) {
 
     console.log("Enter into sentOtpToEmail");
     var userMailId = req.body.userMailId;
@@ -515,7 +522,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -542,24 +549,24 @@ createNewUser: function(req, res) {
         to: userMailId,
         subject: 'Please reset your password',
         text: 'We heard that you lost your BccPay password. Sorry about that! ' +
-        '\n But don’t worry! You can use this otp reset your password ' + newCreatedPassword
+          '\n But don’t worry! You can use this otp reset your password ' + newCreatedPassword
       };
-      transporter.sendMail(mailOptions, function (error, info) {
+      transporter.sendMail(mailOptions, function(error, info) {
         if (error) {
           console.log(error);
         } else {
           console.log(newCreatedPassword + 'Email sent: ' + info.response);
           //res.json(200,"Message Send Succesfully");
           console.log("createing encryptedPassword ....");
-          bcrypt.hash(newCreatedPassword.toString(), 10, function (err, hash) {
+          bcrypt.hash(newCreatedPassword.toString(), 10, function(err, hash) {
             if (err) return next(err);
             var newEncryptedPass = hash;
             User.update({
-              email: userMailId
-            }, {
-              encryptedForgotPasswordOTP: newEncryptedPass
-            })
-              .exec(function (err, updatedUser) {
+                email: userMailId
+              }, {
+                encryptedForgotPasswordOTP: newEncryptedPass
+              })
+              .exec(function(err, updatedUser) {
                 if (err) {
                   return res.serverError(err);
                 }
@@ -575,7 +582,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  verifyOtpToEmailForgotPassord: function (req, res, next) {
+  verifyOtpToEmailForgotPassord: function(req, res, next) {
 
     console.log("Enter into sentOtpToEmail");
     var userMailId = req.body.userMailId;
@@ -589,7 +596,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -602,7 +609,7 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      User.compareForgotpasswordOTP(otp, user, function (err, valid) {
+      User.compareForgotpasswordOTP(otp, user, function(err, valid) {
         if (err) {
           console.log("Error to compare otp");
           return res.json({
@@ -626,7 +633,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  updateForgotPassordAfterVerify: function (req, res, next) {
+  updateForgotPassordAfterVerify: function(req, res, next) {
     console.log("Enter into sentOtpToEmail");
     var userMailId = req.body.userMailId;
     var newPassword = req.body.newPassword;
@@ -647,7 +654,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -660,18 +667,18 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      bcrypt.hash(confirmNewPassword, 10, function (err, hash) {
+      bcrypt.hash(confirmNewPassword, 10, function(err, hash) {
         if (err) res.json({
           "message": "Errot to bcrypt passoword",
           statusCode: 401
         });
         var newEncryptedPass = hash;
         User.update({
-          email: userMailId
-        }, {
-          encryptedPassword: newEncryptedPass
-        })
-          .exec(function (err, updatedUser) {
+            email: userMailId
+          }, {
+            encryptedPassword: newEncryptedPass
+          })
+          .exec(function(err, updatedUser) {
             if (err) {
               return res.json({
                 "message": "Error to update passoword!",
@@ -687,7 +694,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  updateCurrentPassword: function (req, res, next) {
+  updateCurrentPassword: function(req, res, next) {
     console.log("Enter into updateCurrentPassword");
     var userMailId = req.body.userMailId;
     var currentPassword = req.body.currentPassword;
@@ -716,7 +723,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -729,7 +736,7 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      User.comparePassword(currentPassword, user, function (err, valid) {
+      User.comparePassword(currentPassword, user, function(err, valid) {
         if (err) {
           console.log("Error to compare password");
           return res.json({
@@ -743,18 +750,18 @@ createNewUser: function(req, res) {
             statusCode: 401
           });
         } else {
-          bcrypt.hash(confirmNewPassword, 10, function (err, hash) {
+          bcrypt.hash(confirmNewPassword, 10, function(err, hash) {
             if (err) res.json({
               "message": "Errot to bcrypt passoword",
               statusCode: 401
             });
             var newEncryptedPass = hash;
             User.update({
-              email: userMailId
-            }, {
-              encryptedPassword: newEncryptedPass
-            })
-              .exec(function (err, updatedUser) {
+                email: userMailId
+              }, {
+                encryptedPassword: newEncryptedPass
+              })
+              .exec(function(err, updatedUser) {
                 if (err) {
                   return res.json({
                     "message": "Error to update passoword!",
@@ -859,7 +866,7 @@ createNewUser: function(req, res) {
 
     });
   },
-  sentOtpToUpdateSpendingPassword: function (req, res, next) {
+  sentOtpToUpdateSpendingPassword: function(req, res, next) {
     console.log("Enter into sentOtpToEmail");
     var userMailId = req.body.userMailId;
     var currentPassword = req.body.currentPassword;
@@ -872,7 +879,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -885,7 +892,7 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      User.comparePassword(currentPassword, user, function (err, valid) {
+      User.comparePassword(currentPassword, user, function(err, valid) {
         if (err) {
           console.log("Error to compare password");
           return res.json({
@@ -913,24 +920,24 @@ createNewUser: function(req, res) {
             to: userMailId,
             subject: 'Please reset your spending password',
             text: 'We heard that you lost your BccPay spending password. Sorry about that! ' +
-            '\n But don’t worry! You can use this otp reset your password ' + newCreatedPassword
+              '\n But don’t worry! You can use this otp reset your password ' + newCreatedPassword
           };
-          transporter.sendMail(mailOptions, function (error, info) {
+          transporter.sendMail(mailOptions, function(error, info) {
             if (error) {
               console.log(error);
             } else {
               console.log(newCreatedPassword + 'Email sent: ' + info.response);
               //res.json(200,"Message Send Succesfully");
               console.log("createing encryptedPassword ....");
-              bcrypt.hash(newCreatedPassword.toString(), 10, function (err, hash) {
+              bcrypt.hash(newCreatedPassword.toString(), 10, function(err, hash) {
                 if (err) return next(err);
                 var newEncryptedPass = hash;
                 User.update({
-                  email: userMailId
-                }, {
-                  encryptedForgotSpendingPasswordOTP: newEncryptedPass
-                })
-                  .exec(function (err, updatedUser) {
+                    email: userMailId
+                  }, {
+                    encryptedForgotSpendingPasswordOTP: newEncryptedPass
+                  })
+                  .exec(function(err, updatedUser) {
                     if (err) {
                       return res.serverError(err);
                     }
@@ -949,7 +956,7 @@ createNewUser: function(req, res) {
 
     });
   },
-  verifyOtpToEmailForgotSpendingPassord: function (req, res, next) {
+  verifyOtpToEmailForgotSpendingPassord: function(req, res, next) {
     console.log("Enter into sentOtpToEmail");
     var userMailId = req.body.userMailId;
     var otp = req.body.otp;
@@ -962,7 +969,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -975,7 +982,7 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      User.compareEmailVerificationOTPForSpendingPassword(otp, user, function (err, valid) {
+      User.compareEmailVerificationOTPForSpendingPassword(otp, user, function(err, valid) {
         if (err) {
           console.log("Error to compare otp");
           return res.json({
@@ -999,7 +1006,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  updateForgotSpendingPassordAfterVerify: function (req, res, next) {
+  updateForgotSpendingPassordAfterVerify: function(req, res, next) {
     console.log("Enter into updateForgotSpendingPassordAfterVerif");
     var userMailId = req.body.userMailId;
     var newSpendingPassword = req.body.newSpendingPassword;
@@ -1020,7 +1027,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -1033,18 +1040,18 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      bcrypt.hash(newSpendingPassword, 10, function (err, hash) {
+      bcrypt.hash(newSpendingPassword, 10, function(err, hash) {
         if (err) res.json({
           "message": "Errot to bcrypt passoword",
           statusCode: 401
         });
         var newEncryptedPass = hash;
         User.update({
-          email: userMailId
-        }, {
-          encryptedSpendingpassword: newEncryptedPass
-        })
-          .exec(function (err, updatedUser) {
+            email: userMailId
+          }, {
+            encryptedSpendingpassword: newEncryptedPass
+          })
+          .exec(function(err, updatedUser) {
             if (err) {
               return res.json({
                 "message": "Error to update passoword!",
@@ -1060,7 +1067,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  sentOtpToEmailVerificatation: function (req, res, next) {
+  sentOtpToEmailVerificatation: function(req, res, next) {
 
     console.log("Enter into sentOtpToEmailVerificatation");
     var userMailId = req.body.userMailId;
@@ -1073,7 +1080,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -1094,21 +1101,21 @@ createNewUser: function(req, res) {
         subject: 'Please verify your email',
         text: 'Your otp to varify email ' + createNewOTP
       };
-      transporter.sendMail(mailOptions, function (error, info) {
+      transporter.sendMail(mailOptions, function(error, info) {
         if (error) {
           console.log(error);
         } else {
           console.log(createNewOTP + 'Email sent: ' + info.response);
           console.log("createing encryptedPassword ....");
-          bcrypt.hash(createNewOTP.toString(), 10, function (err, hash) {
+          bcrypt.hash(createNewOTP.toString(), 10, function(err, hash) {
             if (err) return next(err);
             var newEncryptedPass = hash;
             User.update({
-              email: userMailId
-            }, {
-              encryptedEmailVerificationOTP: newEncryptedPass
-            })
-              .exec(function (err, updatedUser) {
+                email: userMailId
+              }, {
+                encryptedEmailVerificationOTP: newEncryptedPass
+              })
+              .exec(function(err, updatedUser) {
                 if (err) {
                   return res.serverError(err);
                 }
@@ -1123,7 +1130,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  updateUserVerifyEmail: function (req, res, next) {
+  updateUserVerifyEmail: function(req, res, next) {
 
     console.log("Enter into updateUserVerifyEmail");
     var userMailId = req.body.userMailId;
@@ -1137,7 +1144,7 @@ createNewUser: function(req, res) {
     }
     User.findOne({
       email: userMailId
-    }).exec(function (err, user) {
+    }).exec(function(err, user) {
       if (err) {
         return res.json({
           "message": "Error to find user",
@@ -1150,7 +1157,7 @@ createNewUser: function(req, res) {
           statusCode: 401
         });
       }
-      User.compareEmailVerificationOTP(otp, user, function (err, valid) {
+      User.compareEmailVerificationOTP(otp, user, function(err, valid) {
         if (err) {
           console.log("Error to compare otp");
           return res.json({
@@ -1166,11 +1173,11 @@ createNewUser: function(req, res) {
         } else {
           console.log("OTP is varified succesfully");
           User.update({
-            email: userMailId
-          }, {
-            verifyEmail: true
-          })
-            .exec(function (err, updatedUser) {
+              email: userMailId
+            }, {
+              verifyEmail: true
+            })
+            .exec(function(err, updatedUser) {
               if (err) {
                 return res.json({
                   "message": "Error to update passoword!",
@@ -1181,7 +1188,7 @@ createNewUser: function(req, res) {
 
               User.findOne({
                 email: userMailId
-              }).exec(function (err, userDetailsReturn) {
+              }).exec(function(err, userDetailsReturn) {
                 if (err) {
                   return res.json({
                     "message": "Error to find user",
@@ -1204,7 +1211,7 @@ createNewUser: function(req, res) {
       });
     });
   },
-  getAllDetailsOfUser: function (req, res, next) {
+  getAllDetailsOfUser: function(req, res, next) {
     console.log("Enter into getAllDetailsOfUser");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
