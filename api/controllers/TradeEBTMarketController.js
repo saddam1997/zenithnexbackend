@@ -16,7 +16,7 @@ var constants = require('./../../config/constants');
 module.exports = {
   addAskEBTMarket: async function(req, res) {
     console.log("Enter into ask api addAskEBTMarket :: " + JSON.stringify(req.body));
-    var userAskAmountBTC = parseFloat(req.body.askAmountBTC).toFixed(8);
+    var userAskAmountBTC = parseFloat(req.body.askAmountBTC);
     var userAskAmountEBT = parseFloat(req.body.askAmountEBT);
     var userAskRate = req.body.askRate;
     var userAskownerId = req.body.askownerId;
@@ -41,9 +41,9 @@ module.exports = {
       });
     }
     console.log("Getting user details !!! " + JSON.stringify(userAsker));
-    var userEBTBalanceInDb = parseFloat(userAsker.EBTbalance).toFixed(8);
-    var userFreezedEBTBalanceInDb = parseFloat(userAsker.FreezedEBTbalance).toFixed(8);
-    var userIdInDb = parseFloat(userAsker.id).toFixed(8);
+    var userEBTBalanceInDb = parseFloat(userAsker.EBTbalance);
+    var userFreezedEBTBalanceInDb = parseFloat(userAsker.FreezedEBTbalance);
+    var userIdInDb = parseFloat(userAsker.id);
     console.log(" userEBTBalanceInDb :::: " + userEBTBalanceInDb);
     console.log(" userAskAmountEBT :::: " + userAskAmountEBT);
     if (userAskAmountEBT >= userEBTBalanceInDb) {
@@ -59,7 +59,7 @@ module.exports = {
         askAmountEBT: userAskAmountEBT,
         totalaskAmountBTC: userAskAmountBTC,
         totalaskAmountEBT: userAskAmountEBT,
-        askRate: parseFloat(userAskRate).toFixed(8),
+        askRate: parseFloat(userAskRate),
         status: statusTwo,
         statusName: statusTwoPending,
         askownerEBT: userIdInDb
@@ -75,8 +75,8 @@ module.exports = {
     sails.sockets.blast(constants.EBT_ASK_ADDED, askDetails);
 
 
-    var updateUserEBTBalance = parseFloat(userEBTBalanceInDb).toFixed(8) - parseFloat(userAskAmountEBT).toFixed(8);
-    var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT)).toFixed(8);
+    var updateUserEBTBalance = parseFloat(userEBTBalanceInDb) - parseFloat(userAskAmountEBT);
+    var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT));
 
     try {
       var userUpdateAsk = await User.update({
@@ -130,8 +130,8 @@ module.exports = {
             console.log("Enter into total_bid <= totoalAskRemainingEBT total_bid ::: " + total_bid + " totoalAskRemainingEBT ::: " + totoalAskRemainingEBT);
             console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
             //totoalAskRemainingEBT = totoalAskRemainingEBT - allBidsFromdb[i].bidAmountEBT;
-            totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT).toFixed(8) - parseFloat(currentBidDetails.bidAmountEBT).toFixed(8));
-            totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
+            totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
+            totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
             console.log("start from here totoalAskRemainingEBT == 0::: " + totoalAskRemainingEBT);
             if (totoalAskRemainingEBT == 0) {
               //destroy bid and ask and update bidder and asker balances and break
@@ -152,14 +152,14 @@ module.exports = {
               }
               console.log("userAll askDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerEBT
                 }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -168,16 +168,16 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
-              var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerEBT
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -250,8 +250,8 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
 
@@ -259,8 +259,8 @@ module.exports = {
                 var userAllDetailsInDBBidderUpdate = await User.update({
                   id: currentBidDetails.bidownerEBT
                 }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -309,16 +309,16 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
-              var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerEBT
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -335,8 +335,8 @@ module.exports = {
                 var updatedaskDetails = await AskEBT.update({
                   id: askDetails.id
                 }, {
-                  askAmountBTC: parseFloat(totoalAskRemainingBTC).toFixed(8),
-                  askAmountEBT: parseFloat(totoalAskRemainingEBT).toFixed(8),
+                  askAmountBTC: parseFloat(totoalAskRemainingBTC),
+                  askAmountEBT: parseFloat(totoalAskRemainingEBT),
                   status: statusTwo,
                   statusName: statusTwoPending,
                 });
@@ -361,8 +361,8 @@ module.exports = {
             console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
             //totoalAskRemainingEBT = totoalAskRemainingEBT - allBidsFromdb[i].bidAmountEBT;
             if (totoalAskRemainingEBT >= currentBidDetails.bidAmountEBT) {
-              totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT).toFixed(8) - parseFloat(currentBidDetails.bidAmountEBT).toFixed(8));
-              totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
+              totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
+              totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
               console.log("start from here totoalAskRemainingEBT == 0::: " + totoalAskRemainingEBT);
 
               if (totoalAskRemainingEBT == 0) {
@@ -392,14 +392,14 @@ module.exports = {
                 }
                 console.log("userAll askDetails.askownerEBT :: ");
                 console.log("Update value of Bidder and asker");
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
-                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
+                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
                 try {
                   var userUpdateBidder = await User.update({
                     id: currentBidDetails.bidownerEBT
                   }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder)
                   });
                 } catch (e) {
                   return res.json({
@@ -408,16 +408,16 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8);
-                var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT).toFixed(8);
+                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+                var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
                 try {
                   var updatedUser = await User.update({
                     id: askDetails.askownerEBT
                   }, {
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
                   });
                 } catch (e) {
                   return res.json({
@@ -489,8 +489,8 @@ module.exports = {
                   });
                 }
                 console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(currentBidDetails.bidAmountBTC).toFixed(8));
-                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT)).toFixed(8);
+                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
                 console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
                 console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
 
@@ -498,8 +498,8 @@ module.exports = {
                   var userAllDetailsInDBBidderUpdate = await User.update({
                     id: currentBidDetails.bidownerEBT
                   }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder)
                   });
                 } catch (e) {
                   return res.json({
@@ -549,15 +549,15 @@ module.exports = {
                 });
               }
               //Update Bid
-              var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
-              var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT)).toFixed(8);
+              var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
+              var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT));
 
               try {
                 var updatedbidDetails = await BidEBT.update({
                   id: currentBidDetails.id
                 }, {
-                  bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
-                  bidAmountEBT: parseFloat(updatedBidAmountEBT).toFixed(8),
+                  bidAmountBTC: parseFloat(updatedBidAmountBTC),
+                  bidAmountEBT: parseFloat(updatedBidAmountEBT),
                   status: statusTwo,
                   statusName: statusTwoPending,
                 });
@@ -581,16 +581,16 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance).toFixed(8) - parseFloat(totoalAskRemainingBTC).toFixed(8));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.EBTbalance) + parseFloat(totoalAskRemainingEBT)).toFixed(8);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.EBTbalance) + parseFloat(totoalAskRemainingEBT));
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
               try {
                 var userAllDetailsInDBBidderUpdate = await User.update({
                   id: currentBidDetails.bidownerEBT
                 }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -602,16 +602,16 @@ module.exports = {
               //Update asker ===========================================
 
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)).toFixed(8);
-              var updatedFreezedEBTbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(userAskAmountEBT).toFixed(8);
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
+              var updatedFreezedEBTbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerEBT
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8),
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8)
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -694,8 +694,8 @@ module.exports = {
       });
     }
     console.log("Getting user details !!!");
-    var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance).toFixed(8);
-    var userFreezedBTCBalanceInDb = parseFloat(userBidder.FreezedBTCbalance).toFixed(8);
+    var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance);
+    var userFreezedBTCBalanceInDb = parseFloat(userBidder.FreezedBTCbalance);
     var userIdInDb = userBidder.id;
     console.log("userBidder ::: " + JSON.stringify(userBidder));
     if (userBidAmountBTC >= userBTCBalanceInDb) {
@@ -728,8 +728,8 @@ module.exports = {
     sails.sockets.blast(constants.EBT_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
-    var updateUserBTCBalance = parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
-    var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC)).toFixed(8);
+    var updateUserBTCBalance = parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC);
+    var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC));
     console.log("Updating ");
     try {
       var userUpdateBidDetails = await User.update({
@@ -785,8 +785,8 @@ module.exports = {
             console.log("currentAskDetails ::: " + JSON.stringify(currentAskDetails)); //.6 <=.5
 
             //totoalBidRemainingEBT = totoalBidRemainingEBT - allAsksFromdb[i].bidAmountEBT;
-            totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-            totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC).toFixed(8) - parseFloat(currentAskDetails.askAmountBTC).toFixed(8));
+            totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT) - parseFloat(currentAskDetails.askAmountEBT));
+            totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC) - parseFloat(currentAskDetails.askAmountBTC));
             console.log("start from here totoalBidRemainingEBT == 0::: " + totoalBidRemainingEBT);
             if (totoalBidRemainingEBT == 0) {
 
@@ -809,16 +809,16 @@ module.exports = {
               console.log("userAll bidDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
 
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
               //current ask details of Asker  updated
               //Ask FreezedEBTbalance balance of asker deducted and BTC to give asker
               try {
                 var userUpdateAsker = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8),
-                  BTCbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8)
+                  FreezedEBTbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                  BTCbalance: parseFloat(updatedEBTbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -829,17 +829,17 @@ module.exports = {
               }
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and EBT  give to bidder
-              //var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)).toFixed(8) - parseFloat(totoalBidRemainingBTC).toFixed(8);
-              var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
-              var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC).toFixed(8);
+              //var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)) - parseFloat(totoalBidRemainingBTC);
+              var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+              var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker).toFixed(8)
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -909,8 +909,8 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
-              var updatedFreezedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-              var updatedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
+              var updatedFreezedEBTbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+              var updatedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceBidder:: " + updatedFreezedEBTbalanceBidder);
               console.log(currentAskDetails.id + " updatedBTCbalanceBidder:: " + updatedBTCbalanceBidder);
 
@@ -918,8 +918,8 @@ module.exports = {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceBidder).toFixed(8),
-                  BTCbalance: parseFloat(updatedBTCbalanceBidder).toFixed(8)
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceBidder),
+                  BTCbalance: parseFloat(updatedBTCbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -970,16 +970,16 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
-              var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+              var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -995,8 +995,8 @@ module.exports = {
                 var updatedbidDetails = await BidEBT.update({
                   id: bidDetails.id
                 }, {
-                  bidAmountBTC: parseFloat(totoalBidRemainingBTC).toFixed(8),
-                  bidAmountEBT: parseFloat(totoalBidRemainingEBT).toFixed(8),
+                  bidAmountBTC: parseFloat(totoalBidRemainingBTC),
+                  bidAmountEBT: parseFloat(totoalBidRemainingEBT),
                   status: statusTwo,
                   statusName: statusTwoPending,
                 });
@@ -1022,8 +1022,8 @@ module.exports = {
             console.log("currentAskDetails >>>>>::: " + JSON.stringify(currentAskDetails)); //.6 <=.5
             //totoalBidRemainingEBT = totoalBidRemainingEBT - allAsksFromdb[i].bidAmountEBT;
             if (totoalBidRemainingBTC >= currentAskDetails.askAmountBTC) {
-              totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-              totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC).toFixed(8) - parseFloat(currentAskDetails.askAmountBTC).toFixed(8));
+              totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT) - parseFloat(currentAskDetails.askAmountEBT));
+              totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC) - parseFloat(currentAskDetails.askAmountBTC));
               console.log(">>>>>start from here totoalBidRemainingEBT == 0::: " + totoalBidRemainingEBT);
 
               if (totoalBidRemainingEBT == 0) {
@@ -1045,14 +1045,14 @@ module.exports = {
                 }
                 console.log(">>>>>userAll bidDetails.askownerEBT :: ");
                 console.log(">>>>>Update value of Bidder and asker");
-                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
+                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
                 try {
                   var userUpdateAsker = await User.update({
                     id: currentAskDetails.askownerEBT
                   }, {
-                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker)
                   });
                 } catch (e) {
                   return res.json({
@@ -1061,16 +1061,16 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8);
-                var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC).toFixed(8);
+                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+                var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
                 console.log(currentAskDetails.id + ">>>>> updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + ">>>>> updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
                 try {
                   var updatedUser = await User.update({
                     id: bidDetails.bidownerEBT
                   }, {
-                    EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                    EBTbalance: parseFloat(updatedEBTbalanceBidder),
+                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
                   });
                 } catch (e) {
                   return res.json({
@@ -1141,8 +1141,8 @@ module.exports = {
                   });
                 }
                 console.log(currentAskDetails.id + " >>>>>Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
-                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(currentAskDetails.askAmountEBT).toFixed(8));
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC)).toFixed(8);
+                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
                 console.log(currentAskDetails.id + " >>>>>updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
                 console.log(currentAskDetails.id + " >>>>>updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
@@ -1150,8 +1150,8 @@ module.exports = {
                   var userAllDetailsInDBAskerUpdate = await User.update({
                     id: currentAskDetails.askownerEBT
                   }, {
-                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
+                    BTCbalance: parseFloat(updatedBTCbalanceAsker)
                   });
                 } catch (e) {
                   return res.json({
@@ -1199,8 +1199,8 @@ module.exports = {
                 });
               }
               //Update Ask
-              var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8));
-              var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC)).toFixed(8);
+              var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT) - parseFloat(totoalBidRemainingEBT));
+              var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC));
               console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
               console.log("Update ask details here updatedAskAmountEBT :: " + updatedAskAmountEBT);
               console.log("Update ask details here updatedAskAmountBTC :: " + updatedAskAmountBTC);
@@ -1209,8 +1209,8 @@ module.exports = {
                 var updatedaskDetails = await AskEBT.update({
                   id: currentAskDetails.id
                 }, {
-                  askAmountBTC: parseFloat(updatedAskAmountBTC).toFixed(8),
-                  askAmountEBT: parseFloat(updatedAskAmountEBT).toFixed(8),
+                  askAmountBTC: parseFloat(updatedAskAmountBTC),
+                  askAmountEBT: parseFloat(updatedAskAmountEBT),
                   status: statusTwo,
                   statusName: statusTwoPending,
                 });
@@ -1234,16 +1234,16 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance).toFixed(8) - parseFloat(totoalBidRemainingEBT).toFixed(8));
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC)).toFixed(8);
+              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(totoalBidRemainingEBT));
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC));
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker).toFixed(8),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker).toFixed(8)
+                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -1254,16 +1254,16 @@ module.exports = {
               }
               //Update bidder =========================================== 11
               console.log(currentAskDetails.id + " >>>>>enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)).toFixed(8);
-              var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance).toFixed(8) - parseFloat(userBidAmountBTC).toFixed(8);
+              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT));
+              var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC);
               console.log(currentAskDetails.id + " >>>>>updatedBTCbalanceAsker ::: " + updatedEBTbalanceBidder);
               console.log(currentAskDetails.id + " >>>>>updatedFreezedEBTbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder).toFixed(8),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder).toFixed(8)
+                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -1370,11 +1370,11 @@ module.exports = {
           });
         }
 
-        var userBTCBalanceInDb = parseFloat(user.BTCbalance).toFixed(8);
-        var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC).toFixed(8);
-        var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance).toFixed(8);
+        var userBTCBalanceInDb = parseFloat(user.BTCbalance);
+        var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC);
+        var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance);
         var updateFreezedBalance = userFreezedBTCbalanceInDB - bidAmountOfBTCInBidTableDB;
-        var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) + parseFloat(bidAmountOfBTCInBidTableDB)).toFixed(8);
+        var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) + parseFloat(bidAmountOfBTCInBidTableDB));
         console.log("userBTCBalanceInDb :" + userBTCBalanceInDb);
         console.log("bidAmountOfBTCInBidTableDB :" + bidAmountOfBTCInBidTableDB);
         console.log("userFreezedBTCbalanceInDB :" + userFreezedBTCbalanceInDB);
@@ -1384,8 +1384,8 @@ module.exports = {
         User.update({
             id: bidownerId
           }, {
-            BTCbalance: parseFloat(updateUserBTCBalance).toFixed(8),
-            FreezedBTCbalance: parseFloat(updateFreezedBalance).toFixed(8)
+            BTCbalance: parseFloat(updateUserBTCBalance),
+            FreezedBTCbalance: parseFloat(updateFreezedBalance)
           })
           .exec(function(err, updatedUser) {
             if (err) {
@@ -1464,19 +1464,19 @@ module.exports = {
             statusCode: 401
           });
         }
-        var userEBTBalanceInDb = parseFloat(user.EBTbalance).toFixed(8);
-        var askAmountOfEBTInAskTableDB = parseFloat(askDetails.askAmountEBT).toFixed(8);
-        var userFreezedEBTbalanceInDB = parseFloat(user.FreezedEBTbalance).toFixed(8);
+        var userEBTBalanceInDb = parseFloat(user.EBTbalance);
+        var askAmountOfEBTInAskTableDB = parseFloat(askDetails.askAmountEBT);
+        var userFreezedEBTbalanceInDB = parseFloat(user.FreezedEBTbalance);
         console.log("userEBTBalanceInDb :" + userEBTBalanceInDb);
         console.log("askAmountOfEBTInAskTableDB :" + askAmountOfEBTInAskTableDB);
         console.log("userFreezedEBTbalanceInDB :" + userFreezedEBTbalanceInDB);
         var updateFreezedEBTBalance = userFreezedEBTbalanceInDB - askAmountOfEBTInAskTableDB;
-        var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) + parseFloat(askAmountOfEBTInAskTableDB)).toFixed(8);
+        var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) + parseFloat(askAmountOfEBTInAskTableDB));
         User.update({
             id: askownerId
           }, {
-            EBTbalance: parseFloat(updateUserEBTBalance).toFixed(8),
-            FreezedEBTbalance: parseFloat(updateFreezedEBTBalance).toFixed(8)
+            EBTbalance: parseFloat(updateUserEBTBalance),
+            FreezedEBTbalance: parseFloat(updateFreezedEBTBalance)
           })
           .exec(function(err, updatedUser) {
             if (err) {

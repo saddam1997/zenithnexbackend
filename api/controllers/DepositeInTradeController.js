@@ -60,7 +60,7 @@ module.exports = {
   depositeInWalletBTC: function(req, res) {
     console.log("Enter into depositeInWalletBTC");
     var userEmailAddress = req.body.userMailId;
-    var userBTCAmountToDeposite = parseFloat(req.body.btcamount).toFixed(8);
+    var userBTCAmountToDeposite = parseFloat(req.body.btcamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBTCAmountToDeposite || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -111,14 +111,14 @@ module.exports = {
                 });
               }
               console.log("Spending password is valid!!!");
-              var updatedBTCbalance = (parseFloat(userDetails.BTCbalance) + parseFloat(userBTCAmountToDeposite)).toFixed(8);
-              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance).toFixed(8) - parseFloat(userBTCAmountToDeposite).toFixed(8));
+              var updatedBTCbalance = (parseFloat(userDetails.BTCbalance) + parseFloat(userBTCAmountToDeposite));
+              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance) - parseFloat(userBTCAmountToDeposite));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-                  BTCMainbalance: parseFloat(updatedBTCMainbalance).toFixed(8)
+                  BTCbalance: parseFloat(updatedBTCbalance),
+                  BTCMainbalance: parseFloat(updatedBTCMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -207,7 +207,7 @@ module.exports = {
   withdrawInWalletBTC: function(req, res) {
     console.log("Enter into withdrawInWalletBTC");
     var userEmailAddress = req.body.userMailId;
-    var userBTCAmountToWithDraw = parseFloat(req.body.btcamount).toFixed(8);
+    var userBTCAmountToWithDraw = parseFloat(req.body.btcamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBTCAmountToWithDraw || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -231,7 +231,7 @@ module.exports = {
           statusCode: 401
         });
       } else {
-        var userBTCBalanceInDb = parseFloat(userDetails.BTCbalance).toFixed(8);
+        var userBTCBalanceInDb = parseFloat(userDetails.BTCbalance);
         console.log("User BTC balance in database ::: " + userBTCBalanceInDb);
         console.log("User want send BTC to send ::: " + userBTCAmountToWithDraw);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -263,13 +263,13 @@ module.exports = {
               var afterTransactionFeeAmount = (parseFloat(userBTCAmountToWithDraw) - parseFloat(transactionFeeBTC));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
-              var updatedBTCbalance = (parseFloat(userDetails.BTCbalance).toFixed(8) - parseFloat(userBTCAmountToWithDraw).toFixed(8));
+              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedBTCbalance = (parseFloat(userDetails.BTCbalance) - parseFloat(userBTCAmountToWithDraw));
               User.update({
                   id: userDetails.id
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalance).toFixed(8),
-                  BTCMainbalance: parseFloat(updatedBTCMainbalance).toFixed(8)
+                  BTCbalance: parseFloat(updatedBTCbalance),
+                  BTCMainbalance: parseFloat(updatedBTCMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -357,7 +357,7 @@ module.exports = {
   depositeInWalletBCH: function(req, res) {
     console.log("Enter into depositeInWalletBCH");
     var userEmailAddress = req.body.userMailId;
-    var userBCHAmountToDeposite = parseFloat(req.body.bchamount).toFixed(8);
+    var userBCHAmountToDeposite = parseFloat(req.body.bchamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBCHAmountToDeposite || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -409,14 +409,14 @@ module.exports = {
                 });
               }
               console.log("Spending password is valid!!!");
-              var updatedBCHbalance = (parseFloat(userDetails.BCHbalance) + parseFloat(userBCHAmountToDeposite)).toFixed(8);
-              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance).toFixed(8) - parseFloat(userBCHAmountToDeposite).toFixed(8));
+              var updatedBCHbalance = (parseFloat(userDetails.BCHbalance) + parseFloat(userBCHAmountToDeposite));
+              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance) - parseFloat(userBCHAmountToDeposite));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  BCHbalance: parseFloat(updatedBCHbalance).toFixed(8),
-                  BCHMainbalance: parseFloat(updatedBCHMainbalance).toFixed(8)
+                  BCHbalance: parseFloat(updatedBCHbalance),
+                  BCHMainbalance: parseFloat(updatedBCHMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -505,7 +505,7 @@ module.exports = {
   withdrawInWalletBCH: function(req, res) {
     console.log("Enter into withdrawInWalletBCH");
     var userEmailAddress = req.body.userMailId;
-    var userBCHAmountToWithDraw = parseFloat(req.body.bchamount).toFixed(8);
+    var userBCHAmountToWithDraw = parseFloat(req.body.bchamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBCHAmountToWithDraw || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -559,13 +559,13 @@ module.exports = {
               var afterTransactionFeeAmount = (parseFloat(userBCHAmountToWithDraw) - parseFloat(transactionFeeBCH));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
-              var updatedBCHbalance = (parseFloat(userDetails.BCHbalance).toFixed(8) - parseFloat(userBCHAmountToWithDraw).toFixed(8));
+              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedBCHbalance = (parseFloat(userDetails.BCHbalance) - parseFloat(userBCHAmountToWithDraw));
               User.update({
                   id: userDetails.id
                 }, {
-                  BCHbalance: parseFloat(updatedBCHbalance).toFixed(8),
-                  BCHMainbalance: parseFloat(updatedBCHMainbalance).toFixed(8)
+                  BCHbalance: parseFloat(updatedBCHbalance),
+                  BCHMainbalance: parseFloat(updatedBCHMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -653,7 +653,7 @@ module.exports = {
   depositeInWalletEBT: function(req, res) {
     console.log("Enter into depositeInWalletEBT");
     var userEmailAddress = req.body.userMailId;
-    var userEBTAmountToDeposite = parseFloat(req.body.ebtamount).toFixed(8);
+    var userEBTAmountToDeposite = parseFloat(req.body.ebtamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userEBTAmountToDeposite || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -703,14 +703,14 @@ module.exports = {
                 });
               }
               console.log("Spending password is valid!!!");
-              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance) + parseFloat(userEBTAmountToDeposite)).toFixed(8);
-              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance).toFixed(8) - parseFloat(userEBTAmountToDeposite).toFixed(8));
+              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance) + parseFloat(userEBTAmountToDeposite));
+              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) - parseFloat(userEBTAmountToDeposite));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalance).toFixed(8),
-                  EBTMainbalance: parseFloat(updatedEBTMainbalance).toFixed(8)
+                  EBTbalance: parseFloat(updatedEBTbalance),
+                  EBTMainbalance: parseFloat(updatedEBTMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -799,7 +799,7 @@ module.exports = {
   withdrawInWalletEBT: function(req, res) {
     console.log("Enter into depositeInWalletEBT");
     var userEmailAddress = req.body.userMailId;
-    var userEBTAmountToWithDraw = parseFloat(req.body.ebtamount).toFixed(8);
+    var userEBTAmountToWithDraw = parseFloat(req.body.ebtamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userEBTAmountToWithDraw || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -852,14 +852,14 @@ module.exports = {
               var afterTransactionFeeAmount = (parseFloat(userEBTAmountToWithDraw) - parseFloat(transactionFeeEBT));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
-              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance).toFixed(8) - parseFloat(userEBTAmountToWithDraw).toFixed(8));
+              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance) - parseFloat(userEBTAmountToWithDraw));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalance).toFixed(8),
-                  EBTMainbalance: parseFloat(updatedEBTMainbalance).toFixed(8)
+                  EBTbalance: parseFloat(updatedEBTbalance),
+                  EBTMainbalance: parseFloat(updatedEBTMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -948,7 +948,7 @@ module.exports = {
 
     console.log("Enter into depositeInWalletGDS");
     var userEmailAddress = req.body.userMailId;
-    var userGDSAmountToDeposite = parseFloat(req.body.gdsamount).toFixed(8);
+    var userGDSAmountToDeposite = parseFloat(req.body.gdsamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userGDSAmountToDeposite || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -972,7 +972,7 @@ module.exports = {
           statusCode: 401
         });
       } else {
-        var userGDSBalanceInDb = parseFloat(userDetails.GDSbalance).toFixed(8);
+        var userGDSBalanceInDb = parseFloat(userDetails.GDSbalance);
         console.log("User GDS balance in database ::: " + userGDSBalanceInDb);
         console.log("User want send GDS to send ::: " + userGDSAmountToDeposite);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -1001,14 +1001,14 @@ module.exports = {
                 });
               }
               console.log("Spending password is valid!!!");
-              var updatedGDSbalance = (parseFloat(userDetails.GDSbalance) + parseFloat(userGDSAmountToDeposite)).toFixed(8);
-              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance).toFixed(8) - parseFloat(userGDSAmountToDeposite).toFixed(8));
+              var updatedGDSbalance = (parseFloat(userDetails.GDSbalance) + parseFloat(userGDSAmountToDeposite));
+              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance) - parseFloat(userGDSAmountToDeposite));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  GDSbalance: parseFloat(updatedGDSbalance).toFixed(8),
-                  GDSMainbalance: parseFloat(updatedGDSMainbalance).toFixed(8)
+                  GDSbalance: parseFloat(updatedGDSbalance),
+                  GDSMainbalance: parseFloat(updatedGDSMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -1096,7 +1096,7 @@ module.exports = {
   withdrawInWalletGDS: function(req, res) {
     console.log("Enter into depositeInWalletGDS");
     var userEmailAddress = req.body.userMailId;
-    var userGDSAmountToWithDraw = parseFloat(req.body.gdsamount).toFixed(8);
+    var userGDSAmountToWithDraw = parseFloat(req.body.gdsamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userGDSAmountToWithDraw || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
@@ -1150,13 +1150,13 @@ module.exports = {
               var afterTransactionFeeAmount = (parseFloat(userGDSAmountToWithDraw) - parseFloat(transactionFeeGDS));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
-              var updatedGDSbalance = (parseFloat(userDetails.GDSbalance).toFixed(8) - parseFloat(userGDSAmountToWithDraw).toFixed(8));
+              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedGDSbalance = (parseFloat(userDetails.GDSbalance) - parseFloat(userGDSAmountToWithDraw));
               User.update({
                   id: userDetails.id
                 }, {
-                  GDSbalance: parseFloat(updatedGDSbalance).toFixed(8),
-                  GDSMainbalance: parseFloat(updatedGDSMainbalance).toFixed(8)
+                  GDSbalance: parseFloat(updatedGDSbalance),
+                  GDSMainbalance: parseFloat(updatedGDSMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
