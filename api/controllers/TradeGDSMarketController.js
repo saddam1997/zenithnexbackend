@@ -70,7 +70,7 @@ module.exports = {
     }
     //blasting the bid creation event
     sails.sockets.blast(constants.GDS_ASK_ADDED, askDetails);
-    var updateUserGDSBalance = parseFloat(userGDSBalanceInDb) - parseFloat(userAskAmountGDS);
+    var updateUserGDSBalance = (parseFloat(userGDSBalanceInDb) - parseFloat(userAskAmountGDS));
     var updateFreezedGDSBalance = (parseFloat(userFreezedGDSBalanceInDb) + parseFloat(userAskAmountGDS));
     try {
       var userUpdateAsk = await User.update({
@@ -166,7 +166,7 @@ module.exports = {
                 });
               }
 
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
@@ -292,7 +292,7 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
@@ -388,7 +388,7 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+                var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
                 var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
@@ -568,7 +568,7 @@ module.exports = {
 
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
-              var updatedFreezedGDSbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(userAskAmountGDS);
+              var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(userAskAmountGDS));
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               try {
@@ -690,7 +690,7 @@ module.exports = {
     sails.sockets.blast(constants.GDS_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
-    var updateUserBTCBalance = parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC);
+    var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC));
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC));
     console.log("Updating user's bid details ");
     try {
@@ -794,7 +794,7 @@ module.exports = {
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and GDS  give to bidder
               //var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(totoalBidRemainingGDS)) - parseFloat(totoalBidRemainingBTC);
-              var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS);
+              var updatedGDSbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == 0updatedGDSbalanceBidder ::: " + updatedGDSbalanceBidder);
               console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == 0updatedFreezedBTCbalanceAsker ::: " + updatedFreezedBTCbalanceAsker);
@@ -934,7 +934,7 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1 asdf enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerGDS");
-              var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBid.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS);
+              var updatedGDSbalanceBidder = ((parseFloat(userAllDetailsInDBBid.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - updatedGDSbalanceBidder ::: " + updatedGDSbalanceBidder);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
@@ -1037,7 +1037,7 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS);
+                var updatedGDSbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
                 var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
                 console.log(currentAskDetails.id + " totoalBidRemainingGDS == 0 updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " totoalBidRemainingGDS == 0 updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
@@ -1218,7 +1218,7 @@ module.exports = {
               //Update bidder =========================================== 11
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerGDS");
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS));
-              var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC));
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedBTCbalanceAsker ::: " + updatedGDSbalanceBidder);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedFreezedGDSbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               try {
@@ -1327,7 +1327,7 @@ module.exports = {
         var userBTCBalanceInDb = parseFloat(user.BTCbalance);
         var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC);
         var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance);
-        var updateFreezedBalance = userFreezedBTCbalanceInDB - bidAmountOfBTCInBidTableDB;
+        var updateFreezedBalance = (parseFloat(userFreezedBTCbalanceInDB) - parseFloat(bidAmountOfBTCInBidTableDB));
         var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) + parseFloat(bidAmountOfBTCInBidTableDB));
         console.log("userBTCBalanceInDb :" + userBTCBalanceInDb);
         console.log("bidAmountOfBTCInBidTableDB :" + bidAmountOfBTCInBidTableDB);
@@ -1424,7 +1424,7 @@ module.exports = {
         console.log("userGDSBalanceInDb :" + userGDSBalanceInDb);
         console.log("askAmountOfGDSInAskTableDB :" + askAmountOfGDSInAskTableDB);
         console.log("userFreezedGDSbalanceInDB :" + userFreezedGDSbalanceInDB);
-        var updateFreezedGDSBalance = userFreezedGDSbalanceInDB - askAmountOfGDSInAskTableDB;
+        var updateFreezedGDSBalance = (parseFloat(userFreezedGDSbalanceInDB) - parseFloat(askAmountOfGDSInAskTableDB));
         var updateUserGDSBalance = (parseFloat(userGDSBalanceInDb) + parseFloat(askAmountOfGDSInAskTableDB));
         User.update({
             id: askownerId

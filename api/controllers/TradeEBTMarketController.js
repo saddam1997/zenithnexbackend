@@ -75,7 +75,7 @@ module.exports = {
     sails.sockets.blast(constants.EBT_ASK_ADDED, askDetails);
 
 
-    var updateUserEBTBalance = parseFloat(userEBTBalanceInDb) - parseFloat(userAskAmountEBT);
+    var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) - parseFloat(userAskAmountEBT));
     var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT));
 
     try {
@@ -168,7 +168,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -309,7 +309,7 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -408,7 +408,7 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+                var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
                 var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -603,7 +603,7 @@ module.exports = {
 
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
-              var updatedFreezedEBTbalanceAsker = parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT);
+              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT));
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
@@ -728,7 +728,7 @@ module.exports = {
     sails.sockets.blast(constants.EBT_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
-    var updateUserBTCBalance = parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC);
+    var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC));
     var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC));
     console.log("Updating ");
     try {
@@ -830,7 +830,7 @@ module.exports = {
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and EBT  give to bidder
               //var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)) - parseFloat(totoalBidRemainingBTC);
-              var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+              var updatedEBTbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -970,7 +970,7 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+              var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -1061,7 +1061,7 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT);
+                var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
                 var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
                 console.log(currentAskDetails.id + ">>>>> updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + ">>>>> updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
@@ -1255,7 +1255,7 @@ module.exports = {
               //Update bidder =========================================== 11
               console.log(currentAskDetails.id + " >>>>>enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
               var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT));
-              var updatedFreezedBTCbalanceBidder = parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC));
               console.log(currentAskDetails.id + " >>>>>updatedBTCbalanceAsker ::: " + updatedEBTbalanceBidder);
               console.log(currentAskDetails.id + " >>>>>updatedFreezedEBTbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               try {
@@ -1373,7 +1373,7 @@ module.exports = {
         var userBTCBalanceInDb = parseFloat(user.BTCbalance);
         var bidAmountOfBTCInBidTableDB = parseFloat(bidDetails.bidAmountBTC);
         var userFreezedBTCbalanceInDB = parseFloat(user.FreezedBTCbalance);
-        var updateFreezedBalance = userFreezedBTCbalanceInDB - bidAmountOfBTCInBidTableDB;
+        var updateFreezedBalance = (parseFloat(userFreezedBTCbalanceInDB) - parseFloat(bidAmountOfBTCInBidTableDB));
         var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) + parseFloat(bidAmountOfBTCInBidTableDB));
         console.log("userBTCBalanceInDb :" + userBTCBalanceInDb);
         console.log("bidAmountOfBTCInBidTableDB :" + bidAmountOfBTCInBidTableDB);
@@ -1470,7 +1470,7 @@ module.exports = {
         console.log("userEBTBalanceInDb :" + userEBTBalanceInDb);
         console.log("askAmountOfEBTInAskTableDB :" + askAmountOfEBTInAskTableDB);
         console.log("userFreezedEBTbalanceInDB :" + userFreezedEBTbalanceInDB);
-        var updateFreezedEBTBalance = userFreezedEBTbalanceInDB - askAmountOfEBTInAskTableDB;
+        var updateFreezedEBTBalance = (parseFloat(userFreezedEBTbalanceInDB) - parseFloat(askAmountOfEBTInAskTableDB));
         var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) + parseFloat(askAmountOfEBTInAskTableDB));
         User.update({
             id: askownerId
