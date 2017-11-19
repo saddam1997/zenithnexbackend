@@ -203,6 +203,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
               console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
               // var askDestroy = await AskGDS.destroy({
               //   id: askDetails.id
@@ -272,6 +273,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, desctroyCurrentBid);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
             console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
@@ -327,6 +329,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.GDS_ASK_DESTROYED, updatedaskDetails);
             }
           }
         } else {
@@ -421,6 +424,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
                 console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
                 // var askDestroy = await AskGDS.destroy({
                 //   id: askDetails.id
@@ -439,6 +443,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -488,6 +493,7 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
+                sails.sockets.blast(constants.GDS_BID_DESTROYED, desctroyCurrentBid);
                 console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
               }
             } else {
@@ -527,7 +533,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, updatedaskDetails);
               //Update Bidder===========================================
               try {
                 var userAllDetailsInDBBiddder = await User.findOne({
@@ -598,6 +604,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
               //emitting event for bch_ask destruction
               sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
@@ -823,6 +830,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
               console.log(currentAskDetails.id + " totoalBidRemainingGDS == 0AskGDS.destroy bidDetails.id::: " + bidDetails.id);
               // var askDestroy = await AskGDS.destroy({
               //   id: currentAskDetails.askownerGDS
@@ -964,6 +972,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, updatedbidDetails);
             }
 
           }
@@ -1077,7 +1086,7 @@ module.exports = {
                   status: statusOne,
                   statusName: statusOneSuccessfull
                 });
-
+                sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
                 return res.json({
                   "message": "Bid Executed successfully",
                   statusCode: 200
@@ -1135,6 +1144,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.GDS_ASK_DESTROYED, destroyCurrentAsk);
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -1172,7 +1182,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.GDS_ASK_DESTROYED, updatedaskDetails);
               //Update Asker===========================================11
               try {
                 var userAllDetailsInDBAsker = await User.findOne({
@@ -1245,6 +1255,7 @@ module.exports = {
                   statusCode: 200
                 });
               }
+              sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
                 "message": "Ask Executed successfully",

@@ -328,6 +328,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, updatedaskDetails);
             }
           }
         } else {
@@ -441,6 +442,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
                 return res.json({
                   "message": "Ask Executed successfully",
                   statusCode: 200
@@ -1071,7 +1073,7 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-
+                sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 AskBCH.destroy bidDetails.id::: " + bidDetails.id);
                 // var bidDestroy = await BidBCH.destroy({
                 //   id: bidDetails.id
@@ -1140,6 +1142,7 @@ module.exports = {
                     statusCode: 200
                   });
                 }
+                sails.sockets.blast(constants.BCH_ASK_DESTROYED, destroyCurrentAsk);
                 console.log(currentAskDetails.id + "Bid destroy successfully destroyCurrentAsk ::" + JSON.stringify(destroyCurrentAsk));
               }
             } else {
@@ -1177,7 +1180,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.BCH_ASK_DESTROYED, updatedaskDetails);
               //Update Asker===========================================11
               try {
                 var userAllDetailsInDBAsker = await User.findOne({

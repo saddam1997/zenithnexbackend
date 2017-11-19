@@ -287,8 +287,6 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
-
               sails.sockets.blast(constants.EBT_BID_DESTROYED, desctroyCurrentBid);
 
 
@@ -349,6 +347,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.EBT_ASK_DESTROYED, updatedaskDetails);
             }
 
           }
@@ -554,7 +553,7 @@ module.exports = {
               var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT)).toFixed(8);
 
               try {
-                var updatedaskDetails = await BidEBT.update({
+                var updatedbidDetails = await BidEBT.update({
                   id: currentBidDetails.id
                 }, {
                   bidAmountBTC: parseFloat(updatedBidAmountBTC).toFixed(8),
@@ -569,7 +568,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.EBT_BID_DESTROYED, updatedbidDetails);
               //Update Bidder===========================================
               try {
                 var userAllDetailsInDBBiddder = await User.findOne({
@@ -1008,6 +1007,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              sails.sockets.blast(constants.EBT_BID_DESTROYED, updatedbidDetails);
             }
           }
 
@@ -1221,7 +1221,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
+              sails.sockets.blast(constants.EBT_ASK_DESTROYED, updatedaskDetails);
               //Update Asker===========================================11
               try {
                 var userAllDetailsInDBAsker = await User.findOne({
