@@ -259,8 +259,11 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              //Deduct transactionFeeBTC
+              var afterTransactionFeeAmount = (parseFloat(userBTCAmountToWithDraw) - parseFloat(transactionFeeBTC));
+              console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance) + parseFloat(userBTCAmountToWithDraw)).toFixed(8);
+              var updatedBTCMainbalance = (parseFloat(userDetails.BTCMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
               var updatedBTCbalance = (parseFloat(userDetails.BTCbalance).toFixed(8) - parseFloat(userBTCAmountToWithDraw).toFixed(8));
               User.update({
                   id: userDetails.id
@@ -292,7 +295,7 @@ module.exports = {
                       clientBTC.cmd('move',
                         companyBTCAccount,
                         userEmailAddress,
-                        userBTCAmountToWithDraw,
+                        afterTransactionFeeAmount,
                         function(err, moveBTCTransaction, resHeaders) {
                           if (err) {
                             console.log("Error from WithdrawalBTC :: ");
@@ -552,8 +555,11 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              //Deduct transactionFeeBCH
+              var afterTransactionFeeAmount = (parseFloat(userBCHAmountToWithDraw) - parseFloat(transactionFeeBCH));
+              console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance) + parseFloat(userBCHAmountToWithDraw)).toFixed(8);
+              var updatedBCHMainbalance = (parseFloat(userDetails.BCHMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
               var updatedBCHbalance = (parseFloat(userDetails.BCHbalance).toFixed(8) - parseFloat(userBCHAmountToWithDraw).toFixed(8));
               User.update({
                   id: userDetails.id
@@ -580,11 +586,12 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
+
                       //Move BCH Company account to User Account on Withdrawal
                       clientBCH.cmd('move',
                         companyBCHAccount,
                         userEmailAddress,
-                        userBCHAmountToWithDraw,
+                        afterTransactionFeeAmount,
                         function(err, moveBCHTransaction, resHeaders) {
                           if (err) {
                             console.log("Error from WithdrawalBCH :: ");
@@ -841,9 +848,13 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              //Deduct transactionFeeEBT
+              var afterTransactionFeeAmount = (parseFloat(userEBTAmountToWithDraw) - parseFloat(transactionFeeEBT));
+              console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) + parseFloat(userEBTAmountToWithDraw)).toFixed(8);
+              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
               var updatedEBTbalance = (parseFloat(userDetails.EBTbalance).toFixed(8) - parseFloat(userEBTAmountToWithDraw).toFixed(8));
+
               User.update({
                   id: userDetails.id
                 }, {
@@ -869,11 +880,12 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
+
                       //Move EBT Company account to User Account on Withdrawal
                       clientEBT.cmd('move',
                         companyEBTAccount,
                         userEmailAddress,
-                        userEBTAmountToWithDraw,
+                        afterTransactionFeeAmount,
                         function(err, moveEBTTransaction, resHeaders) {
                           if (err) {
                             console.log("Error from WithdrawalEBT :: ");
@@ -1134,8 +1146,11 @@ module.exports = {
                   statusCode: 401
                 });
               }
+              //Deduct transactionFeeEBT
+              var afterTransactionFeeAmount = (parseFloat(userGDSAmountToWithDraw) - parseFloat(transactionFeeGDS));
+              console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance) + parseFloat(userGDSAmountToWithDraw)).toFixed(8);
+              var updatedGDSMainbalance = (parseFloat(userDetails.GDSMainbalance) + parseFloat(afterTransactionFeeAmount)).toFixed(8);
               var updatedGDSbalance = (parseFloat(userDetails.GDSbalance).toFixed(8) - parseFloat(userGDSAmountToWithDraw).toFixed(8));
               User.update({
                   id: userDetails.id
@@ -1162,11 +1177,12 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
+
                       //Move GDS Company account to User Account on Withdrawal
                       clientGDS.cmd('move',
                         companyGDSAccount,
                         userEmailAddress,
-                        userGDSAmountToWithDraw,
+                        afterTransactionFeeAmount,
                         function(err, moveGDSTransaction, resHeaders) {
                           if (err) {
                             console.log("Error from WithdrawalGDS :: ");
