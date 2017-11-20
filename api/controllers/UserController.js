@@ -38,7 +38,7 @@ var clientEBT = new bitcoinEBT.Client({
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
 var clientGDS = new bitcoinGDS.Client({
-  host: sails.config.company.clientGDSHhost,
+  host: sails.config.company.clientGDShost,
   port: sails.config.company.clientGDSport,
   user: sails.config.company.clientGDSuser,
   pass: sails.config.company.clientGDSpass
