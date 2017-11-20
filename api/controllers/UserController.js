@@ -30,21 +30,19 @@ var clientBCH = new bitcoinBCH.Client({
 //EBT Wallet Details
 var bitcoinEBT = require('bitcoin');
 var clientEBT = new bitcoinEBT.Client({
-  host: sails.config.company.clientBCHhost,
-  port: sails.config.company.clientBCHport,
-  user: sails.config.company.clientBCHuser,
-  pass: sails.config.company.clientBCHpass
+  host: sails.config.company.clientEBThost,
+  port: sails.config.company.clientEBTport,
+  user: sails.config.company.clientEBTuser,
+  pass: sails.config.company.clientEBTpass
 });
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
 var clientGDS = new bitcoinGDS.Client({
-  host: sails.config.company.clientBCHhost,
-  port: sails.config.company.clientBCHport,
-  user: sails.config.company.clientBCHuser,
-  pass: sails.config.company.clientBCHpass
+  host: sails.config.company.clientGDSHhost,
+  port: sails.config.company.clientGDSport,
+  user: sails.config.company.clientGDSuser,
+  pass: sails.config.company.clientGDSpass
 });
-var companyBCHAccount = sails.config.company.companyBCHAccount;
-var companyBCHAccountAddress = sails.config.company.companyBCHAccountAddress;
 
 var transporter = nodemailer.createTransport({
   service: 'gmail',
