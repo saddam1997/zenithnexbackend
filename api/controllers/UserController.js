@@ -11,6 +11,7 @@ var bcrypt = require('bcrypt');
 var nodemailer = require('nodemailer');
 var mergeJSON = require("merge-json");
 var validator = require('validator');
+var crypto = require("crypto");
 //BTC Wallet Details
 var bitcoinBTC = require('bitcoin');
 var clientBTC = new bitcoinBTC.Client({
@@ -47,10 +48,12 @@ var clientGDS = new bitcoinGDS.Client({
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'wallet.bcc@gmail.com',
-    pass: 'boosters@123'
+    user: sails.config.common.supportEmailId,
+    pass: sails.config.common.supportEmailIdpass
   }
 });
+
+var projectURL = sails.config.common.projectURL;
 
 module.exports = {
   getNewGDSAddress: function(req, res) {
@@ -420,7 +423,7 @@ module.exports = {
                       statusCode: 500
                     });
                   }
-                  var otpForEmail = Math.floor(100000 + Math.random() * 900000);
+                  var otpForEmail = crypto.randomBytes(20).toString('hex');;
                   console.log("otpForEmail :: " + otpForEmail);
                   bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
                     if (err) return next(err);
@@ -446,32 +449,29 @@ module.exports = {
                       }
                       console.log("User Create Succesfully...........");
 
-                      return res.json(200, {
-                        "message": "Your account created Succesfully",
-                        "userMailId": useremailaddress,
-                        statusCode: 200
-                      });
-
-                      // var mailOptions = {
-                      //   from: 'wallet.bcc@gmail.com',
-                      //   to: useremailaddress,
-                      //   subject: 'Sending Email using Node.js',
-                      //   text: 'Otp Password for Verify email  ' + otpForEmail
-                      // };
-                      // transporter.sendMail(mailOptions, function (error, info) {
-                      //   if (error) {
-                      //     console.log(error);
-                      //   } else {
-                      //     console.log('Email sent: ' + info.response);
-                      //
-                      //     return res.json(200, {
-                      //       "message": "Otp sent on user mail id",
-                      //       "userMailId": useremailaddress,
-                      //       statusCode: 200
-                      //     });
-                      //   }
+                      // return res.json(200, {
+                      //   "message": "Your account created Succesfully",
+                      //   "userMailId": useremailaddress,
+                      //   statusCode: 200
                       // });
-
+                      var mailOptions = {
+                        from: sails.config.common.supportEmailId,
+                        to: useremailaddress,
+                        subject: 'Sending Email using Node.js',
+                        text: "Please verify email we send email " + projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail
+                      };
+                      transporter.sendMail(mailOptions, function(error, info) {
+                        if (error) {
+                          console.log(error);
+                        } else {
+                          console.log('Email sent: ' + info.response);
+                          return res.json(200, {
+                            "message": "We send link on your email address please verify link!!!",
+                            "userMailId": useremailaddress,
+                            statusCode: 200
+                          });
+                        }
+                      });
                     });
                   });
                 });
@@ -483,17 +483,88 @@ module.exports = {
       }
     });
   },
+  verifyEmailAddress: function(req, res, next) {
+    console.log("Enter into verifyEmailAddress");
+    var userMailId = req.param('email');
+    var otp = req.param('otp');
+    if (!userMailId || !otp) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      if (user.verifyEmail) {
+        return res.json({
+          "message": "Email already verified !!",
+          statusCode: 401
+        });
+      }
+      User.compareEmailVerificationOTP(otp, user, function(err, valid) {
+        if (err) {
+          console.log("Error to compare otp");
+          return res.json({
+            "message": "Error to compare otp",
+            statusCode: 401
+          });
+        }
+        if (!valid) {
+          return res.json({
+            "message": "OTP is incorrect!!",
+            statusCode: 401
+          });
+        } else {
+          console.log("OTP is varified succesfully");
+          User.update({
+              email: userMailId
+            }, {
+              verifyEmail: true
+            })
+            .exec(function(err, updatedUser) {
+              if (err) {
+                return res.json({
+                  "message": "Error to update passoword!",
+                  statusCode: 401
+                });
+              }
+              console.log("Update passoword succesfully!!!");
+              res.json(200, {
+                "message": "Email verified succesfully",
+                "userMailId": userMailId,
+                statusCode: 200
+              });
+            });
+
+        }
+      });
+    });
+  },
   sendEmail: function(req, res, next) {
     console.log("Enter into sendEmailTest::: " + JSON.stringify(req.body));
-    var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'wallet.bcc@gmail.com',
-        pass: 'boosters@123'
-      }
-    });
+    // var transporter = nodemailer.createTransport({
+    //   service: 'gmail',
+    //   auth: {
+    //     user: 'wallet.bcc@gmail.com',
+    //     pass: 'boosters@123'
+    //   }
+    // });
     var mailOptions = {
-      from: 'wallet.bcc@gmail.com',
+      from: sails.config.common.supportEmailId,
       to: 'bccwalletsuport@gmail.com',
       subject: 'Sending Email using Node.js',
       text: 'That was easy!'
@@ -533,17 +604,17 @@ module.exports = {
           statusCode: 401
         });
       }
-      var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'wallet.bcc@gmail.com',
-          pass: 'boosters@123'
-        }
-      });
+      // var transporter = nodemailer.createTransport({
+      //   service: 'gmail',
+      //   auth: {
+      //     user: 'wallet.bcc@gmail.com',
+      //     pass: 'boosters@123'
+      //   }
+      // });
       var newCreatedPassword = Math.floor(100000 + Math.random() * 900000);
       console.log("newCreatedPassword :: " + newCreatedPassword);
       var mailOptions = {
-        from: 'wallet.bcc@gmail.com',
+        from: sails.config.common.supportEmailId,
         to: userMailId,
         subject: 'Please reset your password',
         text: 'We heard that you lost your BccPay password. Sorry about that! ' +
@@ -904,17 +975,17 @@ module.exports = {
             statusCode: 401
           });
         } else {
-          var transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: 'wallet.bcc@gmail.com',
-              pass: 'boosters@123'
-            }
-          });
+          // var transporter = nodemailer.createTransport({
+          //   service: 'gmail',
+          //   auth: {
+          //     user: sails.config.common.supportEmailId,
+          //     pass: 'boosters@123'
+          //   }
+          // });
           var newCreatedPassword = Math.floor(100000 + Math.random() * 900000);
           console.log("newCreatedPassword :: " + newCreatedPassword);
           var mailOptions = {
-            from: 'wallet.bcc@gmail.com',
+            from: sails.config.common.supportEmailId,
             to: userMailId,
             subject: 'Please reset your spending password',
             text: 'We heard that you lost your BccPay spending password. Sorry about that! ' +
@@ -1094,7 +1165,7 @@ module.exports = {
       var createNewOTP = Math.floor(100000 + Math.random() * 900000);
       console.log("createNewOTP :: " + createNewOTP);
       var mailOptions = {
-        from: 'wallet.bcc@gmail.com',
+        from: sails.config.common.supportEmailId,
         to: user.email,
         subject: 'Please verify your email',
         text: 'Your otp to varify email ' + createNewOTP

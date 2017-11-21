@@ -42,6 +42,12 @@ module.exports = {
             statusCode: 401
           });
         }
+        if (!user.verifyEmail) {
+          return res.json({
+            "message": "We already sent email verification link please verify your email !!",
+            statusCode: 401
+          });
+        }
         console.log("Compare passs");
         User.comparePassword(password, user, function(err, valid) {
           if (err) {
