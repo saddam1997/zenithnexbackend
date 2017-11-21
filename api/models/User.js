@@ -100,6 +100,13 @@ module.exports = {
       type: "boolean",
       defaultsTo: false
     },
+    tfastatus: {
+      type: "boolean",
+      defaultsTo: false
+    },
+    googlesecreatekey: {
+      type: 'string'
+    },
     isAdmin: {
       type: "boolean",
       defaultsTo: false

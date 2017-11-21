@@ -64,7 +64,17 @@ module.exports = {
             });
           } else {
             console.log("User is valid return user details !!!");
-            res.json(200, {
+            if (user.tfastatus) {
+              res.json({
+                user: user,
+                statusCode: 201,
+                message: "Google Authenticattion Enabled For this user!!!",
+                token: jwToken.issue({
+                  id: user.id
+                })
+              });
+            }
+            res.json({
               user: user,
               statusCode: 200,
               token: jwToken.issue({

@@ -1314,5 +1314,73 @@ module.exports = {
         }
 
       });
+  },
+  enableTFA: function(req, res, next) {
+    console.log("Enter into enableTFA");
+    var userMailId = req.body.userMailId;
+    var googlesecreatekey = req.body.googlesecreatekey;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 401
+      });
+    }
+
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      User.update({
+          email: userMailId
+        }, {
+          tfastatus: true,
+          googlesecreatekey: googlesecreatekey
+        })
+        .exec(function(err, updatedUser) {
+          if (err) {
+            return res.json({
+              "message": "Error to update passoword!",
+              statusCode: 401
+            });
+          }
+          console.log("TFA and googlesecreatekey updated succesfully!!!");
+          User.findOne({
+              email: userMailId
+            })
+            .populateAll()
+            .exec(function(err, user) {
+              if (err) {
+                return res.json({
+                  "message": "Error to find user",
+                  statusCode: 401
+                });
+              }
+              if (!user) {
+                return res.json({
+                  "message": "Invalid email!",
+                  statusCode: 401
+                });
+              } else {
+                return res.json({
+                  user: user,
+                  statusCode: 200
+                });
+              }
+
+            });
+        });
+    });
   }
 };
