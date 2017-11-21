@@ -1,3 +1,3 @@
 .idea/
-config/companyBTCAndBCHAccountDetails.js
+config/ServerRPCDetails.js
 node_modules
