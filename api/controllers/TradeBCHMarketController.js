@@ -12,6 +12,9 @@ var statusZeroCreated = sails.config.company.statusZeroCreated;
 var statusOneSuccessfull = sails.config.company.statusOneSuccessfull;
 var statusTwoPending = sails.config.company.statusTwoPending;
 var constants = require('./../../config/constants');
+const txFeeBCHWithdrawSuccess = sails.config.common.txFeeBCHWithdrawSuccess;
+const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
+
 module.exports = {
   addAskBchMarket: async function(req, res) {
     console.log("Enter into ask api addAskBchMarket : : ");
@@ -79,13 +82,11 @@ module.exports = {
         BCHbalance: updateUserBCHBalance,
       });
     } catch (e) {
-
       return res.json({
         error: e,
         message: 'Failed to update user',
         statusCode: 401
       });
-
     }
     try {
       var allBidsFromdb = await BidBCH.find({
@@ -149,7 +150,12 @@ module.exports = {
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
-
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerBCH
@@ -165,10 +171,19 @@ module.exports = {
                 });
               }
 
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC);
+              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+
+              //Deduct Transation Fee Asker
+              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerBCH
@@ -237,6 +252,14 @@ module.exports = {
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
               try {
@@ -293,6 +316,15 @@ module.exports = {
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
               var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
               var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
+              //Deduct Transation Fee Asker
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+
+              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               try {
@@ -373,6 +405,14 @@ module.exports = {
                 console.log("Update value of Bidder and asker");
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
                 var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+
+                //Deduct Transation Fee Bidder
+                console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+                var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+                console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+                updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
                 try {
                   var userUpdateBidder = await User.update({
                     id: currentBidDetails.bidownerBCH
@@ -389,6 +429,15 @@ module.exports = {
                 }
                 var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
                 var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
+
+                //Deduct Transation Fee Asker
+                console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+                var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+                var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
+                console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
                 console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
                 try {
@@ -465,6 +514,13 @@ module.exports = {
                 console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
                 var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
                 var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+
+                //Deduct Transation Fee Bidder
+                console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+                var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+                console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+                updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
                 console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
                 console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
 
@@ -548,6 +604,15 @@ module.exports = {
               }
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.BCHbalance) + parseFloat(totoalAskRemainingBCH));
+
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var bchAmountSucess = parseFloat(totoalAskRemainingBCH);
+              var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
               try {
@@ -569,6 +634,14 @@ module.exports = {
               console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
               var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(userAskAmountBCH));
+
+              //Deduct Transation Fee Asker
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
               console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               try {
@@ -759,9 +832,26 @@ module.exports = {
                   statusCode: 401
                 });
               }
+
+              console.log("userAll bidDetails.askownerBCH totoalBidRemainingBCH == 0:: ");
+              console.log("Update value of Bidder and asker");
+              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+              //Deduct Transation Fee Asker
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+              //current ask details of Asker  updated
+              //Ask FreezedBCHbalance balance of asker deducted and BTC to give asker
               try {
-                var BidderuserAllDetailsInDBBidder = await User.findOne({
-                  id: bidDetails.bidownerBCH
+                var userUpdateAsker = await User.update({
+                  id: currentAskDetails.askownerBCH
+                }, {
+                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker),
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -770,18 +860,10 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              console.log("userAll bidDetails.askownerBCH totoalBidRemainingBCH == 0:: ");
-              console.log("Update value of Bidder and asker");
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
-              var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
-              //current ask details of Asker  updated
-              //Ask FreezedBCHbalance balance of asker deducted and BTC to give asker
+
               try {
-                var userUpdateAsker = await User.update({
-                  id: currentAskDetails.askownerBCH
-                }, {
-                  FreezedBCHbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                  BTCbalance: parseFloat(updatedBCHbalanceBidder)
+                var BidderuserAllDetailsInDBBidder = await User.findOne({
+                  id: bidDetails.bidownerBCH
                 });
               } catch (e) {
                 return res.json({
@@ -795,8 +877,18 @@ module.exports = {
               //var updatedBCHbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.BCHbalance) + parseFloat(totoalBidRemainingBCH)) - parseFloat(totoalBidRemainingBTC);
               var updatedBCHbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.BCHbalance) + parseFloat(userBidAmountBCH)) - parseFloat(totoalBidRemainingBCH));
               var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC);
+
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
+              var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentAskDetails.id + " asdftotoalBidRemainingBCH == 0updatedBCHbalanceBidder ::: " + updatedBCHbalanceBidder);
               console.log(currentAskDetails.id + " asdftotoalBidRemainingBCH == 0updatedFreezedBTCbalanceAsker ::: " + updatedFreezedBTCbalanceAsker);
+
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerBCH
@@ -848,14 +940,11 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
               sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
-
               return res.json({
                 "message": "Ask Executed successfully",
                 statusCode: 200
               });
-
             } else {
               //destroy bid
               console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0  enter into else of totoalBidRemainingBCH == 0");
@@ -872,17 +961,25 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == 0 Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
-              var updatedFreezedBCHbalanceBidder = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
-              var updatedBTCbalanceBidder = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
-              console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == 0updatedFreezedBCHbalanceBidder:: " + updatedFreezedBCHbalanceBidder);
-              console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == 0updatedBTCbalanceBidder:: " + updatedBTCbalanceBidder);
+              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
+              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+
+              //Deduct Transation Fee Asker
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+              console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == :: ");
+              console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == 0updatedBTCbalanceBidder:: ");
 
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerBCH
                 }, {
-                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceBidder),
-                  BTCbalance: parseFloat(updatedBTCbalanceBidder)
+                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker),
+                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
                 });
               } catch (e) {
                 return res.json({
@@ -935,6 +1032,15 @@ module.exports = {
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1 asdf enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerBCH");
               var updatedBCHbalanceBidder = ((parseFloat(userAllDetailsInDBBid.BCHbalance) + parseFloat(userBidAmountBCH)) - parseFloat(totoalBidRemainingBCH));
               var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
+              var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               try {
@@ -1017,7 +1123,12 @@ module.exports = {
                 console.log(" totoalBidRemainingBCH == 0Update value of Bidder and asker");
                 var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
-
+                //Deduct Transation Fee Asker
+                console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+                var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
                 console.log("--------------------------------------------------------------------------------");
                 console.log(" totoalBidRemainingBCH == 0userAllDetailsInDBAsker ::: " + JSON.stringify(userAllDetailsInDBAsker));
                 console.log(" totoalBidRemainingBCH == 0updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
@@ -1039,6 +1150,14 @@ module.exports = {
                 }
                 var updatedBCHbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(userBidAmountBCH)) - parseFloat(totoalBidRemainingBCH));
                 var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+                //Deduct Transation Fee Bidder
+                console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+                var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
+                var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+                console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+                updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
                 try {
@@ -1107,6 +1226,13 @@ module.exports = {
                 console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
                 var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(currentAskDetails.askAmountBCH));
                 var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+                //Deduct Transation Fee Asker
+                console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+                var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
                 console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0 updatedFreezedBCHbalanceAsker:: " + updatedFreezedBCHbalanceAsker);
                 console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0 updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
@@ -1196,6 +1322,14 @@ module.exports = {
 
               var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalBidRemainingBCH));
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC));
+
+              //Deduct Transation Fee Asker
+              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              var txFeesAskerBTC = (parseFloat(totoalBidRemainingBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedFreezedBCHbalanceAsker:: " + updatedFreezedBCHbalanceAsker);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
               try {
@@ -1217,6 +1351,14 @@ module.exports = {
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerBCH");
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(userBidAmountBCH));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC));
+
+              //Deduct Transation Fee Bidder
+              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+              var txFeesBidderBCH = (parseFloat(updatedBCHbalanceBidder) * parseFloat(txFeeBCHWithdrawSuccess));
+              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedBTCbalanceAsker ::: " + updatedBCHbalanceBidder);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBTCbalanceBidder);
               try {
