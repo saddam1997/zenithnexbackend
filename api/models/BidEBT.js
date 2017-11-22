@@ -10,6 +10,9 @@ module.exports = {
 
   schema: true,
   attributes: {
+    createTimeUTC: {
+      type: 'string',
+    },
     bidAmountBTC: {
       type: 'float',
       defaultsTo: 0.00,

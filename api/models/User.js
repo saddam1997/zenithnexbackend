@@ -97,7 +97,7 @@ module.exports = {
       type: 'string'
     },
     verifyEmail: {
-      type: "boolean",
+      type: 'boolean',
       defaultsTo: false
     },
     tfastatus: {
@@ -108,7 +108,7 @@ module.exports = {
       type: 'string'
     },
     isAdmin: {
-      type: "boolean",
+      type: 'boolean',
       defaultsTo: false
     },
     //Tradebalanceorder

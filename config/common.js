@@ -10,7 +10,7 @@ module.exports.common = {
 
   supportEmailId: 'wallet.bcc@gmail.com', //Support Email Id to send mail signup and login and forgot password
   supportEmailIdpass: 'boosters@123', //Support Email Id passoword
-  projectURL: 'http://localhost:1338',
+  projectURL: 'http://192.168.1.16:1338',
   txFeeBCHWithdrawSuccess: 0.0001,
   txFeeBTCWithdrawSuccess: 0.0001,
   txFeeEBTWithdrawSuccess: 0.0001,

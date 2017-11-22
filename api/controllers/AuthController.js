@@ -65,6 +65,7 @@ module.exports = {
           } else {
             console.log("User is valid return user details !!!");
             if (user.tfastatus) {
+              console.log("Enter into this user.tfastatus");
               res.json({
                 user: user,
                 statusCode: 201,
@@ -73,14 +74,16 @@ module.exports = {
                   id: user.id
                 })
               });
+            } else {
+              console.log("Returnin user detailsss");
+              res.json({
+                user: user,
+                statusCode: 200,
+                token: jwToken.issue({
+                  id: user.id
+                })
+              });
             }
-            res.json({
-              user: user,
-              statusCode: 200,
-              token: jwToken.issue({
-                id: user.id
-              })
-            });
           }
         });
       });

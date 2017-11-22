@@ -284,13 +284,15 @@ module.exports = {
     var userpassword = req.body.password;
     var userconfirmPassword = req.body.confirmPassword;
     var userspendingpassword = req.body.spendingpassword;
+    var userconfirmspendingpassword = req.body.confirmspendingpassword;
+    var googlesecreatekey = req.body.googlesecreatekey;
     if (!validator.isEmail(useremailaddress)) {
       return res.json({
         "message": "Please Enter valid email id",
         statusCode: 400
       });
     }
-    if (!useremailaddress || !userpassword || !userconfirmPassword || !userspendingpassword) {
+    if (!useremailaddress || !userpassword || !userconfirmPassword || !userspendingpassword || !googlesecreatekey || !userconfirmspendingpassword) {
       console.log("User Entered invalid parameter ");
       return res.json({
         "message": "Invalid Parameter",
@@ -304,6 +306,15 @@ module.exports = {
         statusCode: 400
       });
     }
+
+    if (userspendingpassword !== userconfirmspendingpassword) {
+      console.log("spendingpassword and confirmspendingpassword doesn\'t match!");
+      return res.json({
+        "message": 'spendingpassword and confirmspendingpassword doesn\'t match!',
+        statusCode: 400
+      });
+    }
+
     User.findOne({
       email: useremailaddress
     }, function(err, user) {
@@ -436,7 +447,8 @@ module.exports = {
                       userBCHAddress: newBCHAddressForUser,
                       userEBTAddress: newEBTAddressForUser,
                       userGDSAddress: newGDSAddressForUser,
-                      encryptedEmailVerificationOTP: encOtpForEmail
+                      encryptedEmailVerificationOTP: encOtpForEmail,
+                      googlesecreatekey: googlesecreatekey
                     }
                     User.create(userObj).exec(function(err, userAddDetails) {
                       if (err) {
@@ -449,16 +461,13 @@ module.exports = {
                       }
                       console.log("User Create Succesfully...........");
 
-                      // return res.json(200, {
-                      //   "message": "Your account created Succesfully",
-                      //   "userMailId": useremailaddress,
-                      //   statusCode: 200
-                      // });
+                      //"<h1 style='color:red'>Please verify email we send email <h1>" + projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail
                       var mailOptions = {
                         from: sails.config.common.supportEmailId,
                         to: useremailaddress,
                         subject: 'Sending Email using Node.js',
-                        text: "Please verify email we send email " + projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail
+                        html: '<p><b>Hello</b> to myself <img src="cid:note@example.com"/></p>' + projectURL +
+                          '<p>Here\'s a nyan cat for you as an embedded attachment:<br/><img src="cid:nyan@example.com"/></p>'
                       };
                       transporter.sendMail(mailOptions, function(error, info) {
                         if (error) {
@@ -1318,7 +1327,7 @@ module.exports = {
   enableTFA: function(req, res, next) {
     console.log("Enter into enableTFA");
     var userMailId = req.body.userMailId;
-    var googlesecreatekey = req.body.googlesecreatekey;
+
     if (!userMailId) {
       console.log("Invalid Parameter by user.....");
       return res.json({
@@ -1345,8 +1354,7 @@ module.exports = {
       User.update({
           email: userMailId
         }, {
-          tfastatus: true,
-          googlesecreatekey: googlesecreatekey
+          tfastatus: true
         })
         .exec(function(err, updatedUser) {
           if (err) {
@@ -1378,7 +1386,71 @@ module.exports = {
                   statusCode: 200
                 });
               }
+            });
+        });
+    });
+  },
+  disableTFA: function(req, res, next) {
+    console.log("Enter into disableTFA");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Invalid Parameter by user.....");
+      return res.json({
+        "message": "Invalid Parameter",
+        statusCode: 401
+      });
+    }
 
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      User.update({
+          email: userMailId
+        }, {
+          tfastatus: false
+        })
+        .exec(function(err, updatedUser) {
+          if (err) {
+            return res.json({
+              "message": "Error to update passoword!",
+              statusCode: 401
+            });
+          }
+          console.log("TFA disabled succesfully!!!");
+          User.findOne({
+              email: userMailId
+            })
+            .populateAll()
+            .exec(function(err, user) {
+              if (err) {
+                return res.json({
+                  "message": "Error to find user",
+                  statusCode: 401
+                });
+              }
+              if (!user) {
+                return res.json({
+                  "message": "Invalid email!",
+                  statusCode: 401
+                });
+              } else {
+                return res.json({
+                  user: user,
+                  statusCode: 200
+                });
+              }
             });
         });
     });
