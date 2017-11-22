@@ -19,18 +19,27 @@ const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 
 
 module.exports = {
+
+
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket : : ");
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC);
     var userAskAmountGDS = parseFloat(req.body.askAmountGDS);
-    var userAskRate = req.body.askRate;
+    var userAskRate = parseFloat(req.body.askRate);
     var userAskownerId = req.body.askownerId;
 
     if (!userAskAmountGDS || !userAskAmountBTC ||
       !userAskRate || !userAskownerId) {
-      console.log("User Entered invalid parameter !!!");
+      console.log("Invalid Parameter!!!");
       return res.json({
-        "message": "Invalid parameter!!!!",
+        "message": "Invalid Paramter!!!!",
+        statusCode: 400
+      });
+    }
+    if (userAskAmountGDS < 0 || userAskAmountBTC < 0 || userAskRate < 0) {
+      console.log("Negative Paramter");
+      return res.json({
+        "message": "Negative Paramter!!!!",
         statusCode: 400
       });
     }
@@ -45,7 +54,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("Getting user details !!!");
+    console.log("User details find successfully :::: " + userAsker.email);
     var userGDSBalanceInDb = parseFloat(userAsker.GDSbalance);
     var userFreezedGDSBalanceInDb = parseFloat(userAsker.FreezedGDSbalance);
     var userIdInDb = parseFloat(userAsker.id);
@@ -107,45 +116,291 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("allBidsFromdb :: " + JSON.stringify(allBidsFromdb));
-    if (allBidsFromdb) {
-      if (allBidsFromdb.length >= 1) {
-        //Find exact bid if available in db
-        var total_bid = 0;
-        var totoalAskRemainingGDS = userAskAmountGDS;
-        var totoalAskRemainingBTC = userAskAmountBTC;
-        //this loop for sum of all Bids amount of GDS
+    console.log("Total number bids on same  :: " + allBidsFromdb.length);
+    var total_bid = 0;
+    if (allBidsFromdb.length >= 1) {
+      //Find exact bid if available in db
+      var totoalAskRemainingGDS = userAskAmountGDS;
+      var totoalAskRemainingBTC = userAskAmountBTC;
+      //this loop for sum of all Bids amount of GDS
+      for (var i = 0; i < allBidsFromdb.length; i++) {
+        total_bid = total_bid + allBidsFromdb[i].bidAmountGDS;
+      }
+      if (total_bid <= totoalAskRemainingGDS) {
+        console.log("Inside of total_bid <= totoalAskRemainingGDS");
         for (var i = 0; i < allBidsFromdb.length; i++) {
-          total_bid = total_bid + allBidsFromdb[i].bidAmountGDS;
-        }
-        if (total_bid <= totoalAskRemainingGDS) {
-          for (var i = 0; i < allBidsFromdb.length; i++) {
-            currentBidDetails = allBidsFromdb[i];
-            console.log(currentBidDetails.id + " totoalAskRemainingGDS :: " + totoalAskRemainingGDS);
-            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+          console.log("Inside of For Loop total_bid <= totoalAskRemainingGDS");
+          currentBidDetails = allBidsFromdb[i];
+          console.log(currentBidDetails.id + " Before totoalAskRemainingGDS :: " + totoalAskRemainingGDS);
+          console.log(currentBidDetails.id + " Before totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+          totoalAskRemainingGDS = (parseFloat(totoalAskRemainingGDS) - parseFloat(currentBidDetails.bidAmountGDS));
+          totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+          console.log(currentBidDetails.id + " After totoalAskRemainingGDS :: " + totoalAskRemainingGDS);
+          console.log(currentBidDetails.id + " After totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
 
-            console.log("Enter into total_bid <= totoalAskRemainingGDS");
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
-            //totoalAskRemainingGDS = totoalAskRemainingGDS - allBidsFromdb[i].bidAmountGDS;
+          if (totoalAskRemainingGDS == 0) {
+            //destroy bid and ask and update bidder and asker balances and break
+            console.log("Enter into totoalAskRemainingGDS == 0");
+
+            try {
+              var userAllDetailsInDBBidder = await User.findOne({
+                id: currentBidDetails.bidownerGDS
+              });
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerGDS
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to find bid/ask with bid/ask owner',
+                statusCode: 401
+              });
+            }
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+            var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
+            console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+            updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+            try {
+              var userUpdateBidder = await User.update({
+                id: currentBidDetails.bidownerGDS
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                GDSbalance: parseFloat(updatedGDSbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update users freezed and bch balance',
+                statusCode: 401
+              });
+            }
+
+            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
+
+            //Deduct Transation Fee Asker
+            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
+
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerGDS
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update users BTCBalance and Freezed GDSBalance',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " Updating success Of bidGDS:: ");
+            try {
+              var bidDestroy = await BidGDS.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                "message": "Failed with an error",
+                statusCode: 200
+              });
+            }
+            sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
+            console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
+
+            try {
+              var askDestroy = await AskGDS.update({
+                id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update AskGDS',
+                statusCode: 401
+              });
+            }
+            //emitting event of destruction of bch_ask
+            sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
+            console.log("Ask Executed successfully and Return!!!");
+            return res.json({
+              "message": "Ask Executed successfully",
+              statusCode: 200
+            });
+          } else {
+            //destroy bid
+            console.log(currentBidDetails.id + " enter into else of totoalAskRemainingGDS == 0");
+            console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerGDS " + currentBidDetails.bidownerGDS);
+            var userAllDetailsInDBBidder = await User.findOne({
+              id: currentBidDetails.bidownerGDS
+            });
+            console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + userAllDetailsInDBBidder.email);
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
+
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+            var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
+            console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+            updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+
+            console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+            console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
+            try {
+              var userAllDetailsInDBBidderUpdate = await User.update({
+                id: currentBidDetails.bidownerGDS
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                GDSbalance: parseFloat(updatedGDSbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update user',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
+
+            try {
+              var desctroyCurrentBid = await BidGDS.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                "message": "Failed with an error",
+                statusCode: 200
+              });
+            }
+            sails.sockets.blast(constants.GDS_BID_DESTROYED, desctroyCurrentBid);
+            console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+          }
+          console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
+          if (i == allBidsFromdb.length - 1) {
+            console.log(currentBidDetails.id + " userAll Details :: ");
+            console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
+            try {
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerGDS
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
+            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(totoalAskRemainingGDS));
+            //Deduct Transation Fee Asker
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            console.log("Total Ask RemainGDS totoalAskRemainingGDS " + totoalAskRemainingGDS);
+            console.log("Total Ask RemainGDS userAllDetailsInDBAsker.FreezedGDSbalance " + userAllDetailsInDBAsker.FreezedGDSbalance);
+            console.log("Total Ask RemainGDS updatedFreezedGDSbalanceAsker " + updatedFreezedGDSbalanceAsker);
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+
+            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
+
+            console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerGDS
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update user',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
+            console.log(currentBidDetails.id + " Update In last Ask askAmountGDS totoalAskRemainingGDS " + totoalAskRemainingGDS);
+            console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
+            try {
+              var updatedaskDetails = await AskGDS.update({
+                id: askDetails.id
+              }, {
+                askAmountBTC: parseFloat(totoalAskRemainingBTC),
+                askAmountGDS: parseFloat(totoalAskRemainingGDS),
+                status: statusTwo,
+                statusName: statusTwoPending,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            sails.sockets.blast(constants.GDS_ASK_DESTROYED, updatedaskDetails);
+          }
+        }
+      } else {
+        for (var i = 0; i < allBidsFromdb.length; i++) {
+          currentBidDetails = allBidsFromdb[i];
+          console.log(currentBidDetails.id + " totoalAskRemainingGDS :: " + totoalAskRemainingGDS);
+          console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+          console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+          console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
+          //totoalAskRemainingGDS = totoalAskRemainingGDS - allBidsFromdb[i].bidAmountGDS;
+          if (totoalAskRemainingGDS >= currentBidDetails.bidAmountGDS) {
             totoalAskRemainingGDS = (parseFloat(totoalAskRemainingGDS) - parseFloat(currentBidDetails.bidAmountGDS));
             totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
             console.log("start from here totoalAskRemainingGDS == 0::: " + totoalAskRemainingGDS);
+
             if (totoalAskRemainingGDS == 0) {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingGDS == 0");
-
               try {
                 var userAllDetailsInDBBidder = await User.findOne({
                   id: currentBidDetails.bidownerGDS
                 });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
+              try {
                 var userAllDetailsInDBAsker = await User.findOne({
                   id: askDetails.askownerGDS
                 });
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to find bid/ask with bid/ask owner',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
@@ -153,12 +408,14 @@ module.exports = {
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
+
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
               var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerGDS
@@ -169,24 +426,28 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update users freezed and bch balance',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
-
               var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-              var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
-
+              //var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
+              var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(totoalAskRemainingGDS));
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+              console.log("Total Ask RemainGDS totoalAskRemainingGDS " + totoalAskRemainingGDS);
+              console.log("Total Ask RemainGDS userAllDetailsInDBAsker.FreezedGDSbalance " + userAllDetailsInDBAsker.FreezedGDSbalance);
+              console.log("Total Ask RemainGDS updatedFreezedGDSbalanceAsker " + updatedFreezedGDSbalanceAsker);
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               //Deduct Transation Fee Asker
-              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+              var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
               updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
               console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
 
+              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+              console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerGDS
@@ -197,7 +458,7 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update users BTCBalance and Freezed GDSBalance',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
@@ -205,7 +466,6 @@ module.exports = {
               // var bidDestroy = await BidGDS.destroy({
               //   id: currentBidDetails.id
               // });
-
               try {
                 var bidDestroy = await BidGDS.update({
                   id: currentBidDetails.id
@@ -230,16 +490,15 @@ module.exports = {
                   id: askDetails.id
                 }, {
                   status: statusOne,
-                  statusName: statusOneSuccessfull,
+                  statusName: statusOneSuccessfull
                 });
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update AskGDS',
-                  statusCode: 401
+                  "message": "Failed with an error",
+                  statusCode: 200
                 });
               }
-              //emitting event of destruction of bch_ask
               sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
               return res.json({
                 "message": "Ask Executed successfully",
@@ -249,9 +508,17 @@ module.exports = {
               //destroy bid
               console.log(currentBidDetails.id + " enter into else of totoalAskRemainingGDS == 0");
               console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerGDS " + currentBidDetails.bidownerGDS);
-              var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidownerGDS
-              });
+              try {
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidownerGDS
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
@@ -262,9 +529,9 @@ module.exports = {
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
+
               try {
                 var userAllDetailsInDBBidderUpdate = await User.update({
                   id: currentBidDetails.bidownerGDS
@@ -275,434 +542,165 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update user',
+                  message: 'Failed with an error',
                   statusCode: 401
-                });
+                })
               }
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
               // var desctroyCurrentBid = await BidGDS.destroy({
               //   id: currentBidDetails.id
               // });
-
-              try {
-                var desctroyCurrentBid = await BidGDS.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  "message": "Failed with an error",
-                  statusCode: 200
-                });
-              }
+              var desctroyCurrentBid = await BidGDS.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
               sails.sockets.blast(constants.GDS_BID_DESTROYED, desctroyCurrentBid);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
-            console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
-            if (i == allBidsFromdb.length - 1) {
-              console.log(currentBidDetails.id + " userAll Details :: ");
-              console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
-              try {
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askownerGDS
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
-              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-              var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
-              //Deduct Transation Fee Asker
-              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+          } else {
+            //destroy ask and update bid and  update asker and bidder and break
 
-              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
-              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-              console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " userAll Details :: ");
+            console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
-              try {
-                var updatedUser = await User.update({
-                  id: askDetails.askownerGDS
-                }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                  FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed to update user',
-                  statusCode: 401
-                });
-              }
-              console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
-              console.log(currentBidDetails.id + " Update In last Ask askAmountGDS totoalAskRemainingGDS " + totoalAskRemainingGDS);
-              console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
-              try {
-                var updatedaskDetails = await AskGDS.update({
-                  id: askDetails.id
-                }, {
-                  askAmountBTC: parseFloat(totoalAskRemainingBTC),
-                  askAmountGDS: parseFloat(totoalAskRemainingGDS),
-                  status: statusTwo,
-                  statusName: statusTwoPending,
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              sails.sockets.blast(constants.GDS_ASK_DESTROYED, updatedaskDetails);
-            }
-          }
-        } else {
-          for (var i = 0; i < allBidsFromdb.length; i++) {
-            currentBidDetails = allBidsFromdb[i];
-            console.log(currentBidDetails.id + " totoalAskRemainingGDS :: " + totoalAskRemainingGDS);
-            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
-            //totoalAskRemainingGDS = totoalAskRemainingGDS - allBidsFromdb[i].bidAmountGDS;
-            if (totoalAskRemainingGDS >= currentBidDetails.bidAmountGDS) {
-              totoalAskRemainingGDS = (parseFloat(totoalAskRemainingGDS) - parseFloat(currentBidDetails.bidAmountGDS));
-              totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
-              console.log("start from here totoalAskRemainingGDS == 0::: " + totoalAskRemainingGDS);
-
-              if (totoalAskRemainingGDS == 0) {
-                //destroy bid and ask and update bidder and asker balances and break
-                console.log("Enter into totoalAskRemainingGDS == 0");
-                try {
-                  var userAllDetailsInDBBidder = await User.findOne({
-                    id: currentBidDetails.bidownerGDS
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                try {
-                  var userAllDetailsInDBAsker = await User.findOne({
-                    id: askDetails.askownerGDS
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log("userAll askDetails.askownerGDS :: ");
-                console.log("Update value of Bidder and asker");
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-                var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
-
-                //Deduct Transation Fee Bidder
-                console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-                var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-                console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-                updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
-                console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-
-                try {
-                  var userUpdateBidder = await User.update({
-                    id: currentBidDetails.bidownerGDS
-                  }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                    GDSbalance: parseFloat(updatedGDSbalanceBidder)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-                var updatedFreezedGDSbalanceAsker = parseFloat(totoalAskRemainingGDS);
-
-                //Deduct Transation Fee Asker
-                console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-                var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
-                var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
-                console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-                console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
-
-                console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-                console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
-                try {
-                  var updatedUser = await User.update({
-                    id: askDetails.askownerGDS
-                  }, {
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                    FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log(currentBidDetails.id + " BidGDS.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                // var bidDestroy = await BidGDS.destroy({
-                //   id: currentBidDetails.id
-                // });
-                try {
-                  var bidDestroy = await BidGDS.update({
-                    id: currentBidDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
-                console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
-                // var askDestroy = await AskGDS.destroy({
-                //   id: askDetails.id
-                // });
-                try {
-                  var askDestroy = await AskGDS.update({
-                    id: askDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
-                return res.json({
-                  "message": "Ask Executed successfully",
-                  statusCode: 200
-                });
-              } else {
-                //destroy bid
-                console.log(currentBidDetails.id + " enter into else of totoalAskRemainingGDS == 0");
-                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerGDS " + currentBidDetails.bidownerGDS);
-                try {
-                  var userAllDetailsInDBBidder = await User.findOne({
-                    id: currentBidDetails.bidownerGDS
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-                var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(currentBidDetails.bidAmountGDS));
-
-                //Deduct Transation Fee Bidder
-                console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-                var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-                console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-                updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
-                console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-                console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-                console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
-
-                try {
-                  var userAllDetailsInDBBidderUpdate = await User.update({
-                    id: currentBidDetails.bidownerGDS
-                  }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                    GDSbalance: parseFloat(updatedGDSbalanceBidder)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  })
-                }
-                console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                // var desctroyCurrentBid = await BidGDS.destroy({
-                //   id: currentBidDetails.id
-                // });
-                var desctroyCurrentBid = await BidGDS.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-                sails.sockets.blast(constants.GDS_BID_DESTROYED, desctroyCurrentBid);
-                console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
-              }
-            } else {
-              //destroy ask and update bid and  update asker and bidder and break
-
-              console.log(currentBidDetails.id + " userAll Details :: ");
-              console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
-
-              try {
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askownerGDS
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update Bid
-              var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
-              var updatedBidAmountGDS = (parseFloat(currentBidDetails.bidAmountGDS) - parseFloat(totoalAskRemainingGDS));
-
-              try {
-                var updatedaskDetails = await BidGDS.update({
-                  id: currentBidDetails.id
-                }, {
-                  bidAmountBTC: parseFloat(updatedBidAmountBTC),
-                  bidAmountGDS: parseFloat(updatedBidAmountGDS),
-                  status: statusTwo,
-                  statusName: statusTwoPending,
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update socket.io
-              sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
-              //Update Bidder===========================================
-              try {
-                var userAllDetailsInDBBiddder = await User.findOne({
-                  id: currentBidDetails.bidownerGDS
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
-              var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.GDSbalance) + parseFloat(totoalAskRemainingGDS));
-
-              //Deduct Transation Fee Bidder
-              console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-              var bchAmountSucess = parseFloat(totoalAskRemainingGDS);
-              var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
-              updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
-              console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-              console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
-
-              console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-              console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
-              try {
-                var userAllDetailsInDBBidderUpdate = await User.update({
-                  id: currentBidDetails.bidownerGDS
-                }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                  GDSbalance: parseFloat(updatedGDSbalanceBidder)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update asker ===========================================
-
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
-              var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(userAskAmountGDS));
-
-              //Deduct Transation Fee Asker
-              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
-              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-              console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
-
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
-              try {
-                var updatedUser = await User.update({
-                  id: askDetails.askownerGDS
-                }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                  FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Destroy Ask===========================================
-              console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
-              // var askDestroy = await AskGDS.destroy({
-              //   id: askDetails.id
-              // });
-              try {
-                var askDestroy = await AskGDS.update({
-                  id: askDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //emitting event for bch_ask destruction
-              sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
-              console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+            try {
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerGDS
+              });
+            } catch (e) {
               return res.json({
-                "message": "Ask Executed successfully",
-                statusCode: 200
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
               });
             }
+            //Update Bid
+            var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            var updatedBidAmountGDS = (parseFloat(currentBidDetails.bidAmountGDS) - parseFloat(totoalAskRemainingGDS));
+
+            try {
+              var updatedaskDetails = await BidGDS.update({
+                id: currentBidDetails.id
+              }, {
+                bidAmountBTC: parseFloat(updatedBidAmountBTC),
+                bidAmountGDS: parseFloat(updatedBidAmountGDS),
+                status: statusTwo,
+                statusName: statusTwoPending,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Update socket.io
+            sails.sockets.blast(constants.GDS_BID_DESTROYED, bidDestroy);
+            //Update Bidder===========================================
+            try {
+              var userAllDetailsInDBBiddder = await User.findOne({
+                id: currentBidDetails.bidownerGDS
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
+            var updatedGDSbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.GDSbalance) + parseFloat(totoalAskRemainingGDS));
+
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+            var bchAmountSucess = parseFloat(totoalAskRemainingGDS);
+            var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
+            updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+            console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+
+            console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+            console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: " + updatedGDSbalanceBidder);
+            try {
+              var userAllDetailsInDBBidderUpdate = await User.update({
+                id: currentBidDetails.bidownerGDS
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                GDSbalance: parseFloat(updatedGDSbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Update asker ===========================================
+
+            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerGDS");
+            var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
+            var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(userAskAmountGDS));
+
+            //Deduct Transation Fee Asker
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of GDS Update user " + updatedBTCbalanceAsker);
+
+            console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " updatedFreezedGDSbalanceAsker ::: " + updatedFreezedGDSbalanceAsker);
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerGDS
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedGDSbalance: parseFloat(updatedFreezedGDSbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Destroy Ask===========================================
+            console.log(currentBidDetails.id + " AskGDS.destroy askDetails.id::: " + askDetails.id);
+            // var askDestroy = await AskGDS.destroy({
+            //   id: askDetails.id
+            // });
+            try {
+              var askDestroy = await AskGDS.update({
+                id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //emitting event for bch_ask destruction
+            sails.sockets.blast(constants.GDS_ASK_DESTROYED, askDestroy);
+            console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+            return res.json({
+              "message": "Ask Executed successfully",
+              statusCode: 200
+            });
           }
         }
       }
-      console.log("Total Bid ::: " + total_bid);
-      return res.json({
-        "message": "Your ask placed successfully!!",
-        statusCode: 200
-      });
-    } else {
-      //No bid match on this rate Ask and Ask placed successfully
-      return res.json({
-        "message": "Your ask placed successfully!!",
-        statusCode: 200
-      });
     }
+    console.log("Total Bid ::: " + total_bid);
+    return res.json({
+      "message": "Your ask placed successfully!!",
+      statusCode: 200
+    });
   },
   addBidGDSMarket: async function(req, res) {
     console.log("Enter into ask api addBidGDSMarket :: " + JSON.stringify(req.body));
@@ -879,7 +877,14 @@ module.exports = {
               //Bid FreezedBTCbalance of bidder deduct and GDS  give to bidder
               //var updatedGDSbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(totoalBidRemainingGDS)) - parseFloat(totoalBidRemainingBTC);
               var updatedGDSbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
-              var updatedFreezedBTCbalanceAsker = parseFloat(totoalBidRemainingBTC);
+              //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(totoalBidRemainingBTC));
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+              console.log("Total Ask RemainGDS totoalBidRemainingBTC " + totoalBidRemainingBTC);
+              console.log("Total Ask RemainGDS BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + BidderuserAllDetailsInDBBidder.FreezedBTCbalance);
+              console.log("Total Ask RemainGDS updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
 
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
@@ -890,14 +895,14 @@ module.exports = {
               console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
               console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == 0updatedGDSbalanceBidder ::: " + updatedGDSbalanceBidder);
-              console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == 0updatedFreezedBTCbalanceAsker ::: " + updatedFreezedBTCbalanceAsker);
+              console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
 
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerGDS
                 }, {
                   GDSbalance: parseFloat(updatedGDSbalanceBidder),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceAsker)
+                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
                 });
               } catch (e) {
                 return res.json({
@@ -1034,7 +1039,13 @@ module.exports = {
               }
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1 asdf enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerGDS");
               var updatedGDSbalanceBidder = ((parseFloat(userAllDetailsInDBBid.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
-              var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+              //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBid.FreezedBTCbalance) - parseFloat(totoalBidRemainingBTC));
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+              console.log("Total Ask RemainGDS totoalBidRemainingBTC " + totoalBidRemainingBTC);
+              console.log("Total Ask RemainGDS BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + userAllDetailsInDBBid.FreezedBTCbalance);
+              console.log("Total Ask RemainGDS updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
@@ -1060,7 +1071,6 @@ module.exports = {
                   statusCode: 401
                 });
               }
-
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1Update In last Ask askAmountBTC totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1Update In last Ask askAmountGDS totoalBidRemainingGDS " + totoalBidRemainingGDS);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1bidDetails.id ::: " + bidDetails.id);
@@ -1152,7 +1162,14 @@ module.exports = {
                   });
                 }
                 var updatedGDSbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.GDSbalance) + parseFloat(userBidAmountGDS)) - parseFloat(totoalBidRemainingGDS));
-                var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+                //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
+                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(totoalBidRemainingBTC));
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+                console.log("Total Ask RemainGDS totoalAskRemainingGDS " + totoalBidRemainingBTC);
+                console.log("Total Ask RemainGDS BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + userAllDetailsInDBBidder.FreezedBTCbalance);
+                console.log("Total Ask RemainGDS updatedFreezedGDSbalanceAsker " + updatedFreezedBTCbalanceBidder);
+                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
                 //Deduct Transation Fee Bidder
                 console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
                 var bchAmountSucess = (parseFloat(userBidAmountGDS) - parseFloat(totoalBidRemainingGDS));
@@ -1325,6 +1342,12 @@ module.exports = {
 
               var updatedFreezedGDSbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedGDSbalance) - parseFloat(totoalBidRemainingGDS));
               var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC));
+
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+              console.log("Total Ask RemainGDS totoalBidRemainingBTC " + totoalBidRemainingBTC);
+              console.log("Total Ask RemainGDS userAllDetailsInDBAsker.FreezedGDSbalance " + userAllDetailsInDBAsker.FreezedGDSbalance);
+              console.log("Total Ask RemainGDS updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
               //Deduct Transation Fee Asker
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
@@ -1669,4 +1692,5 @@ module.exports = {
         }
       });
   }
+
 };

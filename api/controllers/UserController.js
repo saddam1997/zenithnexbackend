@@ -279,7 +279,7 @@ module.exports = {
     });
   },
   createNewUser: function(req, res) {
-    console.log("Enter into createNewUser :: ");
+    console.log("Enter into createNewUser :: " + req.body.email);
     var useremailaddress = req.body.email;
     var userpassword = req.body.password;
     var userconfirmPassword = req.body.confirmPassword;

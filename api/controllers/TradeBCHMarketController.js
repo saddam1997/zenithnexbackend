@@ -17,18 +17,26 @@ const txFeeBCHWithdrawSuccess = sails.config.common.txFeeBCHWithdrawSuccess;
 const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 
 module.exports = {
-  addAskBchMarket: async function(req, res) {
-    console.log("Enter into ask api addAskBchMarket : : ");
+
+  addAskBCHMarket: async function(req, res) {
+    console.log("Enter into ask api addAskBCHMarket : : ");
     var userAskAmountBTC = parseFloat(req.body.askAmountBTC);
     var userAskAmountBCH = parseFloat(req.body.askAmountBCH);
-    var userAskRate = req.body.askRate;
+    var userAskRate = parseFloat(req.body.askRate);
     var userAskownerId = req.body.askownerId;
 
     if (!userAskAmountBCH || !userAskAmountBTC ||
       !userAskRate || !userAskownerId) {
-      console.log("User Entered invalid parameter !!!");
+      console.log("Invalid Parameter!!!");
       return res.json({
-        "message": "Invalid parameter!!!!",
+        "message": "Invalid Paramter!!!!",
+        statusCode: 400
+      });
+    }
+    if (userAskAmountBCH < 0 || userAskAmountBTC < 0 || userAskRate < 0) {
+      console.log("Negative Paramter");
+      return res.json({
+        "message": "Negative Paramter!!!!",
         statusCode: 400
       });
     }
@@ -43,7 +51,7 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("Getting user details !!!");
+    console.log("User details find successfully :::: " + userAsker.email);
     var userBCHBalanceInDb = parseFloat(userAsker.BCHbalance);
     var userFreezedBCHBalanceInDb = parseFloat(userAsker.FreezedBCHbalance);
     var userIdInDb = parseFloat(userAsker.id);
@@ -105,45 +113,291 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("allBidsFromdb :: " + JSON.stringify(allBidsFromdb));
-    if (allBidsFromdb) {
-      if (allBidsFromdb.length >= 1) {
-        //Find exact bid if available in db
-        var total_bid = 0;
-        var totoalAskRemainingBCH = userAskAmountBCH;
-        var totoalAskRemainingBTC = userAskAmountBTC;
-        //this loop for sum of all Bids amount of BCH
+    console.log("Total number bids on same  :: " + allBidsFromdb.length);
+    var total_bid = 0;
+    if (allBidsFromdb.length >= 1) {
+      //Find exact bid if available in db
+      var totoalAskRemainingBCH = userAskAmountBCH;
+      var totoalAskRemainingBTC = userAskAmountBTC;
+      //this loop for sum of all Bids amount of BCH
+      for (var i = 0; i < allBidsFromdb.length; i++) {
+        total_bid = total_bid + allBidsFromdb[i].bidAmountBCH;
+      }
+      if (total_bid <= totoalAskRemainingBCH) {
+        console.log("Inside of total_bid <= totoalAskRemainingBCH");
         for (var i = 0; i < allBidsFromdb.length; i++) {
-          total_bid = total_bid + allBidsFromdb[i].bidAmountBCH;
-        }
-        if (total_bid <= totoalAskRemainingBCH) {
-          for (var i = 0; i < allBidsFromdb.length; i++) {
-            currentBidDetails = allBidsFromdb[i];
-            console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
-            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+          console.log("Inside of For Loop total_bid <= totoalAskRemainingBCH");
+          currentBidDetails = allBidsFromdb[i];
+          console.log(currentBidDetails.id + " Before totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
+          console.log(currentBidDetails.id + " Before totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+          totoalAskRemainingBCH = (parseFloat(totoalAskRemainingBCH) - parseFloat(currentBidDetails.bidAmountBCH));
+          totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+          console.log(currentBidDetails.id + " After totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
+          console.log(currentBidDetails.id + " After totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
 
-            console.log("Enter into total_bid <= totoalAskRemainingBCH");
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
-            //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
+          if (totoalAskRemainingBCH == 0) {
+            //destroy bid and ask and update bidder and asker balances and break
+            console.log("Enter into totoalAskRemainingBCH == 0");
+
+            try {
+              var userAllDetailsInDBBidder = await User.findOne({
+                id: currentBidDetails.bidownerBCH
+              });
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerBCH
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to find bid/ask with bid/ask owner',
+                statusCode: 401
+              });
+            }
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+            var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+            console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+            updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+            try {
+              var userUpdateBidder = await User.update({
+                id: currentBidDetails.bidownerBCH
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                BCHbalance: parseFloat(updatedBCHbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update users freezed and bch balance',
+                statusCode: 401
+              });
+            }
+
+            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
+
+            //Deduct Transation Fee Asker
+            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerBCH
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update users BTCBalance and Freezed BCHBalance',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " Updating success Of bidBCH:: ");
+            try {
+              var bidDestroy = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                "message": "Failed with an error",
+                statusCode: 200
+              });
+            }
+            sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+            console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
+
+            try {
+              var askDestroy = await AskBCH.update({
+                id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update AskBCH',
+                statusCode: 401
+              });
+            }
+            //emitting event of destruction of bch_ask
+            sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
+            console.log("Ask Executed successfully and Return!!!");
+            return res.json({
+              "message": "Ask Executed successfully",
+              statusCode: 200
+            });
+          } else {
+            //destroy bid
+            console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
+            console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerBCH " + currentBidDetails.bidownerBCH);
+            var userAllDetailsInDBBidder = await User.findOne({
+              id: currentBidDetails.bidownerBCH
+            });
+            console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + userAllDetailsInDBBidder.email);
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+            var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
+            console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+            updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
+            console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+            console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+            try {
+              var userAllDetailsInDBBidderUpdate = await User.update({
+                id: currentBidDetails.bidownerBCH
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                BCHbalance: parseFloat(updatedBCHbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update user',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
+
+            try {
+              var desctroyCurrentBid = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                "message": "Failed with an error",
+                statusCode: 200
+              });
+            }
+            sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
+            console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+          }
+          console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
+          if (i == allBidsFromdb.length - 1) {
+            console.log(currentBidDetails.id + " userAll Details :: ");
+            console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
+            try {
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerBCH
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
+            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalAskRemainingBCH));
+            //Deduct Transation Fee Asker
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            console.log("Total Ask RemainBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Total Ask RemainBCH userAllDetailsInDBAsker.FreezedBCHbalance " + userAllDetailsInDBAsker.FreezedBCHbalance);
+            console.log("Total Ask RemainBCH updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+            console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+
+            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+            console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerBCH
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed to update user',
+                statusCode: 401
+              });
+            }
+            console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
+            console.log(currentBidDetails.id + " Update In last Ask askAmountBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
+            try {
+              var updatedaskDetails = await AskBCH.update({
+                id: askDetails.id
+              }, {
+                askAmountBTC: parseFloat(totoalAskRemainingBTC),
+                askAmountBCH: parseFloat(totoalAskRemainingBCH),
+                status: statusTwo,
+                statusName: statusTwoPending,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            sails.sockets.blast(constants.BCH_ASK_DESTROYED, updatedaskDetails);
+          }
+        }
+      } else {
+        for (var i = 0; i < allBidsFromdb.length; i++) {
+          currentBidDetails = allBidsFromdb[i];
+          console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
+          console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
+          console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
+          console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
+          //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
+          if (totoalAskRemainingBCH >= currentBidDetails.bidAmountBCH) {
             totoalAskRemainingBCH = (parseFloat(totoalAskRemainingBCH) - parseFloat(currentBidDetails.bidAmountBCH));
             totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
             console.log("start from here totoalAskRemainingBCH == 0::: " + totoalAskRemainingBCH);
+
             if (totoalAskRemainingBCH == 0) {
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalAskRemainingBCH == 0");
-
               try {
                 var userAllDetailsInDBBidder = await User.findOne({
                   id: currentBidDetails.bidownerBCH
                 });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  "message": "Failed with an error",
+                  statusCode: 200
+                });
+              }
+              try {
                 var userAllDetailsInDBAsker = await User.findOne({
                   id: askDetails.askownerBCH
                 });
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to find bid/ask with bid/ask owner',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
@@ -151,12 +405,14 @@ module.exports = {
               console.log("Update value of Bidder and asker");
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
+
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
               updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerBCH
@@ -167,24 +423,28 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update users freezed and bch balance',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
-
               var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-              var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
-
+              //var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
+              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalAskRemainingBCH));
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+              console.log("Total Ask RemainBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
+              console.log("Total Ask RemainBCH userAllDetailsInDBAsker.FreezedBCHbalance " + userAllDetailsInDBAsker.FreezedBCHbalance);
+              console.log("Total Ask RemainBCH updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               //Deduct Transation Fee Asker
-              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+              var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
               updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
               console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
 
+              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerBCH
@@ -195,7 +455,7 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update users BTCBalance and Freezed BCHBalance',
+                  message: 'Failed with an error',
                   statusCode: 401
                 });
               }
@@ -203,7 +463,6 @@ module.exports = {
               // var bidDestroy = await BidBCH.destroy({
               //   id: currentBidDetails.id
               // });
-
               try {
                 var bidDestroy = await BidBCH.update({
                   id: currentBidDetails.id
@@ -228,16 +487,15 @@ module.exports = {
                   id: askDetails.id
                 }, {
                   status: statusOne,
-                  statusName: statusOneSuccessfull,
+                  statusName: statusOneSuccessfull
                 });
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update AskBCH',
-                  statusCode: 401
+                  "message": "Failed with an error",
+                  statusCode: 200
                 });
               }
-              //emitting event of destruction of bch_ask
               sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
               return res.json({
                 "message": "Ask Executed successfully",
@@ -247,9 +505,17 @@ module.exports = {
               //destroy bid
               console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
               console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerBCH " + currentBidDetails.bidownerBCH);
-              var userAllDetailsInDBBidder = await User.findOne({
-                id: currentBidDetails.bidownerBCH
-              });
+              try {
+                var userAllDetailsInDBBidder = await User.findOne({
+                  id: currentBidDetails.bidownerBCH
+                });
+              } catch (e) {
+                return res.json({
+                  error: e,
+                  message: 'Failed with an error',
+                  statusCode: 401
+                });
+              }
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
               var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
               var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
@@ -260,9 +526,9 @@ module.exports = {
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
               updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+
               try {
                 var userAllDetailsInDBBidderUpdate = await User.update({
                   id: currentBidDetails.bidownerBCH
@@ -273,447 +539,168 @@ module.exports = {
               } catch (e) {
                 return res.json({
                   error: e,
-                  message: 'Failed to update user',
+                  message: 'Failed with an error',
                   statusCode: 401
-                });
+                })
               }
               console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
               // var desctroyCurrentBid = await BidBCH.destroy({
               //   id: currentBidDetails.id
               // });
-
-              try {
-                var desctroyCurrentBid = await BidBCH.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  "message": "Failed with an error",
-                  statusCode: 200
-                });
-              }
+              var desctroyCurrentBid = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
               sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
               console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
             }
-            console.log(currentBidDetails.id + "index index == allBidsFromdb.length - 1 ");
-            if (i == allBidsFromdb.length - 1) {
-              console.log(currentBidDetails.id + " userAll Details :: ");
-              console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
-              try {
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askownerBCH
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
-              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalAskRemainingBCH));
-              //Deduct Transation Fee Asker
-              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-              console.log("Total Ask RemainBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
-              console.log("Total Ask RemainBCH userAllDetailsInDBAsker.FreezedBCHbalance " + userAllDetailsInDBAsker.FreezedBCHbalance);
-              console.log("Total Ask RemainBCH updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
-              console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+          } else {
+            //destroy ask and update bid and  update asker and bidder and break
 
-              var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
-              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " userAll Details :: ");
+            console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
 
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
-              try {
-                var updatedUser = await User.update({
-                  id: askDetails.askownerBCH
-                }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed to update user',
-                  statusCode: 401
-                });
-              }
-              console.log(currentBidDetails.id + " Update In last Ask askAmountBTC totoalAskRemainingBTC " + totoalAskRemainingBTC);
-              console.log(currentBidDetails.id + " Update In last Ask askAmountBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
-              console.log(currentBidDetails.id + " askDetails.id ::: " + askDetails.id);
-              try {
-                var updatedaskDetails = await AskBCH.update({
-                  id: askDetails.id
-                }, {
-                  askAmountBTC: parseFloat(totoalAskRemainingBTC),
-                  askAmountBCH: parseFloat(totoalAskRemainingBCH),
-                  status: statusTwo,
-                  statusName: statusTwoPending,
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              sails.sockets.blast(constants.BCH_ASK_DESTROYED, updatedaskDetails);
-            }
-          }
-        } else {
-          for (var i = 0; i < allBidsFromdb.length; i++) {
-            currentBidDetails = allBidsFromdb[i];
-            console.log(currentBidDetails.id + " totoalAskRemainingBCH :: " + totoalAskRemainingBCH);
-            console.log(currentBidDetails.id + " totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails)); //.6 <=.5
-            console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
-            //totoalAskRemainingBCH = totoalAskRemainingBCH - allBidsFromdb[i].bidAmountBCH;
-            if (totoalAskRemainingBCH >= currentBidDetails.bidAmountBCH) {
-              totoalAskRemainingBCH = (parseFloat(totoalAskRemainingBCH) - parseFloat(currentBidDetails.bidAmountBCH));
-              totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
-              console.log("start from here totoalAskRemainingBCH == 0::: " + totoalAskRemainingBCH);
-
-              if (totoalAskRemainingBCH == 0) {
-                //destroy bid and ask and update bidder and asker balances and break
-                console.log("Enter into totoalAskRemainingBCH == 0");
-                try {
-                  var userAllDetailsInDBBidder = await User.findOne({
-                    id: currentBidDetails.bidownerBCH
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                try {
-                  var userAllDetailsInDBAsker = await User.findOne({
-                    id: askDetails.askownerBCH
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log("userAll askDetails.askownerBCH :: ");
-                console.log("Update value of Bidder and asker");
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-                var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
-
-                //Deduct Transation Fee Bidder
-                console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-                var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-                console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-                updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
-                console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-
-                try {
-                  var userUpdateBidder = await User.update({
-                    id: currentBidDetails.bidownerBCH
-                  }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                    BCHbalance: parseFloat(updatedBCHbalanceBidder)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-                //var updatedFreezedBCHbalanceAsker = parseFloat(totoalAskRemainingBCH);
-                var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalAskRemainingBCH));
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                console.log("Total Ask RemainBCH totoalAskRemainingBCH " + totoalAskRemainingBCH);
-                console.log("Total Ask RemainBCH userAllDetailsInDBAsker.FreezedBCHbalance " + userAllDetailsInDBAsker.FreezedBCHbalance);
-                console.log("Total Ask RemainBCH updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
-                console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-                //Deduct Transation Fee Asker
-                console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-                var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
-                var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
-                console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-                console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
-
-                console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-                console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
-                try {
-                  var updatedUser = await User.update({
-                    id: askDetails.askownerBCH
-                  }, {
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                    FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log(currentBidDetails.id + " BidBCH.destroy currentBidDetails.id::: " + currentBidDetails.id);
-                // var bidDestroy = await BidBCH.destroy({
-                //   id: currentBidDetails.id
-                // });
-                try {
-                  var bidDestroy = await BidBCH.update({
-                    id: currentBidDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
-                console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
-                // var askDestroy = await AskBCH.destroy({
-                //   id: askDetails.id
-                // });
-                try {
-                  var askDestroy = await AskBCH.update({
-                    id: askDetails.id
-                  }, {
-                    status: statusOne,
-                    statusName: statusOneSuccessfull
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    "message": "Failed with an error",
-                    statusCode: 200
-                  });
-                }
-                sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
-                return res.json({
-                  "message": "Ask Executed successfully",
-                  statusCode: 200
-                });
-              } else {
-                //destroy bid
-                console.log(currentBidDetails.id + " enter into else of totoalAskRemainingBCH == 0");
-                console.log(currentBidDetails.id + " start User.findOne currentBidDetails.bidownerBCH " + currentBidDetails.bidownerBCH);
-                try {
-                  var userAllDetailsInDBBidder = await User.findOne({
-                    id: currentBidDetails.bidownerBCH
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  });
-                }
-                console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
-                var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-                var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBidder.BCHbalance) + parseFloat(currentBidDetails.bidAmountBCH));
-
-                //Deduct Transation Fee Bidder
-                console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-                var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-                console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-                updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
-                console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-                console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-                console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
-
-                try {
-                  var userAllDetailsInDBBidderUpdate = await User.update({
-                    id: currentBidDetails.bidownerBCH
-                  }, {
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                    BCHbalance: parseFloat(updatedBCHbalanceBidder)
-                  });
-                } catch (e) {
-                  return res.json({
-                    error: e,
-                    message: 'Failed with an error',
-                    statusCode: 401
-                  })
-                }
-                console.log(currentBidDetails.id + " userAllDetailsInDBBidderUpdate ::" + userAllDetailsInDBBidderUpdate);
-                // var desctroyCurrentBid = await BidBCH.destroy({
-                //   id: currentBidDetails.id
-                // });
-                var desctroyCurrentBid = await BidBCH.update({
-                  id: currentBidDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-                sails.sockets.blast(constants.BCH_BID_DESTROYED, desctroyCurrentBid);
-                console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::" + JSON.stringify(desctroyCurrentBid));
-              }
-            } else {
-              //destroy ask and update bid and  update asker and bidder and break
-
-              console.log(currentBidDetails.id + " userAll Details :: ");
-              console.log(currentBidDetails.id + " enter into i == allBidsFromdb.length - 1");
-
-              try {
-                var userAllDetailsInDBAsker = await User.findOne({
-                  id: askDetails.askownerBCH
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update Bid
-              var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
-              var updatedBidAmountBCH = (parseFloat(currentBidDetails.bidAmountBCH) - parseFloat(totoalAskRemainingBCH));
-
-              try {
-                var updatedaskDetails = await BidBCH.update({
-                  id: currentBidDetails.id
-                }, {
-                  bidAmountBTC: parseFloat(updatedBidAmountBTC),
-                  bidAmountBCH: parseFloat(updatedBidAmountBCH),
-                  status: statusTwo,
-                  statusName: statusTwoPending,
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update socket.io
-              sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
-              //Update Bidder===========================================
-              try {
-                var userAllDetailsInDBBiddder = await User.findOne({
-                  id: currentBidDetails.bidownerBCH
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
-              var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.BCHbalance) + parseFloat(totoalAskRemainingBCH));
-
-              //Deduct Transation Fee Bidder
-              console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-              var bchAmountSucess = parseFloat(totoalAskRemainingBCH);
-              var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
-              updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
-              console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
-
-              console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-              console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
-              try {
-                var userAllDetailsInDBBidderUpdate = await User.update({
-                  id: currentBidDetails.bidownerBCH
-                }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                  BCHbalance: parseFloat(updatedBCHbalanceBidder)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Update asker ===========================================
-
-              console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
-              var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(userAskAmountBCH));
-
-              //Deduct Transation Fee Asker
-              console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
-              console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-              console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
-
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
-              try {
-                var updatedUser = await User.update({
-                  id: askDetails.askownerBCH
-                }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                  FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //Destroy Ask===========================================
-              console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
-              // var askDestroy = await AskBCH.destroy({
-              //   id: askDetails.id
-              // });
-              try {
-                var askDestroy = await AskBCH.update({
-                  id: askDetails.id
-                }, {
-                  status: statusOne,
-                  statusName: statusOneSuccessfull
-                });
-              } catch (e) {
-                return res.json({
-                  error: e,
-                  message: 'Failed with an error',
-                  statusCode: 401
-                });
-              }
-              //emitting event for bch_ask destruction
-              sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
-              console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+            try {
+              var userAllDetailsInDBAsker = await User.findOne({
+                id: askDetails.askownerBCH
+              });
+            } catch (e) {
               return res.json({
-                "message": "Ask Executed successfully",
-                statusCode: 200
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
               });
             }
+            //Update Bid
+            var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            var updatedBidAmountBCH = (parseFloat(currentBidDetails.bidAmountBCH) - parseFloat(totoalAskRemainingBCH));
+
+            try {
+              var updatedaskDetails = await BidBCH.update({
+                id: currentBidDetails.id
+              }, {
+                bidAmountBTC: parseFloat(updatedBidAmountBTC),
+                bidAmountBCH: parseFloat(updatedBidAmountBCH),
+                status: statusTwo,
+                statusName: statusTwoPending,
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Update socket.io
+            sails.sockets.blast(constants.BCH_BID_DESTROYED, bidDestroy);
+            //Update Bidder===========================================
+            try {
+              var userAllDetailsInDBBiddder = await User.findOne({
+                id: currentBidDetails.bidownerBCH
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
+            var updatedBCHbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.BCHbalance) + parseFloat(totoalAskRemainingBCH));
+
+            //Deduct Transation Fee Bidder
+            console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+            var bchAmountSucess = parseFloat(totoalAskRemainingBCH);
+            var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+            updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+            console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
+            console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
+            console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+            try {
+              var userAllDetailsInDBBidderUpdate = await User.update({
+                id: currentBidDetails.bidownerBCH
+              }, {
+                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
+                BCHbalance: parseFloat(updatedBCHbalanceBidder)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Update asker ===========================================
+
+            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
+            var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
+            var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(userAskAmountBCH));
+
+            //Deduct Transation Fee Asker
+            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+            console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
+            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+            console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+            console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+            try {
+              var updatedUser = await User.update({
+                id: askDetails.askownerBCH
+              }, {
+                BTCbalance: parseFloat(updatedBTCbalanceAsker),
+                FreezedBCHbalance: parseFloat(updatedFreezedBCHbalanceAsker)
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //Destroy Ask===========================================
+            console.log(currentBidDetails.id + " AskBCH.destroy askDetails.id::: " + askDetails.id);
+            // var askDestroy = await AskBCH.destroy({
+            //   id: askDetails.id
+            // });
+            try {
+              var askDestroy = await AskBCH.update({
+                id: askDetails.id
+              }, {
+                status: statusOne,
+                statusName: statusOneSuccessfull
+              });
+            } catch (e) {
+              return res.json({
+                error: e,
+                message: 'Failed with an error',
+                statusCode: 401
+              });
+            }
+            //emitting event for bch_ask destruction
+            sails.sockets.blast(constants.BCH_ASK_DESTROYED, askDestroy);
+            console.log(currentBidDetails.id + "Bid destroy successfully desctroyCurrentBid ::");
+            return res.json({
+              "message": "Ask Executed successfully",
+              statusCode: 200
+            });
           }
         }
       }
-      console.log("Total Bid ::: " + total_bid);
-      return res.json({
-        "message": "Your ask placed successfully!!",
-        statusCode: 200
-      });
-    } else {
-      //No bid match on this rate Ask and Ask placed successfully
-      return res.json({
-        "message": "Your ask placed successfully!!",
-        statusCode: 200
-      });
     }
+    console.log("Total Bid ::: " + total_bid);
+    return res.json({
+      "message": "Your ask placed successfully!!",
+      statusCode: 200
+    });
   },
-  addBidBchMarket: async function(req, res) {
-    console.log("Enter into ask api addBidBchMarket :: " + JSON.stringify(req.body));
+  addBidBCHMarket: async function(req, res) {
+    console.log("Enter into ask api addBidBCHMarket :: " + JSON.stringify(req.body));
     var userBidAmountBTC = req.body.bidAmountBTC;
     var userBidAmountBCH = req.body.bidAmountBCH;
     var userBidRate = req.body.bidRate;

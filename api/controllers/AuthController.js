@@ -14,7 +14,7 @@ module.exports = {
     });
   },
   authentcate: function(req, res) {
-    console.log("Enter into authentcate!!!" + JSON.stringify(req.body));
+    console.log("Enter into authentcate!!!" + req.body.email);
     var useremail = req.param('email');
     var password = req.param('password');
     if (!useremail || !password) {
