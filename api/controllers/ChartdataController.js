@@ -221,6 +221,41 @@ module.exports = {
           }
         }
       });
+  },
+  getBidsTotal: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    AskEBT.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('askRate ASC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            return res.json({
+              asksEBT: allAskDetailsToExecute,
+              statusCode: 200
+            });
+          } else {
+            return res.json({
+              "message": "No AskEBT Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
   }
-
 };

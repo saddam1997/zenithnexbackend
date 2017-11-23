@@ -32,7 +32,7 @@ module.exports.routes = {
    *                                                                          *
    ***************************************************************************/
   cors: true
-  // '/': {
+  // 'user/verifyEmailAddress': {
   //   view: 'homepage'
   // }
   // "GET /user/": {response: 'forbidden'},
