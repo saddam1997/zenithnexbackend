@@ -24,8 +24,7 @@ module.exports = {
     var userAskRate = parseFloat(req.body.askRate);
     var userAskownerId = req.body.askownerId;
 
-    if (!userAskAmountBCH || !userAskAmountBTC ||
-      !userAskRate || !userAskownerId) {
+    if (!userAskAmountBCH || !userAskAmountBTC || !userAskRate || !userAskownerId) {
       console.log("Invalid Parameter!!!");
       return res.json({
         "message": "Invalid Paramter!!!!",
@@ -53,7 +52,7 @@ module.exports = {
     console.log("User details find successfully :::: " + userAsker.email);
     var userBCHBalanceInDb = parseFloat(userAsker.BCHbalance);
     var userFreezedBCHBalanceInDb = parseFloat(userAsker.FreezedBCHbalance);
-    var userIdInDb = parseFloat(userAsker.id);
+    var userIdInDb = userAsker.id;
     if (userAskAmountBCH >= userBCHBalanceInDb) {
       return res.json({
         "message": "You have insufficient BCH Balance",
@@ -66,7 +65,7 @@ module.exports = {
         askAmountBCH: userAskAmountBCH,
         totalaskAmountBTC: userAskAmountBTC,
         totalaskAmountBCH: userAskAmountBCH,
-        askRate: parseFloat(userAskRate),
+        askRate: userAskRate,
         status: statusTwo,
         statusName: statusTwoPending,
         askownerBCH: userIdInDb
@@ -137,7 +136,6 @@ module.exports = {
           if (totoalAskRemainingBCH == 0) {
             //destroy bid and ask and update bidder and asker balances and break
             console.log("Enter into totoalAskRemainingBCH == 0");
-
             try {
               var userAllDetailsInDBBidder = await User.findOne({
                 id: currentBidDetails.bidownerBCH
@@ -307,7 +305,7 @@ module.exports = {
                 statusCode: 401
               });
             }
-            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
+            console.log(currentBidDetails.id + " enter 234 into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
             var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
             //var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(totoalAskRemainingBCH));
             var updatedFreezedBCHbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(userAskAmountBCH)) + parseFloat(totoalAskRemainingBCH));
@@ -637,7 +635,7 @@ module.exports = {
             }
             //Update asker ===========================================
 
-            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
+            console.log(currentBidDetails.id + " enter into asdf userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerBCH");
             var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
             var updatedFreezedBCHbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedBCHbalance) - parseFloat(userAskAmountBCH));
 
@@ -702,9 +700,9 @@ module.exports = {
   },
   addBidBCHMarket: async function(req, res) {
     console.log("Enter into ask api addBidBCHMarket :: " + JSON.stringify(req.body));
-    var userBidAmountBTC = req.body.bidAmountBTC;
-    var userBidAmountBCH = req.body.bidAmountBCH;
-    var userBidRate = req.body.bidRate;
+    var userBidAmountBTC = parseFloat(req.body.bidAmountBTC);
+    var userBidAmountBCH = parseFloat(req.body.bidAmountBCH);
+    var userBidRate = parseFloat(req.body.bidRate);
     var userBid1ownerId = req.body.bidownerId;
 
     if (!userBidAmountBCH || !userBidAmountBTC ||
@@ -744,7 +742,7 @@ module.exports = {
         bidAmountBCH: userBidAmountBCH,
         totalbidAmountBTC: userBidAmountBTC,
         totalbidAmountBCH: userBidAmountBCH,
-        bidRate: parseFloat(userBidRate),
+        bidRate: userBidRate,
         status: statusTwo,
         statusName: statusTwoPending,
         bidownerBCH: userIdInDb
@@ -1638,20 +1636,47 @@ module.exports = {
       .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
-          console.log("Error to find ask");
-        }
-        if (!allBidDetailsToExecute) {
           return res.json({
-            "message": "No Bid Found!!",
+            "message": "NError to find Bids!!",
             statusCode: 401
           });
         }
         if (allBidDetailsToExecute) {
           if (allBidDetailsToExecute.length >= 1) {
-            return res.json({
-              bidsBCH: allBidDetailsToExecute,
-              statusCode: 200
-            });
+            BidBCH.find({
+                status: {
+                  '!': statusOne
+                }
+              })
+              .sum('bidAmountBCH')
+              .exec(function(err, bidAmountBCHSumPending) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of bidAmountBCHSumPending",
+                    statusCode: 401
+                  });
+                }
+                BidBCH.find({
+                    status: {
+                      'like': statusOne
+                    }
+                  })
+                  .sum('bidAmountBCH')
+                  .exec(function(err, bidAmountBCHSumSuccess) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of bidAmountBCHSumSuccess",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      bidsBCH: allBidDetailsToExecute,
+                      bidAmountBCHSumSuccess: parseFloat(bidAmountBCHSumSuccess[0].bidAmountBCH),
+                      bidAmountBCHSumPending: parseFloat(bidAmountBCHSumPending[0].bidAmountBCH),
+                      statusCode: 200
+                    });
+                  });
+              });
           } else {
             return res.json({
               "message": "No Bid Found!!",
@@ -1681,10 +1706,10 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            return res.json({
-              asksBCH: allAskDetailsToExecute,
-              statusCode: 200
-            });
+            // return res.json({
+            //   asksBCH: allAskDetailsToExecute,
+            //   statusCode: 200
+            // });
           } else {
             return res.json({
               "message": "No Ask Found!!",

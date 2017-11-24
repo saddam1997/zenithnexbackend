@@ -1639,11 +1639,8 @@ module.exports = {
       .sort('bidRate DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
-          console.log("Error to find ask");
-        }
-        if (!allBidDetailsToExecute) {
           return res.json({
-            "message": "No Bid Found!!",
+            "message": "Error to find Bids!!",
             statusCode: 401
           });
         }

@@ -51,7 +51,7 @@ module.exports = {
   afterCreate: function(values, next) {
     //values.createTimeUTC = moment.utc().format();
     values.createTimeUTC = Date.parse(moment.utc().format()) / 1000;
-    BidBCH.update({
+    AskEBT.update({
       id: values.id
     }, values, next);
   }
