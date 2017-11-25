@@ -8,8 +8,10 @@ module.exports.common = {
   statusOneSuccessfull: "Successfull", //Successfull
   statusTwoPending: "Pending", //Pending
 
-  supportEmailId: 'wallet.bcc@gmail.com', //Support Email Id to send mail signup and login and forgot password
-  supportEmailIdpass: 'boosters@123', //Support Email Id passoword
+  supportEmailId: 'no-reply@zenithnex.com', //Support Email Id to send mail signup and login and forgot password
+  supportEmailIdpass: 'zenithnex@123', //Support Email Id passoword
+
+  supportEmailIdService: 'zoho',
   projectURL: 'http://192.168.1.16:1338',
   txFeeBCHWithdrawSuccess: 0.0001,
   txFeeBTCWithdrawSuccess: 0.0001,
