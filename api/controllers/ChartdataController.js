@@ -14,7 +14,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate DESC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           return res.json({
@@ -88,7 +88,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate DESC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           return res.json({
@@ -157,7 +157,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate DESC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           return res.json({

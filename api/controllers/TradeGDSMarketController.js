@@ -1700,7 +1700,7 @@ module.exports = {
   getAllBidGDS: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidGDS.find()
-      .sort('createTimeUTC DESC')
+      .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1754,7 +1754,7 @@ module.exports = {
   getAllAskGDS: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskGDS.find()
-      .sort('createTimeUTC DESC')
+      .sort('askRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1812,7 +1812,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('createTimeUTC DESC')
+      .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1878,7 +1878,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('createTimeUTC DESC')
+      .sort('askRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({

@@ -1722,7 +1722,7 @@ module.exports = {
   getAllBidBCH: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidBCH.find()
-      .sort('createTimeUTC DESC')
+      .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1776,7 +1776,7 @@ module.exports = {
   getAllAskBCH: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskBCH.find()
-      .sort('createTimeUTC DESC')
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1834,7 +1834,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('createTimeUTC DESC')
+      .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1900,7 +1900,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('createTimeUTC DESC')
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
