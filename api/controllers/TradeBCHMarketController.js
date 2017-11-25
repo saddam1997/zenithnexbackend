@@ -1626,33 +1626,240 @@ module.exports = {
       });
     });
   },
+  // getAllBidBCH: function(req, res) {
+  //   console.log("Enter into ask api getAllBid :: ");
+  //   BidBCH.find({
+  //       status: {
+  //         '!': statusOne
+  //       }
+  //     })
+  //     .sort('bidRate DESC')
+  //     .exec(function(err, allBidDetailsToExecute) {
+  //       if (err) {
+  //         return res.json({
+  //           "message": "NError to find Bids!!",
+  //           statusCode: 401
+  //         });
+  //       }
+  //       if (allBidDetailsToExecute) {
+  //         if (allBidDetailsToExecute.length >= 1) {
+  //           BidBCH.find({
+  //               status: {
+  //                 '!': statusOne
+  //               }
+  //             })
+  //             .sum('bidAmountBCH')
+  //             .exec(function(err, bidAmountBCHSumPending) {
+  //               if (err) {
+  //                 return res.json({
+  //                   "message": "Error to sum Of bidAmountBCHSumPending",
+  //                   statusCode: 401
+  //                 });
+  //               }
+  //               BidBCH.find({
+  //                   status: {
+  //                     'like': statusOne
+  //                   }
+  //                 })
+  //                 .sum('bidAmountBCH')
+  //                 .exec(function(err, bidAmountBCHSumSuccess) {
+  //                   if (err) {
+  //                     return res.json({
+  //                       "message": "Error to sum Of bidAmountBCHSumSuccess",
+  //                       statusCode: 401
+  //                     });
+  //                   }
+  //                   return res.json({
+  //                     bidsBCH: allBidDetailsToExecute,
+  //                     bidAmountBCHSumSuccess: parseFloat(bidAmountBCHSumSuccess[0].bidAmountBCH),
+  //                     bidAmountBCHSumPending: parseFloat(bidAmountBCHSumPending[0].bidAmountBCH),
+  //                     statusCode: 200
+  //                   });
+  //                 });
+  //             });
+  //         } else {
+  //           return res.json({
+  //             "message": "No Bid Found!!",
+  //             statusCode: 401
+  //           });
+  //         }
+  //       }
+  //     });
+  // },
+  // getAllAskBCH: function(req, res) {
+  //   console.log("Enter into ask api getAllBid :: ");
+  //   AskBCH.find({
+  //       status: {
+  //         '!': statusOne
+  //       }
+  //     })
+  //     .sort('askRate ASC')
+  //     .exec(function(err, allAskDetailsToExecute) {
+  //       if (err) {
+  //         console.log("Error to find ask");
+  //       }
+  //       if (!allAskDetailsToExecute) {
+  //         return res.json({
+  //           "message": "No Ask Found!!",
+  //           statusCode: 401
+  //         });
+  //       }
+  //       if (allAskDetailsToExecute) {
+  //         if (allAskDetailsToExecute.length >= 1) {
+  //           return res.json({
+  //             asksBCH: allAskDetailsToExecute,
+  //             statusCode: 200
+  //           });
+  //         } else {
+  //           return res.json({
+  //             "message": "No Ask Found!!",
+  //             statusCode: 401
+  //           });
+  //         }
+  //       }
+  //     });
+  // }
   getAllBidBCH: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
-    BidBCH.find({
-        status: {
-          '!': statusOne
-        }
-      })
-      .sort('bidRate DESC')
-      .exec(function(err, allBidDetailsToExecute) {
+    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    BidBCH.find()
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
-            "message": "NError to find Bids!!",
+            "message": "Error found to get AskEBT !!",
             statusCode: 401
           });
         }
-        if (allBidDetailsToExecute) {
-          if (allBidDetailsToExecute.length >= 1) {
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            BidBCH.find()
+              .sum('bidAmountBCH')
+              .exec(function(err, bidAmountBCHSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of bidAmountBCHSum",
+                    statusCode: 401
+                  });
+                }
+                BidBCH.find()
+                  .sum('bidAmountBTC')
+                  .exec(function(err, bidAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of bidAmountBCHSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      bidsBCH: allAskDetailsToExecute,
+                      bidAmountBCHSum: bidAmountBCHSum[0].bidAmountBCH,
+                      bidAmountBTCSum: bidAmountBTCSum[0].bidAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
+          } else {
+            return res.json({
+              "message": "No AskEBT Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
+  getAllAskBCH: function(req, res) {
+    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    AskBCH.find()
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            AskBCH.find()
+              .sum('askAmountBCH')
+              .exec(function(err, askAmountBCHSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of askAmountBCHSum",
+                    statusCode: 401
+                  });
+                }
+                AskBCH.find()
+                  .sum('askAmountBTC')
+                  .exec(function(err, askAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of askAmountBCHSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      asksBCH: allAskDetailsToExecute,
+                      askAmountBCHSum: askAmountBCHSum[0].askAmountBCH,
+                      askAmountBTCSum: askAmountBTCSum[0].askAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
+          } else {
+            return res.json({
+              "message": "No AskBCH Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
+  getBidsBCHSuccess: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    BidBCH.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
             BidBCH.find({
                 status: {
-                  '!': statusOne
+                  'like': statusOne
                 }
               })
               .sum('bidAmountBCH')
-              .exec(function(err, bidAmountBCHSumPending) {
+              .exec(function(err, bidAmountBCHSum) {
                 if (err) {
                   return res.json({
-                    "message": "Error to sum Of bidAmountBCHSumPending",
+                    "message": "Error to sum Of bidAmountBCHSum",
                     statusCode: 401
                   });
                 }
@@ -1661,62 +1868,96 @@ module.exports = {
                       'like': statusOne
                     }
                   })
-                  .sum('bidAmountBCH')
-                  .exec(function(err, bidAmountBCHSumSuccess) {
+                  .sum('bidAmountBTC')
+                  .exec(function(err, bidAmountBTCSum) {
                     if (err) {
                       return res.json({
-                        "message": "Error to sum Of bidAmountBCHSumSuccess",
+                        "message": "Error to sum Of bidAmountBCHSum",
                         statusCode: 401
                       });
                     }
                     return res.json({
-                      bidsBCH: allBidDetailsToExecute,
-                      bidAmountBCHSumSuccess: parseFloat(bidAmountBCHSumSuccess[0].bidAmountBCH),
-                      bidAmountBCHSumPending: parseFloat(bidAmountBCHSumPending[0].bidAmountBCH),
+                      bidsBCH: allAskDetailsToExecute,
+                      bidAmountBCHSum: bidAmountBCHSum[0].bidAmountBCH,
+                      bidAmountBTCSum: bidAmountBTCSum[0].bidAmountBTC,
                       statusCode: 200
                     });
                   });
               });
           } else {
             return res.json({
-              "message": "No Bid Found!!",
+              "message": "No AskEBT Found!!",
               statusCode: 401
             });
           }
         }
       });
   },
-  getAllAskBCH: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
+  getAsksBCHSuccess: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
     AskBCH.find({
         status: {
-          '!': statusOne
+          'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
-          console.log("Error to find ask");
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No Ask Found!!",
+            "message": "No AskEBT Found!!",
             statusCode: 401
           });
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            return res.json({
-              asksBCH: allAskDetailsToExecute,
-              statusCode: 200
-            });
+            AskBCH.find({
+                status: {
+                  'like': statusOne
+                }
+              })
+              .sum('askAmountBCH')
+              .exec(function(err, askAmountBCHSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of askAmountBCHSum",
+                    statusCode: 401
+                  });
+                }
+                AskBCH.find({
+                    status: {
+                      'like': statusOne
+                    }
+                  })
+                  .sum('askAmountBTC')
+                  .exec(function(err, askAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of askAmountBCHSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      asksBCH: allAskDetailsToExecute,
+                      askAmountBCHSum: askAmountBCHSum[0].askAmountBCH,
+                      askAmountBTCSum: askAmountBTCSum[0].askAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
           } else {
             return res.json({
-              "message": "No Ask Found!!",
+              "message": "No AskBCH Found!!",
               statusCode: 401
             });
           }
         }
       });
-  }
+  },
+
 };

@@ -1631,33 +1631,120 @@ module.exports = {
       });
     });
   },
+  // getAllBidGDS: function(req, res) {
+  //   console.log("Enter into ask api getAllBid :: ");
+  //   BidGDS.find({
+  //       status: {
+  //         '!': statusOne
+  //       }
+  //     })
+  //     .sort('bidRate DESC')
+  //     .exec(function(err, allBidDetailsToExecute) {
+  //       if (err) {
+  //         console.log("Error to find ask");
+  //       }
+  //       if (!allBidDetailsToExecute) {
+  //         return res.json({
+  //           "message": "No Bid Found!!",
+  //           statusCode: 401
+  //         });
+  //       }
+  //       if (allBidDetailsToExecute) {
+  //         if (allBidDetailsToExecute.length >= 1) {
+  //           return res.json({
+  //             bidsGDS: allBidDetailsToExecute,
+  //             statusCode: 200
+  //           });
+  //         } else {
+  //           return res.json({
+  //             "message": "No Bid Found!!",
+  //             statusCode: 401
+  //           });
+  //         }
+  //       }
+  //     });
+  // },
+  // getAllAskGDS: function(req, res) {
+  //   console.log("Enter into ask api getAllBid :: ");
+  //   AskGDS.find({
+  //       status: {
+  //         '!': statusOne
+  //       }
+  //     })
+  //     .sort('askRate ASC')
+  //     .exec(function(err, allAskDetailsToExecute) {
+  //       if (err) {
+  //         console.log("Error to find ask");
+  //       }
+  //       if (!allAskDetailsToExecute) {
+  //         return res.json({
+  //           "message": "No Ask Found!!",
+  //           statusCode: 401
+  //         });
+  //       }
+  //       if (allAskDetailsToExecute) {
+  //         if (allAskDetailsToExecute.length >= 1) {
+  //           return res.json({
+  //             asksGDS: allAskDetailsToExecute,
+  //             statusCode: 200
+  //           });
+  //         } else {
+  //           return res.json({
+  //             "message": "No Ask Found!!",
+  //             statusCode: 401
+  //           });
+  //         }
+  //       }
+  //     });
+  // }
   getAllBidGDS: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
-    BidGDS.find({
-        status: {
-          '!': statusOne
-        }
-      })
-      .sort('bidRate DESC')
-      .exec(function(err, allBidDetailsToExecute) {
+    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    BidGDS.find()
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
         if (err) {
-          console.log("Error to find ask");
-        }
-        if (!allBidDetailsToExecute) {
           return res.json({
-            "message": "No Bid Found!!",
+            "message": "Error found to get AskEBT !!",
             statusCode: 401
           });
         }
-        if (allBidDetailsToExecute) {
-          if (allBidDetailsToExecute.length >= 1) {
-            return res.json({
-              bidsGDS: allBidDetailsToExecute,
-              statusCode: 200
-            });
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            BidGDS.find()
+              .sum('bidAmountGDS')
+              .exec(function(err, bidAmountGDSSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of bidAmountGDSSum",
+                    statusCode: 401
+                  });
+                }
+                BidGDS.find()
+                  .sum('bidAmountBTC')
+                  .exec(function(err, bidAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of bidAmountGDSSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      bidsGDS: allAskDetailsToExecute,
+                      bidAmountGDSSum: bidAmountGDSSum[0].bidAmountGDS,
+                      bidAmountBTCSum: bidAmountBTCSum[0].bidAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
           } else {
             return res.json({
-              "message": "No Bid Found!!",
+              "message": "No AskEBT Found!!",
               statusCode: 401
             });
           }
@@ -1665,37 +1752,190 @@ module.exports = {
       });
   },
   getAllAskGDS: function(req, res) {
-    console.log("Enter into ask api getAllBid :: ");
-    AskGDS.find({
-        status: {
-          '!': statusOne
-        }
-      })
-      .sort('askRate ASC')
+    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    AskGDS.find()
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
-          console.log("Error to find ask");
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No Ask Found!!",
+            "message": "No AskEBT Found!!",
             statusCode: 401
           });
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            return res.json({
-              asksGDS: allAskDetailsToExecute,
-              statusCode: 200
-            });
+            AskGDS.find()
+              .sum('askAmountGDS')
+              .exec(function(err, askAmountGDSSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of askAmountGDSSum",
+                    statusCode: 401
+                  });
+                }
+                AskGDS.find()
+                  .sum('askAmountBTC')
+                  .exec(function(err, askAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of askAmountGDSSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      asksGDS: allAskDetailsToExecute,
+                      askAmountGDSSum: askAmountGDSSum[0].askAmountGDS,
+                      askAmountBTCSum: askAmountBTCSum[0].askAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
           } else {
             return res.json({
-              "message": "No Ask Found!!",
+              "message": "No AskGDS Found!!",
               statusCode: 401
             });
           }
         }
       });
-  }
+  },
+  getBidsGDSSuccess: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    BidGDS.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            BidGDS.find({
+                status: {
+                  'like': statusOne
+                }
+              })
+              .sum('bidAmountGDS')
+              .exec(function(err, bidAmountGDSSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of bidAmountGDSSum",
+                    statusCode: 401
+                  });
+                }
+                BidGDS.find({
+                    status: {
+                      'like': statusOne
+                    }
+                  })
+                  .sum('bidAmountBTC')
+                  .exec(function(err, bidAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of bidAmountGDSSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      bidsGDS: allAskDetailsToExecute,
+                      bidAmountGDSSum: bidAmountGDSSum[0].bidAmountGDS,
+                      bidAmountBTCSum: bidAmountBTCSum[0].bidAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
+          } else {
+            return res.json({
+              "message": "No AskEBT Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
+  getAsksGDSSuccess: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    AskGDS.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error found to get AskEBT !!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskEBT Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            AskGDS.find({
+                status: {
+                  'like': statusOne
+                }
+              })
+              .sum('askAmountGDS')
+              .exec(function(err, askAmountGDSSum) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to sum Of askAmountGDSSum",
+                    statusCode: 401
+                  });
+                }
+                AskGDS.find({
+                    status: {
+                      'like': statusOne
+                    }
+                  })
+                  .sum('askAmountBTC')
+                  .exec(function(err, askAmountBTCSum) {
+                    if (err) {
+                      return res.json({
+                        "message": "Error to sum Of askAmountGDSSum",
+                        statusCode: 401
+                      });
+                    }
+                    return res.json({
+                      asksGDS: allAskDetailsToExecute,
+                      askAmountGDSSum: askAmountGDSSum[0].askAmountGDS,
+                      askAmountBTCSum: askAmountBTCSum[0].askAmountBTC,
+                      statusCode: 200
+                    });
+                  });
+              });
+          } else {
+            return res.json({
+              "message": "No AskGDS Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
 
 };
