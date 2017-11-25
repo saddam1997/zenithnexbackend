@@ -1706,10 +1706,10 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            // return res.json({
-            //   asksBCH: allAskDetailsToExecute,
-            //   statusCode: 200
-            // });
+            return res.json({
+              asksBCH: allAskDetailsToExecute,
+              statusCode: 200
+            });
           } else {
             return res.json({
               "message": "No Ask Found!!",

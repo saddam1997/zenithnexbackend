@@ -52,7 +52,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -124,7 +124,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           console.log("Error to find AskGDS");
@@ -193,7 +193,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -229,7 +229,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -265,7 +265,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -331,7 +331,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -397,7 +397,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -463,7 +463,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -529,7 +529,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -595,7 +595,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -657,7 +657,7 @@ module.exports = {
   getBidsBCHAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidBCH.find()
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -711,7 +711,7 @@ module.exports = {
   getAsksBCHAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskBCH.find()
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -765,7 +765,7 @@ module.exports = {
   getBidsEBTAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidEBT.find()
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -819,7 +819,7 @@ module.exports = {
   getAsksEBTAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskEBT.find()
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -873,7 +873,7 @@ module.exports = {
   getBidsGDSAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidGDS.find()
-      .sort('bidRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -927,7 +927,7 @@ module.exports = {
   getAsksGDSAll: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskGDS.find()
-      .sort('askRate ASC')
+      .sort('createTimeUTC DESC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
