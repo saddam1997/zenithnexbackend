@@ -4,6 +4,7 @@
  * @description :: Server-side logic for managing tradeebtmarkets
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
+var BigNumber = require('bignumber.js');
 
 var statusZero = sails.config.company.statusZero;
 var statusOne = sails.config.company.statusOne;
@@ -20,13 +21,12 @@ const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 module.exports = {
   addAskEBTMarket: async function(req, res) {
     console.log("Enter into ask api addAskEBTMarket : : ");
-    var userAskAmountBTC = parseFloat(req.body.askAmountBTC);
-    var userAskAmountEBT = parseFloat(req.body.askAmountEBT);
-    var userAskRate = parseFloat(req.body.askRate);
+    var userAskAmountBTC = new BigNumber(req.body.askAmountBTC);
+    var userAskAmountEBT = new BigNumber(req.body.askAmountEBT);
+    var userAskRate = new BigNumber(req.body.askRate);
     var userAskownerId = req.body.askownerId;
 
-    if (!userAskAmountEBT || !userAskAmountBTC ||
-      !userAskRate || !userAskownerId) {
+    if (!userAskAmountEBT || !userAskAmountBTC || !userAskRate || !userAskownerId) {
       console.log("Invalid Parameter!!!");
       return res.json({
         "message": "Invalid Paramter!!!!",
@@ -51,23 +51,41 @@ module.exports = {
         statusCode: 401
       });
     }
-    console.log("User details find successfully :::: " + userAsker.email);
-    var userEBTBalanceInDb = parseFloat(userAsker.EBTbalance);
-    var userFreezedEBTBalanceInDb = parseFloat(userAsker.FreezedEBTbalance);
-    var userIdInDb = parseFloat(userAsker.id);
-    if (userAskAmountEBT >= userEBTBalanceInDb) {
+    console.log("User details find successfully :::: " + JSON.stringify(userAsker));
+    var userEBTBalanceInDb = new BigNumber(userAsker.EBTbalance);
+    var userFreezedEBTBalanceInDb = new BigNumber(userAsker.FreezedEBTbalance);
+
+    userEBTBalanceInDb = userEBTBalanceInDb.toFixed(8);
+    userFreezedEBTBalanceInDb = userFreezedEBTBalanceInDb.toFixed(8);
+
+    var userIdInDb = userAsker.id;
+    if (userAskAmountEBT.greaterThanOrEqualTo(userEBTBalanceInDb)) {
       return res.json({
         "message": "You have insufficient EBT Balance",
         statusCode: 401
       });
     }
+    console.log("userAskAmountEBT :: " + userAskAmountEBT);
+    console.log("userEBTBalanceInDb :: " + userEBTBalanceInDb);
+    // if (userAskAmountEBT >= userEBTBalanceInDb) {
+    //   return res.json({
+    //     "message": "You have insufficient EBT Balance",
+    //     statusCode: 401
+    //   });
+    // }
+
+
+
+    userAskAmountBTC = userAskAmountBTC.toFixed(8);
+    userAskAmountEBT = userAskAmountEBT.toFixed(8);
+    userAskRate = userAskRate.toFixed(8);
     try {
       var askDetails = await AskEBT.create({
         askAmountBTC: userAskAmountBTC,
         askAmountEBT: userAskAmountEBT,
         totalaskAmountBTC: userAskAmountBTC,
         totalaskAmountEBT: userAskAmountEBT,
-        askRate: parseFloat(userAskRate),
+        askRate: userAskRate,
         status: statusTwo,
         statusName: statusTwoPending,
         askownerEBT: userIdInDb
@@ -81,14 +99,23 @@ module.exports = {
     }
     //blasting the bid creation event
     sails.sockets.blast(constants.EBT_ASK_ADDED, askDetails);
-    var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) - parseFloat(userAskAmountEBT));
-    var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT));
+    // var updateUserEBTBalance = (parseFloat(userEBTBalanceInDb) - parseFloat(userAskAmountEBT));
+    // var updateFreezedEBTBalance = (parseFloat(userFreezedEBTBalanceInDb) + parseFloat(userAskAmountEBT));
+
+    // x = new BigNumber(0.3)   x.plus(y)
+    // x.minus(0.1)
+    userEBTBalanceInDb = new BigNumber(userEBTBalanceInDb);
+    var updateUserEBTBalance = userEBTBalanceInDb.minus(userAskAmountEBT);
+    updateUserEBTBalance = updateUserEBTBalance.toFixed(8);
+    userFreezedEBTBalanceInDb = new BigNumber(userFreezedEBTBalanceInDb);
+    var updateFreezedEBTBalance = userFreezedEBTBalanceInDb.plus(userAskAmountEBT);
+    updateFreezedEBTBalance = updateFreezedEBTBalance.toFixed(8);
     try {
       var userUpdateAsk = await User.update({
         id: userIdInDb
       }, {
         FreezedEBTbalance: updateFreezedEBTBalance,
-        EBTbalance: updateUserEBTBalance,
+        EBTbalance: updateUserEBTBalance
       });
     } catch (e) {
       return res.json({
@@ -117,8 +144,8 @@ module.exports = {
     var total_bid = 0;
     if (allBidsFromdb.length >= 1) {
       //Find exact bid if available in db
-      var totoalAskRemainingEBT = userAskAmountEBT;
-      var totoalAskRemainingBTC = userAskAmountBTC;
+      var totoalAskRemainingEBT = new BigNumber(userAskAmountEBT);
+      var totoalAskRemainingBTC = new BigNumber(userAskAmountBTC);
       //this loop for sum of all Bids amount of EBT
       for (var i = 0; i < allBidsFromdb.length; i++) {
         total_bid = total_bid + allBidsFromdb[i].bidAmountEBT;
@@ -130,15 +157,18 @@ module.exports = {
           currentBidDetails = allBidsFromdb[i];
           console.log(currentBidDetails.id + " Before totoalAskRemainingEBT :: " + totoalAskRemainingEBT);
           console.log(currentBidDetails.id + " Before totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
-          totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
-          totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+          // totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
+          // totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+          totoalAskRemainingEBT = totoalAskRemainingEBT.minus(currentBidDetails.bidAmountEBT);
+          totoalAskRemainingBTC = totoalAskRemainingBTC.minus(currentBidDetails.bidAmountBTC);
+
+
           console.log(currentBidDetails.id + " After totoalAskRemainingEBT :: " + totoalAskRemainingEBT);
           console.log(currentBidDetails.id + " After totoalAskRemainingBTC :: " + totoalAskRemainingBTC);
 
           if (totoalAskRemainingEBT == 0) {
             //destroy bid and ask and update bidder and asker balances and break
             console.log("Enter into totoalAskRemainingEBT == 0");
-
             try {
               var userAllDetailsInDBBidder = await User.findOne({
                 id: currentBidDetails.bidownerEBT
@@ -153,20 +183,32 @@ module.exports = {
                 statusCode: 401
               });
             }
-            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-            var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+            // var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            // var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+
+            var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+            updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(currentBidDetails.bidAmountBTC);
+            updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.toFixed(8);
+            var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(currentBidDetails.bidAmountEBT);
+
             //Deduct Transation Fee Bidder
-            console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-            var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+            console.log("Before deduct TX Fees12312 of EBT Update user " + updatedEBTbalanceBidder);
+            //var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+            var txFeesBidderEBT = new BigNumber(currentBidDetails.bidAmountEBT);
+
+            txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess)
             console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-            updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+            //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.toFixed(8);
             console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
             try {
               var userUpdateBidder = await User.update({
                 id: currentBidDetails.bidownerEBT
               }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder)
+                FreezedBTCbalance: updatedFreezedBTCbalanceBidder,
+                EBTbalance: updatedEBTbalanceBidder
               });
             } catch (e) {
               return res.json({
@@ -175,24 +217,39 @@ module.exports = {
                 statusCode: 401
               });
             }
+            //Workding.................asdfasdf
+            //var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(userAskAmountBTC);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(totoalAskRemainingBTC);
+            //var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
+            //var updatedFreezedEBTbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT)) + parseFloat(totoalAskRemainingEBT));
+            var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(userAskAmountEBT);
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.plus(totoalAskRemainingEBT);
 
-            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
-            var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
-
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.toFixed(8);
             //Deduct Transation Fee Asker
-            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
-            console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            //var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            var btcAmountSucess = new BigNumber(userAskAmountBTC);
+            btcAmountSucess = btcAmountSucess.minus(totoalAskRemainingBTC);
+            console.log("userAllDetailsInDBAsker.BTCbalance :: " + userAllDetailsInDBAsker.BTCbalance);
+            console.log("Before deduct TX Fees of Update Asker Amount BTC updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            //var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            var txFeesAskerBTC = new BigNumber(btcAmountSucess);
+            txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
             console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.toFixed(8);
             console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
             try {
               var updatedUser = await User.update({
                 id: askDetails.askownerEBT
               }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
+                BTCbalance: updatedBTCbalanceAsker,
+                FreezedEBTbalance: updatedFreezedEBTbalanceAsker
               });
             } catch (e) {
               return res.json({
@@ -248,24 +305,34 @@ module.exports = {
               id: currentBidDetails.bidownerEBT
             });
             console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + userAllDetailsInDBBidder.email);
-            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-            var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+            // var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+            // var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+
+            var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+            updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(currentBidDetails.bidAmountBTC);
+            var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(currentBidDetails.bidAmountEBT);
 
             //Deduct Transation Fee Bidder
-            console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-            var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
-            console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-            updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
-            console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
+            console.log("Before deduct TX Fees of EBT 089089Update user " + updatedEBTbalanceBidder);
+            // var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+            var txFeesBidderEBT = new BigNumber(currentBidDetails.bidAmountEBT);
+            txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
 
+            console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
+            // updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
+
+            console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
+            updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.toFixed(8);
             console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
             console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
             try {
               var userAllDetailsInDBBidderUpdate = await User.update({
                 id: currentBidDetails.bidownerEBT
               }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder)
+                FreezedBTCbalance: updatedFreezedBTCbalanceBidder,
+                EBTbalance: updatedEBTbalanceBidder
               });
             } catch (e) {
               return res.json({
@@ -308,32 +375,46 @@ module.exports = {
                 statusCode: 401
               });
             }
-            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
-            var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            console.log(currentBidDetails.id + " enter 234 into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
+            //var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+            var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(userAskAmountBTC);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(totoalAskRemainingBTC);
+
             //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(totoalAskRemainingEBT));
-            var updatedFreezedEBTbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT)) + parseFloat(totoalAskRemainingEBT));
+            //var updatedFreezedEBTbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT)) + parseFloat(totoalAskRemainingEBT));
+            var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(userAskAmountEBT);
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.plus(totoalAskRemainingEBT);
             //Deduct Transation Fee Asker
             console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             console.log("Total Ask RemainEBT totoalAskRemainingEBT " + totoalAskRemainingEBT);
+            console.log("userAllDetailsInDBAsker.BTCbalance :: " + userAllDetailsInDBAsker.BTCbalance);
             console.log("Total Ask RemainEBT userAllDetailsInDBAsker.FreezedEBTbalance " + userAllDetailsInDBAsker.FreezedEBTbalance);
             console.log("Total Ask RemainEBT updatedFreezedEBTbalanceAsker " + updatedFreezedEBTbalanceAsker);
             console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-            var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            //var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            var btcAmountSucess = new BigNumber(userAskAmountBTC);
+            btcAmountSucess = btcAmountSucess.minus(totoalAskRemainingBTC);
 
-            var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            //var txFeesAskerBTC = (parseFloat(btcAmountSucess) * parseFloat(txFeeBTCWithdrawSuccess));
+            var txFeesAskerBTC = new BigNumber(btcAmountSucess);
+            txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
             console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+            //Workding.................asdfasdf2323
             console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
-
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.toFixed(8);
             console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
             console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
             try {
               var updatedUser = await User.update({
                 id: askDetails.askownerEBT
               }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
+                BTCbalance: updatedBTCbalanceAsker,
+                FreezedEBTbalance: updatedFreezedEBTbalanceAsker
               });
             } catch (e) {
               return res.json({
@@ -373,8 +454,10 @@ module.exports = {
           console.log("currentBidDetails ::: " + JSON.stringify(currentBidDetails));
           //totoalAskRemainingEBT = totoalAskRemainingEBT - allBidsFromdb[i].bidAmountEBT;
           if (totoalAskRemainingEBT >= currentBidDetails.bidAmountEBT) {
-            totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
-            totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+            //totoalAskRemainingEBT = (parseFloat(totoalAskRemainingEBT) - parseFloat(currentBidDetails.bidAmountEBT));
+            totoalAskRemainingEBT = totoalAskRemainingEBT.minus(currentBidDetails.bidAmountEBT);
+            //totoalAskRemainingBTC = (parseFloat(totoalAskRemainingBTC) - parseFloat(currentBidDetails.bidAmountBTC));
+            totoalAskRemainingBTC = totoalAskRemainingBTC.minus(currentBidDetails.bidAmountBTC);
             console.log("start from here totoalAskRemainingEBT == 0::: " + totoalAskRemainingEBT);
 
             if (totoalAskRemainingEBT == 0) {
@@ -404,22 +487,28 @@ module.exports = {
               }
               console.log("userAll askDetails.askownerEBT :: ");
               console.log("Update value of Bidder and asker");
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
-
+              //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+              var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(currentBidDetails.bidAmountBTC);
+              //var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+              var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(currentBidDetails.bidAmountEBT);
               //Deduct Transation Fee Bidder
-              console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-              var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+              console.log("Before deduct TX Fees of42342312 EBT Update user " + updatedEBTbalanceBidder);
+              //var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+              var txFeesBidderEBT = new BigNumber(currentBidDetails.bidAmountEBT);
+              txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
               console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-              updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
-              console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
+              //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
+              console.log("After deduct TX Fees of EBT Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerEBT
                 }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder)
+                  FreezedBTCbalance: updatedFreezedBTCbalanceBidder,
+                  EBTbalance: updatedEBTbalanceBidder
                 });
               } catch (e) {
                 return res.json({
@@ -428,31 +517,46 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+              //var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
+              var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(userAskAmountBTC);
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(totoalAskRemainingBTC);
               //var updatedFreezedEBTbalanceAsker = parseFloat(totoalAskRemainingEBT);
               //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(totoalAskRemainingEBT));
-              var updatedFreezedEBTbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT)) + parseFloat(totoalAskRemainingEBT));
+              //var updatedFreezedEBTbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT)) + parseFloat(totoalAskRemainingEBT));
+              var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+              updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(userAskAmountEBT);
+              updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.plus(totoalAskRemainingEBT);
+
               console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               console.log("Total Ask RemainEBT totoalAskRemainingEBT " + totoalAskRemainingEBT);
+              console.log("userAllDetailsInDBAsker.BTCbalance " + userAllDetailsInDBAsker.BTCbalance);
               console.log("Total Ask RemainEBT userAllDetailsInDBAsker.FreezedEBTbalance " + userAllDetailsInDBAsker.FreezedEBTbalance);
               console.log("Total Ask RemainEBT updatedFreezedEBTbalanceAsker " + updatedFreezedEBTbalanceAsker);
               console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               //Deduct Transation Fee Asker
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
-              var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
+              //var btcAmountSucess = (parseFloat(userAskAmountBTC) - parseFloat(totoalAskRemainingBTC));
+              var btcAmountSucess = new BigNumber(userAskAmountBTC);
+              btcAmountSucess = btcAmountSucess.minus(totoalAskRemainingBTC);
+              //var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
+              var txFeesAskerBTC = new BigNumber(updatedBTCbalanceAsker);
+              txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
+
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+
               console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
-              console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+              console.log(currentBidDetails.id + " asdfasdfupdatedBTCbalanceAsker updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerEBT
                 }, {
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
+                  BTCbalance: updatedBTCbalanceAsker,
+                  FreezedEBTbalance: updatedFreezedEBTbalanceAsker
                 });
               } catch (e) {
                 return res.json({
@@ -519,24 +623,31 @@ module.exports = {
                 });
               }
               console.log(currentBidDetails.id + " Find all details of  userAllDetailsInDBBidder:: " + JSON.stringify(userAllDetailsInDBBidder));
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+              //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(currentBidDetails.bidAmountBTC));
+              var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(currentBidDetails.bidAmountBTC);
 
+              //var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(currentBidDetails.bidAmountEBT));
+              var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(currentBidDetails.bidAmountEBT);
               //Deduct Transation Fee Bidder
-              console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-              var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+              console.log("Before deducta7567 TX Fees of EBT Update user " + updatedEBTbalanceBidder);
+              //var txFeesBidderEBT = (parseFloat(currentBidDetails.bidAmountEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+              var txFeesBidderEBT = new BigNumber(currentBidDetails.bidAmountEBT);
+              txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
               console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-              updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
               console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-              console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
+              console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: sadfsdf updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
               try {
                 var userAllDetailsInDBBidderUpdate = await User.update({
                   id: currentBidDetails.bidownerEBT
                 }, {
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder)
+                  FreezedBTCbalance: updatedFreezedBTCbalanceBidder,
+                  EBTbalance: updatedEBTbalanceBidder
                 });
               } catch (e) {
                 return res.json({
@@ -576,15 +687,19 @@ module.exports = {
               });
             }
             //Update Bid
-            var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
-            var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT));
+            //var updatedBidAmountBTC = (parseFloat(currentBidDetails.bidAmountBTC) - parseFloat(totoalAskRemainingBTC));
+            var updatedBidAmountBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+            updatedBidAmountBTC = updatedBidAmountBTC.minus(totoalAskRemainingBTC);
+            //var updatedBidAmountEBT = (parseFloat(currentBidDetails.bidAmountEBT) - parseFloat(totoalAskRemainingEBT));
+            var updatedBidAmountEBT = new BigNumber(currentBidDetails.bidAmountEBT);
+            updatedBidAmountEBT = updatedBidAmountEBT.minus(totoalAskRemainingEBT);
 
             try {
               var updatedaskDetails = await BidEBT.update({
                 id: currentBidDetails.id
               }, {
-                bidAmountBTC: parseFloat(updatedBidAmountBTC),
-                bidAmountEBT: parseFloat(updatedBidAmountEBT),
+                bidAmountBTC: updatedBidAmountBTC,
+                bidAmountEBT: updatedBidAmountEBT,
                 status: statusTwo,
                 statusName: statusTwoPending,
               });
@@ -609,25 +724,38 @@ module.exports = {
                 statusCode: 401
               });
             }
-            var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
-            var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.EBTbalance) + parseFloat(totoalAskRemainingEBT));
+            //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.FreezedBTCbalance) - parseFloat(totoalAskRemainingBTC));
+            var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBiddder.FreezedBTCbalance);
+            updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(totoalAskRemainingBTC);
+
+
+            //var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBiddder.EBTbalance) + parseFloat(totoalAskRemainingEBT));
+
+            var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBiddder.EBTbalance);
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(totoalAskRemainingEBT);
 
             //Deduct Transation Fee Bidder
-            console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-            var bchAmountSucess = parseFloat(totoalAskRemainingEBT);
-            var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
-            updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+            console.log("Before deduct8768678 TX Fees of EBT Update user " + updatedEBTbalanceBidder);
+            //var bchAmountSucess = parseFloat(totoalAskRemainingEBT);
+            //var bchAmountSucess = new BigNumber(totoalAskRemainingEBT);
+            //var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+            //var txFeesBidderEBT = (parseFloat(totoalAskRemainingEBT) * parseFloat(txFeeEBTWithdrawSuccess));
+            var txFeesBidderEBT = new BigNumber(totoalAskRemainingEBT);
+            txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
+
+            //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+            updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
             console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
             console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
 
             console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
-            console.log(currentBidDetails.id + " updatedEBTbalanceBidder:: " + updatedEBTbalanceBidder);
+            console.log(currentBidDetails.id + " updatedEBTbalanceBidder:asdfasdf:updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
             try {
               var userAllDetailsInDBBidderUpdate = await User.update({
                 id: currentBidDetails.bidownerEBT
               }, {
-                FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder),
-                EBTbalance: parseFloat(updatedEBTbalanceBidder)
+                FreezedBTCbalance: updatedFreezedBTCbalanceBidder,
+                EBTbalance: updatedEBTbalanceBidder
               });
             } catch (e) {
               return res.json({
@@ -638,25 +766,36 @@ module.exports = {
             }
             //Update asker ===========================================
 
-            console.log(currentBidDetails.id + " enter into userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
-            var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
-            var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT));
+            console.log(currentBidDetails.id + " enter into asdf userAskAmountBTC i == allBidsFromdb.length - 1 askDetails.askownerEBT");
+            //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC));
+            var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(userAskAmountBTC);
+
+            //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(userAskAmountEBT));
+            var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+            updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(userAskAmountEBT);
 
             //Deduct Transation Fee Asker
             console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-            var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+            //var txFeesAskerBTC = (parseFloat(userAskAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+            var txFeesAskerBTC = new BigNumber(userAskAmountBTC);
+            txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
+
             console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-            updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            console.log("userAllDetailsInDBAsker.BTCbalance :: " + userAllDetailsInDBAsker.BTCbalance);
+            //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+            updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+
             console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
             console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-            console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
+            console.log(currentBidDetails.id + " updatedFreezedEBTbalanceAsker safsdfsdfupdatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
             try {
               var updatedUser = await User.update({
                 id: askDetails.askownerEBT
               }, {
-                BTCbalance: parseFloat(updatedBTCbalanceAsker),
-                FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker)
+                BTCbalance: updatedBTCbalanceAsker,
+                FreezedEBTbalance: updatedFreezedEBTbalanceAsker
               });
             } catch (e) {
               return res.json({
@@ -703,10 +842,15 @@ module.exports = {
   },
   addBidEBTMarket: async function(req, res) {
     console.log("Enter into ask api addBidEBTMarket :: " + JSON.stringify(req.body));
-    var userBidAmountBTC = req.body.bidAmountBTC;
-    var userBidAmountEBT = req.body.bidAmountEBT;
-    var userBidRate = req.body.bidRate;
+    var userBidAmountBTC = new BigNumber(req.body.bidAmountBTC);
+    var userBidAmountEBT = new BigNumber(req.body.bidAmountEBT);
+    var userBidRate = new BigNumber(req.body.bidRate);
     var userBid1ownerId = req.body.bidownerId;
+
+    userBidAmountBTC = userBidAmountBTC.toFixed(8);
+    userBidAmountEBT = userBidAmountEBT.toFixed(8);
+    userBidRate = userBidRate.toFixed(8);
+
 
     if (!userBidAmountEBT || !userBidAmountBTC ||
       !userBidRate || !userBid1ownerId) {
@@ -729,23 +873,25 @@ module.exports = {
     }
 
     console.log("Getting user details !! !");
-    var userBTCBalanceInDb = parseFloat(userBidder.BTCbalance);
-    var userFreezedBTCBalanceInDb = parseFloat(userBidder.FreezedBTCbalance);
+    var userBTCBalanceInDb = new BigNumber(userBidder.BTCbalance);
+    var userFreezedBTCBalanceInDb = new BigNumber(userBidder.FreezedBTCbalance);
     var userIdInDb = userBidder.id;
     console.log("userBidder ::: " + JSON.stringify(userBidder));
-    if (userBidAmountBTC >= userBTCBalanceInDb) {
+    userBidAmountBTC = new BigNumber(userBidAmountBTC);
+    if (userBidAmountBTC.greaterThanOrEqualTo(userBTCBalanceInDb)) {
       return res.json({
         "message": "You have insufficient BTC Balance",
         statusCode: 401
       });
     }
+    userBidAmountBTC = userBidAmountBTC.toFixed(8);
     try {
       var bidDetails = await BidEBT.create({
         bidAmountBTC: userBidAmountBTC,
         bidAmountEBT: userBidAmountEBT,
         totalbidAmountBTC: userBidAmountBTC,
         totalbidAmountEBT: userBidAmountEBT,
-        bidRate: parseFloat(userBidRate),
+        bidRate: userBidRate,
         status: statusTwo,
         statusName: statusTwoPending,
         bidownerEBT: userIdInDb
@@ -762,15 +908,22 @@ module.exports = {
     sails.sockets.blast(constants.EBT_BID_ADDED, bidDetails);
 
     console.log("Bid created .........");
-    var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC));
-    var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC));
-    console.log("Updating user's bid details ");
+    //var updateUserBTCBalance = (parseFloat(userBTCBalanceInDb) - parseFloat(userBidAmountBTC));
+    var updateUserBTCBalance = new BigNumber(userBTCBalanceInDb);
+    updateUserBTCBalance = updateUserBTCBalance.minus(userBidAmountBTC);
+    //Workding.................asdfasdfyrtyrty
+    //var updateFreezedBTCBalance = (parseFloat(userFreezedBTCBalanceInDb) + parseFloat(userBidAmountBTC));
+    var updateFreezedBTCBalance = new BigNumber(userBidder.FreezedBTCbalance);
+    updateFreezedBTCBalance = updateFreezedBTCBalance.plus(userBidAmountBTC);
+
+    console.log("Updating user's bid details sdfyrtyupdateFreezedBTCBalance  " + updateFreezedBTCBalance);
+    console.log("Updating user's bid details asdfasdf updateUserBTCBalance  " + updateUserBTCBalance);
     try {
       var userUpdateBidDetails = await User.update({
         id: userIdInDb
       }, {
-        FreezedBTCbalance: updateFreezedBTCBalance,
-        BTCbalance: updateUserBTCBalance,
+        FreezedBTCbalance: updateFreezedBTCBalance.toFixed(8),
+        BTCbalance: updateUserBTCBalance.toFixed(8),
       });
     } catch (e) {
       return res.json({
@@ -800,8 +953,8 @@ module.exports = {
       if (allAsksFromdb.length >= 1) {
         //Find exact bid if available in db
         var total_ask = 0;
-        var totoalBidRemainingEBT = userBidAmountEBT;
-        var totoalBidRemainingBTC = userBidAmountBTC;
+        var totoalBidRemainingEBT = new BigNumber(userBidAmountEBT);
+        var totoalBidRemainingBTC = new BigNumber(userBidAmountBTC);
         //this loop for sum of all Bids amount of EBT
         for (var i = 0; i < allAsksFromdb.length; i++) {
           total_ask = total_ask + allAsksFromdb[i].askAmountEBT;
@@ -814,11 +967,13 @@ module.exports = {
             console.log("currentAskDetails ::: " + JSON.stringify(currentAskDetails)); //.6 <=.5
 
             //totoalBidRemainingEBT = totoalBidRemainingEBT - allAsksFromdb[i].bidAmountEBT;
-            totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT) - parseFloat(currentAskDetails.askAmountEBT));
-            totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC) - parseFloat(currentAskDetails.askAmountBTC));
+            //totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT) - parseFloat(currentAskDetails.askAmountEBT));
+            totoalBidRemainingEBT = totoalBidRemainingEBT.minus(currentAskDetails.askAmountEBT);
+
+            //totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC) - parseFloat(currentAskDetails.askAmountBTC));
+            totoalBidRemainingBTC = totoalBidRemainingBTC.minus(currentAskDetails.askAmountBTC);
             console.log("start from here totoalBidRemainingEBT == 0::: " + totoalBidRemainingEBT);
             if (totoalBidRemainingEBT == 0) {
-
               //destroy bid and ask and update bidder and asker balances and break
               console.log("Enter into totoalBidRemainingEBT == 0");
               try {
@@ -835,14 +990,22 @@ module.exports = {
 
               console.log("userAll bidDetails.askownerEBT totoalBidRemainingEBT == 0:: ");
               console.log("Update value of Bidder and asker");
-              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+              //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+              var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+              updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(currentAskDetails.askAmountEBT);
+              //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+              var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(currentAskDetails.askAmountBTC);
+
               //Deduct Transation Fee Asker
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              //var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              var txFeesAskerBTC = new BigNumber(currentAskDetails.askAmountBTC);
+              txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
-              console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
+              //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+              console.log("After deduct TX Fees of EBT Update user d gsdfgdf  " + updatedBTCbalanceAsker);
 
               //current ask details of Asker  updated
               //Ask FreezedEBTbalance balance of asker deducted and BTC to give asker
@@ -850,8 +1013,8 @@ module.exports = {
                 var userUpdateAsker = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
+                  FreezedEBTbalance: updatedFreezedEBTbalanceAsker,
+                  BTCbalance: updatedBTCbalanceAsker
                 });
               } catch (e) {
                 return res.json({
@@ -875,9 +1038,16 @@ module.exports = {
               //current bid details Bidder updated
               //Bid FreezedBTCbalance of bidder deduct and EBT  give to bidder
               //var updatedEBTbalanceBidder = (parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(totoalBidRemainingEBT)) - parseFloat(totoalBidRemainingBTC);
-              var updatedEBTbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+              //var updatedEBTbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+              var updatedEBTbalanceBidder = new BigNumber(BidderuserAllDetailsInDBBidder.EBTbalance);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(userBidAmountEBT);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(totoalBidRemainingEBT);
               //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
-              var updatedFreezedBTCbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+              //var updatedFreezedBTCbalanceBidder = ((parseFloat(BidderuserAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+              var updatedFreezedBTCbalanceBidder = new BigNumber(BidderuserAllDetailsInDBBidder.FreezedBTCbalance);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(userBidAmountBTC);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.plus(totoalBidRemainingBTC);
+
               console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               console.log("Total Ask RemainEBT totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log("Total Ask RemainEBT BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + BidderuserAllDetailsInDBBidder.FreezedBTCbalance);
@@ -887,21 +1057,28 @@ module.exports = {
 
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-              var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
-              var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+              //var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
+              var bchAmountSucess = new BigNumber(userBidAmountEBT);
+              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingEBT);
+
+              //var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+              var txFeesBidderEBT = new BigNumber(bchAmountSucess);
+              txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
+
               console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-              updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
               console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
 
               console.log(currentAskDetails.id + " asdftotoalBidRemainingEBT == 0updatedEBTbalanceBidder ::: " + updatedEBTbalanceBidder);
-              console.log(currentAskDetails.id + " asdftotoalBidRemainingEBT == updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
+              console.log(currentAskDetails.id + " asdftotoalBidRemainingEBT asdf== updatedFreezedBTCbalanceBidder updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
 
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
+                  EBTbalance: updatedEBTbalanceBidder,
+                  FreezedBTCbalance: updatedFreezedBTCbalanceBidder
                 });
               } catch (e) {
                 return res.json({
@@ -949,13 +1126,13 @@ module.exports = {
               }
               sails.sockets.blast(constants.EBT_ASK_DESTROYED, askDestroy);
               return res.json({
-                "message": "Ask Executed successfully",
+                "message": "Bid Executed successfully",
                 statusCode: 200
               });
             } else {
               //destroy bid
               console.log(currentAskDetails.id + " else of totoalBidRemainingEBT == 0  enter into else of totoalBidRemainingEBT == 0");
-              console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == 0start User.findOne currentAskDetails.bidownerEBT " + currentAskDetails.bidownerEBT);
+              console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == 0start User.findOne currentAskDetails.bidownerEBT ");
               try {
                 var userAllDetailsInDBAsker = await User.findOne({
                   id: currentAskDetails.askownerEBT
@@ -968,25 +1145,33 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == 0 Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
-              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+              //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+              var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+              updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(currentAskDetails.askAmountEBT);
+              //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+              var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(currentAskDetails.askAmountBTC);
 
               //Deduct Transation Fee Asker
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              //var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              var txFeesAskerBTC = new BigNumber(currentAskDetails.askAmountBTC);
+              txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+
               console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
               console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == :: ");
-              console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == 0updatedBTCbalanceBidder:: ");
+              console.log(currentAskDetails.id + "  else of totoalBidRemainingEBT == 0updaasdfsdftedBTCbalanceBidder updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
+                  FreezedEBTbalance: updatedFreezedEBTbalanceAsker,
+                  BTCbalance: updatedBTCbalanceAsker
                 });
               } catch (e) {
                 return res.json({
@@ -1037,10 +1222,18 @@ module.exports = {
                 });
               }
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1 asdf enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
-              var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+              //var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBid.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+              var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBid.EBTbalance);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(userBidAmountEBT);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(totoalBidRemainingEBT);
+
               //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
               //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBid.FreezedBTCbalance) - parseFloat(totoalBidRemainingBTC));
-              var updatedFreezedBTCbalanceBidder = ((parseFloat(userAllDetailsInDBBid.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+              //var updatedFreezedBTCbalanceBidder = ((parseFloat(userAllDetailsInDBBid.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+              var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBid.FreezedBTCbalance);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(userBidAmountBTC);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.plus(totoalBidRemainingBTC);
+
               console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               console.log("Total Ask RemainEBT totoalBidRemainingBTC " + totoalBidRemainingBTC);
               console.log("Total Ask RemainEBT BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + userAllDetailsInDBBid.FreezedBTCbalance);
@@ -1049,20 +1242,27 @@ module.exports = {
 
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-              var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
-              var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+              //var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
+              var bchAmountSucess = new BigNumber(userBidAmountEBT);
+              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingEBT);
+
+              //var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+              var txFeesBidderEBT = new BigNumber(bchAmountSucess);
+              txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
+
               console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-              updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
               console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
 
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-              console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
+              console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updateasdfdFreezedEBTbalanceAsker updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
+                  EBTbalance: updatedEBTbalanceBidder,
+                  FreezedBTCbalance: updatedFreezedBTCbalanceBidder
                 });
               } catch (e) {
                 return res.json({
@@ -1078,8 +1278,8 @@ module.exports = {
                 var updatedbidDetails = await BidEBT.update({
                   id: bidDetails.id
                 }, {
-                  bidAmountBTC: parseFloat(totoalBidRemainingBTC),
-                  bidAmountEBT: parseFloat(totoalBidRemainingEBT),
+                  bidAmountBTC: totoalBidRemainingBTC,
+                  bidAmountEBT: totoalBidRemainingEBT,
                   status: statusTwo,
                   statusName: statusTwoPending
                 });
@@ -1103,8 +1303,8 @@ module.exports = {
             console.log(" else of i == allAsksFromdb.length - 1currentAskDetails ::: " + JSON.stringify(currentAskDetails)); //.6 <=.5
             //totoalBidRemainingEBT = totoalBidRemainingEBT - allAsksFromdb[i].bidAmountEBT;
             if (totoalBidRemainingBTC >= currentAskDetails.askAmountBTC) {
-              totoalBidRemainingEBT = (parseFloat(totoalBidRemainingEBT) - parseFloat(currentAskDetails.askAmountEBT));
-              totoalBidRemainingBTC = (parseFloat(totoalBidRemainingBTC) - parseFloat(currentAskDetails.askAmountBTC));
+              totoalBidRemainingEBT = totoalBidRemainingEBT.minus(currentAskDetails.askAmountEBT);
+              totoalBidRemainingBTC = totoalBidRemainingBTC.minus(currentAskDetails.askAmountBTC);
               console.log(" else of i == allAsksFromdb.length - 1start from here totoalBidRemainingEBT == 0::: " + totoalBidRemainingEBT);
 
               if (totoalBidRemainingEBT == 0) {
@@ -1134,25 +1334,36 @@ module.exports = {
                 }
                 console.log(" totoalBidRemainingEBT == 0userAll bidDetails.askownerEBT :: ");
                 console.log(" totoalBidRemainingEBT == 0Update value of Bidder and asker");
-                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+                //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+                var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+                updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(currentAskDetails.askAmountEBT);
+
+                //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+                var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+                updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(currentAskDetails.askAmountBTC);
+
                 //Deduct Transation Fee Asker
                 console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-                var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                //var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                var txFeesAskerBTC = new BigNumber(currentAskDetails.askAmountBTC);
+                txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
+
                 console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
+
                 console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
                 console.log("--------------------------------------------------------------------------------");
                 console.log(" totoalBidRemainingEBT == 0userAllDetailsInDBAsker ::: " + JSON.stringify(userAllDetailsInDBAsker));
                 console.log(" totoalBidRemainingEBT == 0updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
                 console.log(" totoalBidRemainingEBT == 0updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-                console.log("----------------------------------------------------------------------------------");
+                console.log("----------------------------------------------------------------------------------updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
                 try {
                   var userUpdateAsker = await User.update({
                     id: currentAskDetails.askownerEBT
                   }, {
-                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker)
+                    FreezedEBTbalance: updatedFreezedEBTbalanceAsker,
+                    BTCbalance: updatedBTCbalanceAsker
                   });
                 } catch (e) {
                   return res.json({
@@ -1161,10 +1372,19 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+                //var updatedEBTbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT)) - parseFloat(totoalBidRemainingEBT));
+
+                var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+                updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(userBidAmountEBT);
+                updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(totoalBidRemainingEBT);
+
                 //var updatedFreezedBTCbalanceBidder = parseFloat(totoalBidRemainingBTC);
                 //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(totoalBidRemainingBTC));
-                var updatedFreezedBTCbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+                //var updatedFreezedBTCbalanceBidder = ((parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC)) + parseFloat(totoalBidRemainingBTC));
+                var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+                updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(userBidAmountBTC);
+                updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.plus(totoalBidRemainingBTC);
+
                 console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
                 console.log("Total Ask RemainEBT totoalAskRemainingEBT " + totoalBidRemainingBTC);
                 console.log("Total Ask RemainEBT BidderuserAllDetailsInDBBidder.FreezedBTCbalance " + userAllDetailsInDBBidder.FreezedBTCbalance);
@@ -1173,20 +1393,28 @@ module.exports = {
 
                 //Deduct Transation Fee Bidder
                 console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-                var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
-                var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+                //var bchAmountSucess = (parseFloat(userBidAmountEBT) - parseFloat(totoalBidRemainingEBT));
+                var bchAmountSucess = new BigNumber(userBidAmountEBT);
+                bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingEBT);
+
+
+                //var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
+                var txFeesBidderEBT = new BigNumber(bchAmountSucess);
+                txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
                 console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-                updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+                //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+                updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
+
                 console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
 
                 console.log(currentAskDetails.id + " totoalBidRemainingEBT == 0 updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
-                console.log(currentAskDetails.id + " totoalBidRemainingEBT == 0 updatedFreezedEBTbalanceAsker ::: " + updatedFreezedEBTbalanceAsker);
+                console.log(currentAskDetails.id + " totoalBidRemainingEBT == 0 updatedFreezedEBTbalaasdf updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
                 try {
                   var updatedUser = await User.update({
                     id: bidDetails.bidownerEBT
                   }, {
-                    EBTbalance: parseFloat(updatedEBTbalanceBidder),
-                    FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
+                    EBTbalance: updatedEBTbalanceBidder,
+                    FreezedBTCbalance: updatedFreezedBTCbalanceBidder
                   });
                 } catch (e) {
                   return res.json({
@@ -1245,24 +1473,35 @@ module.exports = {
                   });
                 }
                 console.log(currentAskDetails.id + " else of totoalBidRemainingEBT == 0Find all details of  userAllDetailsInDBAsker:: " + JSON.stringify(userAllDetailsInDBAsker));
-                var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
-                var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+                //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(currentAskDetails.askAmountEBT));
+
+                var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+                updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(currentAskDetails.askAmountEBT);
+
+                //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(currentAskDetails.askAmountBTC));
+                var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+                updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(currentAskDetails.askAmountBTC);
+
                 //Deduct Transation Fee Asker
                 console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-                var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                //var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+                var txFeesAskerBTC = new BigNumber(currentAskDetails.askAmountBTC);
+                txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
+
                 console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-                updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+                updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
                 console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
                 console.log(currentAskDetails.id + " else of totoalBidRemainingEBT == 0 updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
-                console.log(currentAskDetails.id + " else of totoalBidRemainingEBT == 0 updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
+                console.log(currentAskDetails.id + " else of totoalBidRemainingEBT == 0 updatedBTCbalance asd asd updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
                 try {
                   var userAllDetailsInDBAskerUpdate = await User.update({
                     id: currentAskDetails.askownerEBT
                   }, {
-                    FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
-                    BTCbalance: parseFloat(updatedBTCbalanceAsker)
+                    FreezedEBTbalance: updatedFreezedEBTbalanceAsker,
+                    BTCbalance: updatedBTCbalanceAsker
                   });
                 } catch (e) {
                   return res.json({
@@ -1298,15 +1537,20 @@ module.exports = {
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC  enter into i == allBidsFromdb.length - 1");
 
               //Update Ask
-              var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT) - parseFloat(totoalBidRemainingEBT));
-              var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC));
+              //  var updatedAskAmountEBT = (parseFloat(currentAskDetails.askAmountEBT) - parseFloat(totoalBidRemainingEBT));
 
+              var updatedAskAmountEBT = new BigNumber(currentAskDetails.askAmountEBT);
+              updatedAskAmountEBT = updatedAskAmountEBT.minus(totoalBidRemainingEBT);
+
+              //var updatedAskAmountBTC = (parseFloat(currentAskDetails.askAmountBTC) - parseFloat(totoalBidRemainingBTC));
+              var updatedAskAmountBTC = new BigNumber(currentAskDetails.askAmountBTC);
+              updatedAskAmountBTC = updatedAskAmountBTC.minus(totoalBidRemainingBTC);
               try {
                 var updatedaskDetails = await AskEBT.update({
                   id: currentAskDetails.id
                 }, {
-                  askAmountBTC: parseFloat(updatedAskAmountBTC),
-                  askAmountEBT: parseFloat(updatedAskAmountEBT),
+                  askAmountBTC: updatedAskAmountBTC,
+                  askAmountEBT: updatedAskAmountEBT,
                   status: statusTwo,
                   statusName: statusTwoPending,
                 });
@@ -1331,8 +1575,13 @@ module.exports = {
                 });
               }
 
-              var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(totoalBidRemainingEBT));
-              var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC));
+              //var updatedFreezedEBTbalanceAsker = (parseFloat(userAllDetailsInDBAsker.FreezedEBTbalance) - parseFloat(totoalBidRemainingEBT));
+              var updatedFreezedEBTbalanceAsker = new BigNumber(userAllDetailsInDBAsker.FreezedEBTbalance);
+              updatedFreezedEBTbalanceAsker = updatedFreezedEBTbalanceAsker.minus(totoalBidRemainingEBT);
+
+              //var updatedBTCbalanceAsker = (parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(totoalBidRemainingBTC));
+              var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.plus(totoalBidRemainingBTC);
 
               console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
               console.log("Total Ask RemainEBT totoalBidRemainingBTC " + totoalBidRemainingBTC);
@@ -1342,19 +1591,23 @@ module.exports = {
 
               //Deduct Transation Fee Asker
               console.log("Before deduct TX Fees of updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
-              var txFeesAskerBTC = (parseFloat(totoalBidRemainingBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              //var txFeesAskerBTC = (parseFloat(totoalBidRemainingBTC) * parseFloat(txFeeBTCWithdrawSuccess));
+              var txFeesAskerBTC = new BigNumber(totoalBidRemainingBTC);
+              txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
+
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
-              updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
+              updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
               console.log("After deduct TX Fees of EBT Update user " + updatedBTCbalanceAsker);
 
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedFreezedEBTbalanceAsker:: " + updatedFreezedEBTbalanceAsker);
-              console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
+              console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails asdfasd .askAmountBTC updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerEBT
                 }, {
-                  FreezedEBTbalance: parseFloat(updatedFreezedEBTbalanceAsker),
-                  BTCbalance: parseFloat(updatedBTCbalanceAsker)
+                  FreezedEBTbalance: updatedFreezedEBTbalanceAsker,
+                  BTCbalance: updatedBTCbalanceAsker
                 });
               } catch (e) {
                 return res.json({
@@ -1378,24 +1631,38 @@ module.exports = {
 
               //Update bidder =========================================== 11
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC enter into userAskAmountBTC i == allBidsFromdb.length - 1 bidDetails.askownerEBT");
-              var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT));
-              var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC));
+              //var updatedEBTbalanceBidder = (parseFloat(userAllDetailsInDBBidder.EBTbalance) + parseFloat(userBidAmountEBT));
+              console.log(currentAskDetails.id + " else asdffdsfdof totoalBidRemainingBTC >= currentAskDetails.askAmountBTC userBidAmountEBT " + userBidAmountEBT);
+              console.log(currentAskDetails.id + " else asdffdsfdof totoalBidRemainingBTC >= currentAskDetails.askAmountBTC userAllDetailsInDBBidder.EBTbalance " + userAllDetailsInDBBidder.EBTbalance);
+
+              var updatedEBTbalanceBidder = new BigNumber(userAllDetailsInDBBidder.EBTbalance);
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.plus(userBidAmountEBT);
+
+
+              //var updatedFreezedBTCbalanceBidder = (parseFloat(userAllDetailsInDBBidder.FreezedBTCbalance) - parseFloat(userBidAmountBTC));
+              var updatedFreezedBTCbalanceBidder = new BigNumber(userAllDetailsInDBBidder.FreezedBTCbalance);
+              updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.minus(userBidAmountBTC);
 
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
-              var txFeesBidderEBT = (parseFloat(updatedEBTbalanceBidder) * parseFloat(txFeeEBTWithdrawSuccess));
+              //var txFeesBidderEBT = (parseFloat(updatedEBTbalanceBidder) * parseFloat(txFeeEBTWithdrawSuccess));
+              var txFeesBidderEBT = new BigNumber(userBidAmountEBT);
+              txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
+
               console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
-              updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
+              updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);
+
               console.log("After deduct TX Fees of EBT Update user " + updatedEBTbalanceBidder);
 
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC asdf updatedEBTbalanceBidder ::: " + updatedEBTbalanceBidder);
-              console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC asdf updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
+              console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAsk asdfasd fDetails.askAmountBTC asdf updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerEBT
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalanceBidder),
-                  FreezedBTCbalance: parseFloat(updatedFreezedBTCbalanceBidder)
+                  EBTbalance: updatedEBTbalanceBidder,
+                  FreezedBTCbalance: updatedFreezedBTCbalanceBidder
                 });
               } catch (e) {
                 return res.json({
@@ -1427,7 +1694,7 @@ module.exports = {
               sails.sockets.blast(constants.EBT_BID_DESTROYED, bidDestroy);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC Bid destroy successfully desctroyCurrentBid ::");
               return res.json({
-                "message": "Ask Executed successfully",
+                "message": "Bid Executed successfully",
                 statusCode: 200
               });
             }
@@ -1629,69 +1896,6 @@ module.exports = {
       });
     });
   },
-  // getAllBidEBT: function(req, res) {
-  //   console.log("Enter into ask api getAllBid :: ");
-  //   BidEBT.find({
-  //       status: {
-  //         '!': statusOne
-  //       }
-  //     })
-  //     .sort('bidRate DESC')
-  //     .exec(function(err, allBidDetailsToExecute) {
-  //       if (err) {
-  //         return res.json({
-  //           "message": "Error to find Bids!!",
-  //           statusCode: 401
-  //         });
-  //       }
-  //       if (allBidDetailsToExecute) {
-  //         if (allBidDetailsToExecute.length >= 1) {
-  //           return res.json({
-  //             bidsEBT: allBidDetailsToExecute,
-  //             statusCode: 200
-  //           });
-  //         } else {
-  //           return res.json({
-  //             "message": "No Bid Found!!",
-  //             statusCode: 401
-  //           });
-  //         }
-  //       }
-  //     });
-  // },
-  // getAllAskEBT: function(req, res) {
-  //   console.log("Enter into ask api getAllBid :: ");
-  //   AskEBT.find({
-  //       status: {
-  //         '!': statusOne
-  //       }
-  //     })
-  //     .sort('askRate ASC')
-  //     .exec(function(err, allAskDetailsToExecute) {
-  //       if (err) {
-  //         console.log("Error to find ask");
-  //       }
-  //       if (!allAskDetailsToExecute) {
-  //         return res.json({
-  //           "message": "No Ask Found!!",
-  //           statusCode: 401
-  //         });
-  //       }
-  //       if (allAskDetailsToExecute) {
-  //         if (allAskDetailsToExecute.length >= 1) {
-  //           return res.json({
-  //             asksEBT: allAskDetailsToExecute,
-  //             statusCode: 200
-  //           });
-  //         } else {
-  //           return res.json({
-  //             "message": "No Ask Found!!",
-  //             statusCode: 401
-  //           });
-  //         }
-  //       }
-  //     });
-  // }
   getAllBidEBT: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     BidEBT.find()
@@ -1749,7 +1953,7 @@ module.exports = {
   getAllAskEBT: function(req, res) {
     console.log("Enter into ask api getAllAllfullAskEBT :: ");
     AskEBT.find()
-      .sort('askRate DESC')
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1873,7 +2077,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate DESC')
+      .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -1932,5 +2136,4 @@ module.exports = {
         }
       });
   },
-
 };

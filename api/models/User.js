@@ -143,6 +143,10 @@ module.exports = {
       collection: 'askEBT',
       via: 'askownerEBT'
     },
+    loginHistory: {
+      collection: 'LoginHistory',
+      via: 'loginowner'
+    },
     toJSON: function() {
       var obj = this.toObject();
       delete obj.encryptedPassword;
