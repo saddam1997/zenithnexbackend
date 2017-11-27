@@ -664,7 +664,7 @@ module.exports = {
         });
       }
       if (user.verifyEmail) {
-        return res.redirect('http://zenithnex.com/');
+        return res.redirect('http://zenithnex.com/loginnew.php');
         // return res.json({
         //   "message": "Email already verified !!",
         //   statusCode: 401
@@ -698,7 +698,7 @@ module.exports = {
                 });
               }
               console.log("Update passoword succesfully!!!");
-              return res.redirect('http://zenithnex.com/');
+              return res.redirect('http://zenithnex.com/loginnew.php');
               // res.json(200, {
               //   "message": "Email verified succesfully",
               //   "userMailId": userMailId,

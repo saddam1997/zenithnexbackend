@@ -52,6 +52,12 @@ module.exports = {
         statusCode: 401
       });
     }
+    if (!userAsker) {
+      return res.json({
+        "message": "Invalid Id!",
+        statusCode: 401
+      });
+    }
     console.log("User details find successfully :::: " + JSON.stringify(userAsker));
     var userBCHBalanceInDb = new BigNumber(userAsker.BCHbalance);
     var userFreezedBCHBalanceInDb = new BigNumber(userAsker.FreezedBCHbalance);
@@ -872,7 +878,12 @@ module.exports = {
         statusCode: 401
       });
     }
-
+    if (!userBidder) {
+      return res.json({
+        "message": "Invalid Id!",
+        statusCode: 401
+      });
+    }
     console.log("Getting user details !! !");
     var userBTCBalanceInDb = new BigNumber(userBidder.BTCbalance);
     var userFreezedBTCBalanceInDb = new BigNumber(userBidder.FreezedBTCbalance);

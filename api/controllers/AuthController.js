@@ -5,6 +5,9 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
+const loginHostoryStatus = sails.config.common.loginHostoryStatus;
+const loginHostoryStatusName = sails.config.common.loginHostoryStatusName;
+
 module.exports = {
 
   logout: function(req, res) {
@@ -17,7 +20,9 @@ module.exports = {
     console.log("Enter into authentcate!!!" + req.body.email);
     var useremail = req.param('email');
     var password = req.param('password');
-    if (!useremail || !password) {
+    //var ip = req.param('ip');
+    var ip = "192.168.0.1";
+    if (!useremail || !password || !ip) {
       console.log("email and password required");
       return res.json({
         "message": "Invalid Parameter",
@@ -64,26 +69,40 @@ module.exports = {
             });
           } else {
             console.log("User is valid return user details !!!");
-            if (user.tfastatus) {
-              console.log("Enter into this user.tfastatus");
-              res.json({
-                user: user,
-                statusCode: 201,
-                message: "Google Authenticattion Enabled For this user!!!",
-                token: jwToken.issue({
-                  id: user.id
-                })
+            LoginHistory.create({
+                ip: ip,
+                status: loginHostoryStatus,
+                statusName: loginHostoryStatusName,
+                loginowner: user.id
+              })
+              .exec(function(err, createLoginHistory) {
+                if (err) {
+                  console.log("Error to update user");
+                  return res.serverError(err);
+                }
+                if (user.tfastatus) {
+                  console.log("Enter into this user.tfastatus");
+                  res.json({
+                    user: user,
+                    statusCode: 201,
+                    message: "Google Authenticattion Enabled For this user!!!",
+                    token: jwToken.issue({
+                      id: user.id
+                    })
+                  });
+                } else {
+                  console.log("Returnin user detailsss");
+                  res.json({
+                    user: user,
+                    statusCode: 200,
+                    token: jwToken.issue({
+                      id: user.id
+                    })
+                  });
+                }
+
               });
-            } else {
-              console.log("Returnin user detailsss");
-              res.json({
-                user: user,
-                statusCode: 200,
-                token: jwToken.issue({
-                  id: user.id
-                })
-              });
-            }
+
           }
         });
       });

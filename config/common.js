@@ -16,6 +16,9 @@ module.exports.common = {
   txFeeBCHWithdrawSuccess: 0.0001,
   txFeeBTCWithdrawSuccess: 0.0001,
   txFeeEBTWithdrawSuccess: 0.0001,
-  txFeeGDSWithdrawSuccess: 0.0001
+  txFeeGDSWithdrawSuccess: 0.0001,
+
+  loginHostoryStatus: 1,
+  loginHostoryStatusName: 'Success'
 
 }
