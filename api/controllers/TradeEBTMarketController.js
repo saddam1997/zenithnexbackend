@@ -1411,7 +1411,7 @@ module.exports = {
 
                 //var txFeesBidderEBT = (parseFloat(bchAmountSucess) * parseFloat(txFeeEBTWithdrawSuccess));
                 var txFeesBidderEBT = new BigNumber(bchAmountSucess);
-                txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
+                txFeesBidderEBT = txFeesBidderEBT.times(txFeeEBTWithdrawSuccess);
                 console.log("txFeesBidderEBT :: " + txFeesBidderEBT);
                 //updatedEBTbalanceBidder = (parseFloat(updatedEBTbalanceBidder) - parseFloat(txFeesBidderEBT));
                 updatedEBTbalanceBidder = updatedEBTbalanceBidder.minus(txFeesBidderEBT);

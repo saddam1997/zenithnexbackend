@@ -1412,7 +1412,7 @@ module.exports = {
 
                 //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
                 var txFeesBidderBCH = new BigNumber(bchAmountSucess);
-                txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+                txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
                 console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
                 //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
                 updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
