@@ -462,7 +462,7 @@ module.exports = {
                       console.log("User Create Succesfully...........");
 
                       var verificationURL = projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail;
-                      console.log("verificationURL ::: " + verificationURL);
+                      //console.log("verificationURL ::: " + verificationURL);
                       var mailOptions = {
                         from: sails.config.common.supportEmailId,
                         to: useremailaddress,
@@ -620,7 +620,7 @@ module.exports = {
                         } else {
                           console.log('Email sent: ' + info.response);
                           return res.json(200, {
-                            "message": "We send link on your email address please verify link!!!",
+                            "message": "We sent link on your email address please verify link!!!",
                             "userMailId": useremailaddress,
                             statusCode: 200
                           });
@@ -709,30 +709,6 @@ module.exports = {
       });
     });
   },
-  sendEmail: function(req, res, next) {
-    console.log("Enter into sendEmailTest::: " + JSON.stringify(req.body));
-    // var transporter = nodemailer.createTransport({
-    //   service: 'gmail',
-    //   auth: {
-    //     user: 'wallet.bcc@gmail.com',
-    //     pass: 'boosters@123'
-    //   }
-    // });
-    var mailOptions = {
-      from: sails.config.common.supportEmailId,
-      to: 'bccwalletsuport@gmail.com',
-      subject: 'Sending Email using Node.js',
-      text: 'That was easy!'
-    };
-    transporter.sendMail(mailOptions, function(error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-        res.json(200, "Message Send Succesfully");
-      }
-    });
-  },
   sentOtpToEmailForgotPassword: function(req, res, next) {
 
     console.log("Enter into sentOtpToEmail");
@@ -759,21 +735,85 @@ module.exports = {
           statusCode: 401
         });
       }
-      // var transporter = nodemailer.createTransport({
-      //   service: 'gmail',
-      //   auth: {
-      //     user: 'wallet.bcc@gmail.com',
-      //     pass: 'boosters@123'
-      //   }
-      // });
+
       var newCreatedPassword = Math.floor(100000 + Math.random() * 900000);
       console.log("newCreatedPassword :: " + newCreatedPassword);
       var mailOptions = {
         from: sails.config.common.supportEmailId,
         to: userMailId,
         subject: 'Please reset your password',
-        text: 'We heard that you lost your BccPay password. Sorry about that! ' +
-          '\n But don’t worry! You can use this otp reset your password ' + newCreatedPassword
+        html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Set up a new password for [Product Name]</title>
+
+
+  </head>
+  <body style="-webkit-text-size-adjust: none; box-sizing: border-box; color: #74787E; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; height: 100%; line-height: 1.4; margin: 0; width: 100% !important;" bgcolor="#F2F4F6"><style type="text/css">
+body {
+width: 100% !important; height: 100%; margin: 0; line-height: 1.4; background-color: #F2F4F6; color: #74787E; -webkit-text-size-adjust: none;
+}
+@media only screen and (max-width: 600px) {
+  .email-body_inner {
+    width: 100% !important;
+  }
+  .email-footer {
+    width: 100% !important;
+  }
+}
+@media only screen and (max-width: 500px) {
+  .button {
+    width: 100% !important;
+  }
+}
+</style>
+    <span class="preheader" style="box-sizing: border-box; display: none !important; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 1px; line-height: 1px; max-height: 0; max-width: 0; mso-hide: all; opacity: 0; overflow: hidden; visibility: hidden;">Use this link to reset your password. The link is only valid for 24 hours.</span>
+    <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; margin: 0; padding: 0; width: 100%;" bgcolor="#F2F4F6">
+      <tr>
+        <td align="center" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; word-break: break-word;">
+          <table class="email-content" width="100%" cellpadding="0" cellspacing="0" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; margin: 0; padding: 0; width: 100%;">
+
+
+            <tr>
+              <td class="email-body" width="100%" cellpadding="0" cellspacing="0" style="-premailer-cellpadding: 0; -premailer-cellspacing: 0; border-bottom-color: #EDEFF2; border-bottom-style: solid; border-bottom-width: 1px; border-top-color: #EDEFF2; border-top-style: solid; border-top-width: 1px; box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; margin: 0; padding: 0; width: 100%; word-break: break-word;" bgcolor="#FFFFFF">
+                <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; margin: 0 auto; padding: 0; width: 570px;" bgcolor="#FFFFFF">
+
+                  <tr>
+                    <td class="content-cell" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; padding: 35px; word-break: break-word;">
+                      <h1 style="box-sizing: border-box; color: #2F3133; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 19px; font-weight: bold; margin-top: 0;" align="left">Hi,</h1>
+                      <p style="box-sizing: border-box; color: #74787E; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; line-height: 1.5em; margin-top: 0;" align="left">You recently requested to forgot your password for your Zenithnex account. Use the OTP below to reset it. <strong style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;"></strong></p>
+
+                      <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; margin: 30px auto; padding: 0; text-align: center; width: 100%;">
+                        <tr>
+                          <td align="center" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; word-break: break-word;">
+
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;">
+                              <tr>
+                                <td align="center" style="box-sizing: border-box; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; word-break: break-word;">
+                                   <h5 style="box-sizing: border-box; color: #2F3133; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 15px; font-weight: bold; margin-top: 0;" align="left">${newCreatedPassword}</h5>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      <p style="box-sizing: border-box; color: #74787E; font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 16px; line-height: 1.5em; margin-top: 0;" align="left">Thanks,
+                      <br />The Zenithnex Team</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
       };
       transporter.sendMail(mailOptions, function(error, info) {
         if (error) {
@@ -934,14 +974,14 @@ module.exports = {
     if (currentPassword == newPassword) {
       console.log("Invalid Parameter by user.....");
       return res.json({
-        "message": "Current password is not same as newPassword",
+        "message": "Current password cannot be same as new Password",
         statusCode: 401
       });
     }
     if (newPassword != confirmNewPassword) {
       console.log("Invalid Parameter by user.....");
       return res.json({
-        "message": "New Password and Confirm New Password not match",
+        "message": "New  password and confirm new password are not match",
         statusCode: 401
       });
     }
@@ -992,9 +1032,9 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                console.log("Update current passoword succesfully!!!");
+                console.log("Your password updated succesfully!!!");
                 return res.json({
-                  "message": "Your passoword updated succesfully",
+                  "message": "Your password updated succesfully",
                   statusCode: 200
                 });
               });
@@ -1020,14 +1060,14 @@ module.exports = {
     if (currentSpendingPassword == newSpendingPassword) {
       console.log("Invalid Parameter by user.....");
       return res.json({
-        "message": "Current password is not same as newSpendingPassword",
+        "message": "Current spending password cannot be same as new spending password",
         statusCode: 401
       });
     }
     if (newSpendingPassword != confirmNewSpendingPassword) {
       console.log("Invalid Parameter by user.....");
       return res.json({
-        "message": "New SpendingPassword and Confirm New SpendingPassword not match",
+        "message": "New spending password and confirm new spending password are not match",
         statusCode: 401
       });
     }
@@ -1078,9 +1118,9 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                console.log("Update current passoword succesfully!!!");
+                console.log("Your password updated successfully!!!");
                 return res.json({
-                  "message": "Your passoword updated succesfully",
+                  "message": "Your spending password updated successfully",
                   statusCode: 200
                 });
               });
@@ -1130,13 +1170,7 @@ module.exports = {
             statusCode: 401
           });
         } else {
-          // var transporter = nodemailer.createTransport({
-          //   service: 'gmail',
-          //   auth: {
-          //     user: sails.config.common.supportEmailId,
-          //     pass: 'boosters@123'
-          //   }
-          // });
+
           var newCreatedPassword = Math.floor(100000 + Math.random() * 900000);
           console.log("newCreatedPassword :: " + newCreatedPassword);
           var mailOptions = {
@@ -1291,69 +1325,69 @@ module.exports = {
       });
     });
   },
-  sentOtpToEmailVerificatation: function(req, res, next) {
-
-    console.log("Enter into sentOtpToEmailVerificatation");
-    var userMailId = req.body.userMailId;
-    if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
-      return res.json({
-        "message": "Invalid Parameter",
-        statusCode: 400
-      });
-    }
-    User.findOne({
-      email: userMailId
-    }).exec(function(err, user) {
-      if (err) {
-        return res.json({
-          "message": "Error to find user",
-          statusCode: 401
-        });
-      }
-      if (!user) {
-        return res.json({
-          "message": "Invalid email!",
-          statusCode: 401
-        });
-      }
-      var createNewOTP = Math.floor(100000 + Math.random() * 900000);
-      console.log("createNewOTP :: " + createNewOTP);
-      var mailOptions = {
-        from: sails.config.common.supportEmailId,
-        to: user.email,
-        subject: 'Please verify your email',
-        text: 'Your otp to varify email ' + createNewOTP
-      };
-      transporter.sendMail(mailOptions, function(error, info) {
-        if (error) {
-          console.log(error);
-        } else {
-          console.log(createNewOTP + 'Email sent: ' + info.response);
-          console.log("createing encryptedPassword ....");
-          bcrypt.hash(createNewOTP.toString(), 10, function(err, hash) {
-            if (err) return next(err);
-            var newEncryptedPass = hash;
-            User.update({
-                email: userMailId
-              }, {
-                encryptedEmailVerificationOTP: newEncryptedPass
-              })
-              .exec(function(err, updatedUser) {
-                if (err) {
-                  return res.serverError(err);
-                }
-                console.log("OTP  update encryptedEmailVerificationOTP succesfully!!!");
-                return res.json({
-                  "message": "Otp sent on mail id",
-                  statusCode: 200
-                });
-              });
-          });
-        }
-      });
-    });
-  },
+  // sentOtpToEmailVerificatation: function(req, res, next) {
+  //
+  //   console.log("Enter into sentOtpToEmailVerificatation");
+  //   var userMailId = req.body.userMailId;
+  //   if (!userMailId) {
+  //     console.log("Invalid Parameter by user.....");
+  //     return res.json({
+  //       "message": "Invalid Parameter",
+  //       statusCode: 400
+  //     });
+  //   }
+  //   User.findOne({
+  //     email: userMailId
+  //   }).exec(function(err, user) {
+  //     if (err) {
+  //       return res.json({
+  //         "message": "Error to find user",
+  //         statusCode: 401
+  //       });
+  //     }
+  //     if (!user) {
+  //       return res.json({
+  //         "message": "Invalid email!",
+  //         statusCode: 401
+  //       });
+  //     }
+  //     var createNewOTP = Math.floor(100000 + Math.random() * 900000);
+  //     console.log("createNewOTP :: " + createNewOTP);
+  //     var mailOptions = {
+  //       from: sails.config.common.supportEmailId,
+  //       to: user.email,
+  //       subject: 'Please verify your email',
+  //       text: 'Your otp to varify email ' + createNewOTP
+  //     };
+  //     transporter.sendMail(mailOptions, function(error, info) {
+  //       if (error) {
+  //         console.log(error);
+  //       } else {
+  //         console.log(createNewOTP + 'Email sent: ' + info.response);
+  //         console.log("createing encryptedPassword ....");
+  //         bcrypt.hash(createNewOTP.toString(), 10, function(err, hash) {
+  //           if (err) return next(err);
+  //           var newEncryptedPass = hash;
+  //           User.update({
+  //               email: userMailId
+  //             }, {
+  //               encryptedEmailVerificationOTP: newEncryptedPass
+  //             })
+  //             .exec(function(err, updatedUser) {
+  //               if (err) {
+  //                 return res.serverError(err);
+  //               }
+  //               console.log("OTP  update encryptedEmailVerificationOTP succesfully!!!");
+  //               return res.json({
+  //                 "message": "Otp sent on mail id",
+  //                 statusCode: 200
+  //               });
+  //             });
+  //         });
+  //       }
+  //     });
+  //   });
+  // },
   updateUserVerifyEmail: function(req, res, next) {
 
     console.log("Enter into updateUserVerifyEmail");
