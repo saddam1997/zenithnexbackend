@@ -1359,7 +1359,7 @@ module.exports = {
                 //var txFeesAskerBTC = (parseFloat(currentAskDetails.askAmountBTC) * parseFloat(txFeeBTCWithdrawSuccess));
                 var txFeesAskerBTC = new BigNumber(currentAskDetails.askAmountBTC);
                 txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
-                //Shikha is a great tester
+
                 console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
                 //updatedBTCbalanceAsker = (parseFloat(updatedBTCbalanceAsker) - parseFloat(txFeesAskerBTC));
                 updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
