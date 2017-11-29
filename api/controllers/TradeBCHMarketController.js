@@ -21,7 +21,7 @@ const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 
 module.exports = {
   addAskBCHMarket: async function(req, res) {
-    console.log("Enter into ask api addAskBCHMarket : : ");
+    console.log("Enter into ask api addAskBCHMarket : : " + JSON.stringify(req.body));
     var userAskAmountBTC = new BigNumber(req.body.askAmountBTC);
     var userAskAmountBCH = new BigNumber(req.body.askAmountBCH);
     var userAskRate = new BigNumber(req.body.askRate);
