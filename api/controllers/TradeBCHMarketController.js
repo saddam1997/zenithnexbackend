@@ -209,7 +209,13 @@ module.exports = {
             //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.toFixed(8);
+
             console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+            console.log("Before Update :: asdf111 userAllDetailsInDBBidder " + JSON.stringify(userAllDetailsInDBBidder));
+            console.log("Before Update :: asdf111 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+            console.log("Before Update :: asdf111 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+            console.log("Before Update :: asdf111 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf111 totoalAskRemainingBTC " + totoalAskRemainingBTC);
             try {
               var userUpdateBidder = await User.update({
                 id: currentBidDetails.bidownerBCH
@@ -224,6 +230,7 @@ module.exports = {
                 statusCode: 401
               });
             }
+
             //Workding.................asdfasdf
             //var updatedBTCbalanceAsker = ((parseFloat(userAllDetailsInDBAsker.BTCbalance) + parseFloat(userAskAmountBTC)) - parseFloat(totoalAskRemainingBTC));
             var updatedBTCbalanceAsker = new BigNumber(userAllDetailsInDBAsker.BTCbalance);
@@ -250,6 +257,13 @@ module.exports = {
             updatedBTCbalanceAsker = updatedBTCbalanceAsker.minus(txFeesAskerBTC);
             updatedBTCbalanceAsker = updatedBTCbalanceAsker.toFixed(8);
             console.log("After deduct TX Fees of BCH Update user " + updatedBTCbalanceAsker);
+
+            console.log("Before Update :: asdf112 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+            console.log("Before Update :: asdf112 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+            console.log("Before Update :: asdf112 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            console.log("Before Update :: asdf112 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf112 totoalAskRemainingBTC " + totoalAskRemainingBTC);
+
 
             try {
               var updatedUser = await User.update({
@@ -334,6 +348,13 @@ module.exports = {
             updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.toFixed(8);
             console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
             console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: " + updatedBCHbalanceBidder);
+
+
+            console.log("Before Update :: asdf113 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBBidder));
+            console.log("Before Update :: asdf113 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+            console.log("Before Update :: asdf113 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+            console.log("Before Update :: asdf113 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf113 totoalAskRemainingBTC " + totoalAskRemainingBTC);
             try {
               var userAllDetailsInDBBidderUpdate = await User.update({
                 id: currentBidDetails.bidownerBCH
@@ -416,6 +437,13 @@ module.exports = {
             updatedBTCbalanceAsker = updatedBTCbalanceAsker.toFixed(8);
             console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
             console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+
+
+            console.log("Before Update :: asdf114 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+            console.log("Before Update :: asdf114 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            console.log("Before Update :: asdf114 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+            console.log("Before Update :: asdf114 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf114 totoalAskRemainingBTC " + totoalAskRemainingBTC);
             try {
               var updatedUser = await User.update({
                 id: askDetails.askownerBCH
@@ -510,6 +538,14 @@ module.exports = {
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
               console.log("After deduct TX Fees of BCH Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
+
+              console.log("Before Update :: asdf115 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBBidder));
+              console.log("Before Update :: asdf115 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("Before Update :: asdf115 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+              console.log("Before Update :: asdf115 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+              console.log("Before Update :: asdf115 totoalAskRemainingBTC " + totoalAskRemainingBTC);
+
+
               try {
                 var userUpdateBidder = await User.update({
                   id: currentBidDetails.bidownerBCH
@@ -558,6 +594,16 @@ module.exports = {
 
               console.log(currentBidDetails.id + " asdfasdfupdatedBTCbalanceAsker updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
+
+
+
+              console.log("Before Update :: asdf116 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+              console.log("Before Update :: asdf116 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+              console.log("Before Update :: asdf116 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              console.log("Before Update :: asdf116 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+              console.log("Before Update :: asdf116 totoalAskRemainingBTC " + totoalAskRemainingBTC);
+
+
               try {
                 var updatedUser = await User.update({
                   id: askDetails.askownerBCH
@@ -648,6 +694,13 @@ module.exports = {
               console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: sadfsdf updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+
+
+              console.log("Before Update :: asdf117 userAllDetailsInDBBidder " + JSON.stringify(userAllDetailsInDBBidder));
+              console.log("Before Update :: asdf117 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("Before Update :: asdf117 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+              console.log("Before Update :: asdf117 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+              console.log("Before Update :: asdf117 totoalAskRemainingBTC " + totoalAskRemainingBTC);
 
               try {
                 var userAllDetailsInDBBidderUpdate = await User.update({
@@ -757,6 +810,14 @@ module.exports = {
 
             console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
             console.log(currentBidDetails.id + " updatedBCHbalanceBidder:asdfasdf:updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+
+
+            console.log("Before Update :: asdf118 userAllDetailsInDBBiddder " + JSON.stringify(userAllDetailsInDBBiddder));
+            console.log("Before Update :: asdf118 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+            console.log("Before Update :: asdf118 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+            console.log("Before Update :: asdf118 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf118 totoalAskRemainingBTC " + totoalAskRemainingBTC);
+
             try {
               var userAllDetailsInDBBidderUpdate = await User.update({
                 id: currentBidDetails.bidownerBCH
@@ -797,6 +858,14 @@ module.exports = {
 
             console.log(currentBidDetails.id + " updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
             console.log(currentBidDetails.id + " updatedFreezedBCHbalanceAsker safsdfsdfupdatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
+
+
+            console.log("Before Update :: asdf119 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+            console.log("Before Update :: asdf119 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+            console.log("Before Update :: asdf119 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+            console.log("Before Update :: asdf119 totoalAskRemainingBCH " + totoalAskRemainingBCH);
+            console.log("Before Update :: asdf119 totoalAskRemainingBTC " + totoalAskRemainingBTC);
+
             try {
               var updatedUser = await User.update({
                 id: askDetails.askownerBCH
@@ -1021,6 +1090,12 @@ module.exports = {
 
               //current ask details of Asker  updated
               //Ask FreezedBCHbalance balance of asker deducted and BTC to give asker
+
+              console.log("Before Update :: qweqwer11110 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+              console.log("Before Update :: qweqwer11110 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+              console.log("Before Update :: qweqwer11110 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              console.log("Before Update :: qweqwer11110 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11110 totoalBidRemainingBTC " + totoalBidRemainingBTC);
               try {
                 var userUpdateAsker = await User.update({
                   id: currentAskDetails.askownerBCH
@@ -1084,6 +1159,14 @@ module.exports = {
 
               console.log(currentAskDetails.id + " asdftotoalBidRemainingBCH == 0updatedBCHbalanceBidder ::: " + updatedBCHbalanceBidder);
               console.log(currentAskDetails.id + " asdftotoalBidRemainingBCH asdf== updatedFreezedBTCbalanceBidder updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
+
+
+              console.log("Before Update :: qweqwer11111 BidderuserAllDetailsInDBBidder " + JSON.stringify(BidderuserAllDetailsInDBBidder));
+              console.log("Before Update :: qweqwer11111 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("Before Update :: qweqwer11111 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+              console.log("Before Update :: qweqwer11111 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11111 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
 
               try {
                 var updatedUser = await User.update({
@@ -1178,6 +1261,14 @@ module.exports = {
               console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == :: ");
               console.log(currentAskDetails.id + "  else of totoalBidRemainingBCH == 0updaasdfsdftedBTCbalanceBidder updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
 
+
+              console.log("Before Update :: qweqwer11112 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+              console.log("Before Update :: qweqwer11112 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+              console.log("Before Update :: qweqwer11112 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              console.log("Before Update :: qweqwer11112 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11112 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
+
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerBCH
@@ -1269,6 +1360,14 @@ module.exports = {
 
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updateasdfdFreezedBCHbalanceAsker updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
+
+
+              console.log("Before Update :: qweqwer11113 userAllDetailsInDBBid " + JSON.stringify(userAllDetailsInDBBid));
+              console.log("Before Update :: qweqwer11113 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("Before Update :: qweqwer11113 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+              console.log("Before Update :: qweqwer11113 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11113 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerBCH
@@ -1370,6 +1469,16 @@ module.exports = {
                 console.log(" totoalBidRemainingBCH == 0updatedFreezedBCHbalanceAsker ::: " + updatedFreezedBCHbalanceAsker);
                 console.log(" totoalBidRemainingBCH == 0updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log("----------------------------------------------------------------------------------updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+
+
+
+                console.log("Before Update :: qweqwer11114 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+                console.log("Before Update :: qweqwer11114 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+                console.log("Before Update :: qweqwer11114 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+                console.log("Before Update :: qweqwer11114 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+                console.log("Before Update :: qweqwer11114 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
+
                 try {
                   var userUpdateAsker = await User.update({
                     id: currentAskDetails.askownerBCH
@@ -1421,6 +1530,15 @@ module.exports = {
 
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
                 console.log(currentAskDetails.id + " totoalBidRemainingBCH == 0 updatedFreezedBCHbalaasdf updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
+
+
+                console.log("Before Update :: qweqwer11115 userAllDetailsInDBBidder " + JSON.stringify(userAllDetailsInDBBidder));
+                console.log("Before Update :: qweqwer11115 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+                console.log("Before Update :: qweqwer11115 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+                console.log("Before Update :: qweqwer11115 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+                console.log("Before Update :: qweqwer11115 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
+
                 try {
                   var updatedUser = await User.update({
                     id: bidDetails.bidownerBCH
@@ -1507,6 +1625,14 @@ module.exports = {
 
                 console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0 updatedFreezedBCHbalanceAsker:: " + updatedFreezedBCHbalanceAsker);
                 console.log(currentAskDetails.id + " else of totoalBidRemainingBCH == 0 updatedBTCbalance asd asd updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
+
+
+                console.log("Before Update :: qweqwer11116 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+                console.log("Before Update :: qweqwer11116 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+                console.log("Before Update :: qweqwer11116 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+                console.log("Before Update :: qweqwer11116 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+                console.log("Before Update :: qweqwer11116 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
 
                 try {
                   var userAllDetailsInDBAskerUpdate = await User.update({
@@ -1614,6 +1740,16 @@ module.exports = {
 
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC updatedFreezedBCHbalanceAsker:: " + updatedFreezedBCHbalanceAsker);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails asdfasd .askAmountBTC updatedBTCbalanceAsker:: " + updatedBTCbalanceAsker);
+
+
+              console.log("Before Update :: qweqwer11117 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBAsker));
+              console.log("Before Update :: qweqwer11117 updatedFreezedBCHbalanceAsker " + updatedFreezedBCHbalanceAsker);
+              console.log("Before Update :: qweqwer11117 updatedBTCbalanceAsker " + updatedBTCbalanceAsker);
+              console.log("Before Update :: qweqwer11117 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11117 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
+
+
               try {
                 var userAllDetailsInDBAskerUpdate = await User.update({
                   id: currentAskDetails.askownerBCH
@@ -1628,6 +1764,9 @@ module.exports = {
                   statusCode: 401
                 });
               }
+
+
+
 
               try {
                 var userAllDetailsInDBBidder = await User.findOne({
@@ -1669,6 +1808,15 @@ module.exports = {
 
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAskDetails.askAmountBTC asdf updatedBCHbalanceBidder ::: " + updatedBCHbalanceBidder);
               console.log(currentAskDetails.id + " else of totoalBidRemainingBTC >= currentAsk asdfasd fDetails.askAmountBTC asdf updatedFreezedBTCbalanceBidder ::: " + updatedFreezedBTCbalanceBidder);
+
+
+
+              console.log("Before Update :: qweqwer11118 userAllDetailsInDBBidder " + JSON.stringify(userAllDetailsInDBBidder));
+              console.log("Before Update :: qweqwer11118 updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+              console.log("Before Update :: qweqwer11118 updatedBCHbalanceBidder " + updatedBCHbalanceBidder);
+              console.log("Before Update :: qweqwer11118 totoalBidRemainingBCH " + totoalBidRemainingBCH);
+              console.log("Before Update :: qweqwer11118 totoalBidRemainingBTC " + totoalBidRemainingBTC);
+
               try {
                 var updatedUser = await User.update({
                   id: bidDetails.bidownerBCH
