@@ -2058,7 +2058,7 @@ module.exports = {
     });
   },
   getAllBidGDS: function(req, res) {
-    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    console.log("Enter into ask api getAllBidGDS :: ");
     BidGDS.find()
       .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
@@ -2112,7 +2112,7 @@ module.exports = {
       });
   },
   getAllAskGDS: function(req, res) {
-    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    console.log("Enter into ask api getAllAskGDS :: ");
     AskGDS.find()
       .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
@@ -2166,7 +2166,7 @@ module.exports = {
       });
   },
   getBidsGDSSuccess: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    console.log("Enter into ask api getBidsGDSSuccess :: ");
     BidGDS.find({
         status: {
           'like': statusOne
@@ -2232,7 +2232,7 @@ module.exports = {
       });
   },
   getAsksGDSSuccess: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    console.log("Enter into ask api getAsksGDSSuccess :: ");
     AskGDS.find({
         status: {
           'like': statusOne

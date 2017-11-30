@@ -2057,7 +2057,7 @@ module.exports = {
     });
   },
   getAllBidBCH: function(req, res) {
-    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    console.log("Enter into ask api getAllBidBCH :: ");
     BidBCH.find()
       .sort('bidRate DESC')
       .exec(function(err, allAskDetailsToExecute) {
@@ -2111,7 +2111,7 @@ module.exports = {
       });
   },
   getAllAskBCH: function(req, res) {
-    console.log("Enter into ask api getAllAllfullAskEBT :: ");
+    console.log("Enter into ask api getAllAskBCH :: ");
     AskBCH.find()
       .sort('askRate ASC')
       .exec(function(err, allAskDetailsToExecute) {
@@ -2165,7 +2165,7 @@ module.exports = {
       });
   },
   getBidsBCHSuccess: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    console.log("Enter into ask api getBidsBCHSuccess :: ");
     BidBCH.find({
         status: {
           'like': statusOne
@@ -2231,7 +2231,7 @@ module.exports = {
       });
   },
   getAsksBCHSuccess: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
+    console.log("Enter into ask api getAsksBCHSuccess :: ");
     AskBCH.find({
         status: {
           'like': statusOne
