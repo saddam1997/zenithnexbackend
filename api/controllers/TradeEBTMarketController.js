@@ -2170,7 +2170,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('bidRate DESC')
+      .sort('createTimeUTC ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
@@ -2236,7 +2236,7 @@ module.exports = {
           'like': statusOne
         }
       })
-      .sort('askRate ASC')
+      .sort('createTimeUTC ASC')
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
