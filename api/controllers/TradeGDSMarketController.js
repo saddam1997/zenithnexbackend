@@ -2076,7 +2076,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            BidGDS.find()
+            BidGDS.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('bidAmountGDS')
               .exec(function(err, bidAmountGDSSum) {
                 if (err) {
@@ -2085,7 +2089,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                BidGDS.find()
+                BidGDS.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('bidAmountBTC')
                   .exec(function(err, bidAmountBTCSum) {
                     if (err) {
@@ -2130,7 +2138,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            AskGDS.find()
+            AskGDS.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('askAmountGDS')
               .exec(function(err, askAmountGDSSum) {
                 if (err) {
@@ -2139,7 +2151,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                AskGDS.find()
+                AskGDS.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('askAmountBTC')
                   .exec(function(err, askAmountBTCSum) {
                     if (err) {

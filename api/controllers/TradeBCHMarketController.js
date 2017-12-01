@@ -2075,7 +2075,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            BidBCH.find()
+            BidBCH.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('bidAmountBCH')
               .exec(function(err, bidAmountBCHSum) {
                 if (err) {
@@ -2084,7 +2088,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                BidBCH.find()
+                BidBCH.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('bidAmountBTC')
                   .exec(function(err, bidAmountBTCSum) {
                     if (err) {
@@ -2129,7 +2137,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            AskBCH.find()
+            AskBCH.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('askAmountBCH')
               .exec(function(err, askAmountBCHSum) {
                 if (err) {
@@ -2138,7 +2150,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                AskBCH.find()
+                AskBCH.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('askAmountBTC')
                   .exec(function(err, askAmountBTCSum) {
                     if (err) {

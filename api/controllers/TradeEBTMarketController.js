@@ -2074,7 +2074,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            BidEBT.find()
+            BidEBT.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('bidAmountEBT')
               .exec(function(err, bidAmountEBTSum) {
                 if (err) {
@@ -2083,7 +2087,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                BidEBT.find()
+                BidEBT.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('bidAmountBTC')
                   .exec(function(err, bidAmountBTCSum) {
                     if (err) {
@@ -2128,7 +2136,11 @@ module.exports = {
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
-            AskEBT.find()
+            AskEBT.find({
+                status: {
+                  '!': statusOne
+                }
+              })
               .sum('askAmountEBT')
               .exec(function(err, askAmountEBTSum) {
                 if (err) {
@@ -2137,7 +2149,11 @@ module.exports = {
                     statusCode: 401
                   });
                 }
-                AskEBT.find()
+                AskEBT.find({
+                    status: {
+                      '!': statusOne
+                    }
+                  })
                   .sum('askAmountBTC')
                   .exec(function(err, askAmountBTCSum) {
                     if (err) {
