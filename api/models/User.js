@@ -65,19 +65,19 @@ module.exports = {
       type: 'string'
     },
 
-    EBTMainbalance: {
+    PYYMainbalance: {
       type: 'float',
       defaultsTo: 0
     },
-    EBTbalance: {
+    PYYbalance: {
       type: 'float',
       defaultsTo: 0
     },
-    FreezedEBTbalance: {
+    FreezedPYYbalance: {
       type: 'float',
       defaultsTo: 0
     },
-    userEBTAddress: {
+    userPYYAddress: {
       type: 'string'
     },
 
@@ -134,14 +134,14 @@ module.exports = {
       collection: 'askGDS',
       via: 'askownerGDS'
     },
-    //EBT
-    bidsEBT: {
-      collection: 'bidEBT',
-      via: 'bidownerEBT'
+    //PYY
+    bidsPYY: {
+      collection: 'bidPYY',
+      via: 'bidownerPYY'
     },
-    asksEBT: {
-      collection: 'askEBT',
-      via: 'askownerEBT'
+    asksPYY: {
+      collection: 'askPYY',
+      via: 'askownerPYY'
     },
     loginHistory: {
       collection: 'LoginHistory',

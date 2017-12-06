@@ -28,13 +28,13 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
-//EBT Wallet Details
-var bitcoinEBT = require('bitcoin');
-var clientEBT = new bitcoinEBT.Client({
-  host: sails.config.company.clientEBThost,
-  port: sails.config.company.clientEBTport,
-  user: sails.config.company.clientEBTuser,
-  pass: sails.config.company.clientEBTpass
+//PYY Wallet Details
+var bitcoinPYY = require('bitcoin');
+var clientPYY = new bitcoinPYY.Client({
+  host: sails.config.company.clientPYYhost,
+  port: sails.config.company.clientPYYport,
+  user: sails.config.company.clientPYYuser,
+  pass: sails.config.company.clientPYYpass
 });
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
@@ -112,7 +112,7 @@ module.exports = {
       });
     });
   },
-  getNewEBTAddress: function(req, res) {
+  getNewPYYAddress: function(req, res) {
     var userMailId = req.body.userMailId;
     if (!userMailId)
       return res.json({
@@ -134,23 +134,23 @@ module.exports = {
           statusCode: 401
         });
       }
-      if (user.userEBTAddress)
+      if (user.userPYYAddress)
         return res.json({
           "message": "address already exists",
           statusCode: 401
         });
-      clientEBT.cmd('getnewaddress', userMailId, function(err, address) {
+      clientPYY.cmd('getnewaddress', userMailId, function(err, address) {
         if (err)
           return res.json({
-            "message": "Failed to get new address from ebt server",
+            "message": "Failed to get new address from PYY server",
             statusCode: 400
           });
 
-        console.log('ebt address generated', address);
+        console.log('PYY address generated', address);
         User.update({
           email: userMailId
         }, {
-          userEBTAddress: address
+          userPYYAddress: address
         }, function(err, response) {
           if (err)
             return res.json({
@@ -383,7 +383,7 @@ module.exports = {
               });
             }
             console.log('New address created from BCHServer :: ', newBCHAddressForUser);
-            clientEBT.cmd('getnewaddress', useremailaddress, function(err, newEBTAddressForUser, resHeaders) {
+            clientPYY.cmd('getnewaddress', useremailaddress, function(err, newPYYAddressForUser, resHeaders) {
               if (err) {
                 console.log("Error from sendFromBCHAccount:: ");
                 if (err.code && err.code == "ECONNREFUSED") {
@@ -403,7 +403,7 @@ module.exports = {
                   statusCode: 400
                 });
               }
-              console.log('New address created from newEBTAddressForUser :: ', newEBTAddressForUser);
+              console.log('New address created from newPYYAddressForUser :: ', newPYYAddressForUser);
               clientGDS.cmd('getnewaddress', useremailaddress, function(err, newGDSAddressForUser, resHeaders) {
                 if (err) {
                   console.log("Error from sendFromBCHAccount:: ");
@@ -424,7 +424,7 @@ module.exports = {
                     statusCode: 400
                   });
                 }
-                console.log('New address created from newEBTAddressForUser :: ', newGDSAddressForUser);
+                console.log('New address created from newPYYAddressForUser :: ', newGDSAddressForUser);
                 console.log('New address created from BCHServer :: ', newBCHAddressForUser);
                 bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
                   if (err) {
@@ -445,7 +445,7 @@ module.exports = {
                       encryptedSpendingpassword: hashspendingpassword,
                       userBTCAddress: newBTCAddressForUser,
                       userBCHAddress: newBCHAddressForUser,
-                      userEBTAddress: newEBTAddressForUser,
+                      userPYYAddress: newPYYAddressForUser,
                       userGDSAddress: newGDSAddressForUser,
                       encryptedEmailVerificationOTP: encOtpForEmail,
                       googlesecreatekey: googlesecreatekey

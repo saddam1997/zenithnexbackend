@@ -150,9 +150,9 @@ module.exports = {
         }
       });
   },
-  getAllSuccessfullBidEBT: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullBidEBT :: ");
-    BidEBT.find({
+  getAllSuccessfullBidPYY: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullBidPYY :: ");
+    BidPYY.find({
         status: {
           'like': statusOne
         }
@@ -161,34 +161,34 @@ module.exports = {
       .exec(function(err, allBidDetailsToExecute) {
         if (err) {
           return res.json({
-            "message": "Error found to get BidEBT !!",
+            "message": "Error found to get BidPYY !!",
             statusCode: 401
           });
         }
         if (!allBidDetailsToExecute) {
           return res.json({
-            "message": "No BidEBT Found!!",
+            "message": "No BidPYY Found!!",
             statusCode: 401
           });
         }
         if (allBidDetailsToExecute) {
           if (allBidDetailsToExecute.length >= 1) {
             return res.json({
-              bidsEBT: allBidDetailsToExecute,
+              bidsPYY: allBidDetailsToExecute,
               statusCode: 200
             });
           } else {
             return res.json({
-              "message": "No BidEBT Found!!",
+              "message": "No BidPYY Found!!",
               statusCode: 401
             });
           }
         }
       });
   },
-  getAllSuccessfullAskEBT: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
-    AskEBT.find({
+  getAllSuccessfullAskPYY: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskPYY :: ");
+    AskPYY.find({
         status: {
           'like': statusOne
         }
@@ -197,25 +197,25 @@ module.exports = {
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
-            "message": "Error found to get AskEBT !!",
+            "message": "Error found to get AskPYY !!",
             statusCode: 401
           });
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No AskEBT Found!!",
+            "message": "No AskPYY Found!!",
             statusCode: 401
           });
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
             return res.json({
-              asksEBT: allAskDetailsToExecute,
+              asksPYY: allAskDetailsToExecute,
               statusCode: 200
             });
           } else {
             return res.json({
-              "message": "No AskEBT Found!!",
+              "message": "No AskPYY Found!!",
               statusCode: 401
             });
           }
@@ -223,8 +223,8 @@ module.exports = {
       });
   },
   getBidsTotal: function(req, res) {
-    console.log("Enter into ask api getAllSuccessfullAskEBT :: ");
-    AskEBT.find({
+    console.log("Enter into ask api getAllSuccessfullAskPYY :: ");
+    AskPYY.find({
         status: {
           'like': statusOne
         }
@@ -233,25 +233,25 @@ module.exports = {
       .exec(function(err, allAskDetailsToExecute) {
         if (err) {
           return res.json({
-            "message": "Error found to get AskEBT !!",
+            "message": "Error found to get AskPYY !!",
             statusCode: 401
           });
         }
         if (!allAskDetailsToExecute) {
           return res.json({
-            "message": "No AskEBT Found!!",
+            "message": "No AskPYY Found!!",
             statusCode: 401
           });
         }
         if (allAskDetailsToExecute) {
           if (allAskDetailsToExecute.length >= 1) {
             return res.json({
-              asksEBT: allAskDetailsToExecute,
+              asksPYY: allAskDetailsToExecute,
               statusCode: 200
             });
           } else {
             return res.json({
-              "message": "No AskEBT Found!!",
+              "message": "No AskPYY Found!!",
               statusCode: 401
             });
           }

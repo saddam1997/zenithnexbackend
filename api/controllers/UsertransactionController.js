@@ -20,13 +20,13 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
-//EBT Wallet Details
-var bitcoinEBT = require('bitcoin');
-var clientEBT = new bitcoinEBT.Client({
-  host: sails.config.company.clientEBThost,
-  port: sails.config.company.clientEBTport,
-  user: sails.config.company.clientEBTuser,
-  pass: sails.config.company.clientEBTpass
+//PYY Wallet Details
+var bitcoinPYY = require('bitcoin');
+var clientPYY = new bitcoinPYY.Client({
+  host: sails.config.company.clientPYYhost,
+  port: sails.config.company.clientPYYport,
+  user: sails.config.company.clientPYYuser,
+  pass: sails.config.company.clientPYYpass
 });
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
@@ -38,7 +38,7 @@ var clientGDS = new bitcoinGDS.Client({
 });
 var transactionFeeBCH = sails.config.company.txFeeBCH;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
-var transactionFeeEBT = sails.config.company.txFeeEBT;
+var transactionFeePYY = sails.config.company.txFeePYY;
 var transactionFeeGDS = sails.config.company.txFeeGDS;
 module.exports = {
   sendBTC: function(req, res, next) {
@@ -363,18 +363,18 @@ module.exports = {
       });
     });
   },
-  sendEBT: function(req, res, next) {
-    console.log("Enter into sendEBT with ::: " + JSON.stringify(req.body));
+  sendPYY: function(req, res, next) {
+    console.log("Enter into sendPYY with ::: " + JSON.stringify(req.body));
     var userEmailAddress = req.body.userMailId;
-    var userEBTAmountToSend = parseFloat(req.body.amount).toFixed(8);
-    var userReceiverEBTAddress = req.body.recieverEBTCoinAddress;
+    var userPYYAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userReceiverPYYAddress = req.body.recieverPYYCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
-    var minimumAmountEBTSentByUser = 0.008;
-    miniEBTAmountSentByUser = parseFloat(minimumAmountEBTSentByUser).toFixed(8);
+    var minimumAmountPYYSentByUser = 0.008;
+    miniPYYAmountSentByUser = parseFloat(minimumAmountPYYSentByUser).toFixed(8);
 
-    if (!userEmailAddress || !userEBTAmountToSend || !userReceiverEBTAddress ||
+    if (!userEmailAddress || !userPYYAmountToSend || !userReceiverPYYAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Invalid Parameter by user!!!");
       return res.json({
@@ -382,10 +382,10 @@ module.exports = {
         statusCode: 400
       });
     }
-    if (userEBTAmountToSend < minimumAmountEBTSentByUser) {
+    if (userPYYAmountToSend < minimumAmountPYYSentByUser) {
       console.log("amount in not less 0.08 !!!");
       return res.json({
-        "message": "EBT Amount not less than " + minimumAmountEBTSentByUser,
+        "message": "PYY Amount not less than " + minimumAmountPYYSentByUser,
         statusCode: 400
       });
     }
@@ -404,21 +404,21 @@ module.exports = {
           statusCode: 401
         });
       }
-      var userEBTBalanceInDb = parseFloat(userDetails.EBTMainbalance).toFixed(8);
-      var userEBTAddressInDb = userDetails.userEBTAddress;
-      console.log("UserAMount in database ::: " + userDetails.EBTMainbalance);
-      console.log("EBT Amount send by user ::: " + userEBTAmountToSend);
-      if (userEBTAmountToSend > userEBTBalanceInDb) {
-        console.log("EBT Amount amount Exceed !!!");
+      var userPYYBalanceInDb = parseFloat(userDetails.PYYMainbalance).toFixed(8);
+      var userPYYAddressInDb = userDetails.userPYYAddress;
+      console.log("UserAMount in database ::: " + userDetails.PYYMainbalance);
+      console.log("PYY Amount send by user ::: " + userPYYAmountToSend);
+      if (userPYYAmountToSend > userPYYBalanceInDb) {
+        console.log("PYY Amount amount Exceed !!!");
         return res.json({
-          "message": "You have Insufficient EBT balance",
+          "message": "You have Insufficient PYY balance",
           statusCode: 401
         });
       }
-      if (userReceiverEBTAddress == userEBTAddressInDb) {
-        console.log("User address and recieverEBTCoinAddress Same !!!");
+      if (userReceiverPYYAddress == userPYYAddressInDb) {
+        console.log("User address and recieverPYYCoinAddress Same !!!");
         return res.json({
-          "message": "recieverEBTCoinAddress and Your EBT Address Same",
+          "message": "recieverPYYCoinAddress and Your PYY Address Same",
           statusCode: 401
         });
       }
@@ -439,24 +439,24 @@ module.exports = {
         } else {
           console.log("Spending password is valid!!!");
           var minimumNumberOfConfirmation = 1;
-          var netAmountToSend = parseFloat(userEBTAmountToSend).toFixed(8) - parseFloat(transactionFeeEBT).toFixed(8);
+          var netAmountToSend = parseFloat(userPYYAmountToSend).toFixed(8) - parseFloat(transactionFeePYY).toFixed(8);
           console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
-          console.log(userEmailAddress + " transactionFeeEBT ::: " + transactionFeeEBT);
+          console.log(userEmailAddress + " transactionFeePYY ::: " + transactionFeePYY);
 
-          clientEBT.cmd('sendfrom', userEmailAddress, userReceiverEBTAddress, parseFloat(netAmountToSend).toFixed(8),
-            minimumNumberOfConfirmation, userReceiverEBTAddress, userReceiverEBTAddress,
+          clientPYY.cmd('sendfrom', userEmailAddress, userReceiverPYYAddress, parseFloat(netAmountToSend).toFixed(8),
+            minimumNumberOfConfirmation, userReceiverPYYAddress, userReceiverPYYAddress,
             function(err, TransactionDetails, resHeaders) {
               if (err) {
-                console.log("Error from sendFromEBTAccount:: " + err);
+                console.log("Error from sendFromPYYAccount:: " + err);
                 if (err.code && err.code == "ECONNREFUSED") {
                   return res.json({
-                    "message": "EBT Server Refuse to connect App",
+                    "message": "PYY Server Refuse to connect App",
                     statusCode: 400
                   });
                 }
                 if (err.code && err.code == -5) {
                   return res.json({
-                    "message": "Invalid EBT Address",
+                    "message": "Invalid PYY Address",
                     statusCode: 400
                   });
                 }
@@ -468,25 +468,25 @@ module.exports = {
                 }
                 if (err.code && err.code < 0) {
                   return res.json({
-                    "message": "Problem in EBT server",
+                    "message": "Problem in PYY server",
                     statusCode: 400
                   });
                 }
                 return res.json({
-                  "message": "Error in EBT Server",
+                  "message": "Error in PYY Server",
                   statusCode: 400
                 });
               }
               console.log('TransactionDetails :', TransactionDetails);
-              console.log("User balance in db:: " + userEBTBalanceInDb);
-              console.log("UserEBTAmountToSend  :: " + userEBTAmountToSend);
+              console.log("User balance in db:: " + userPYYBalanceInDb);
+              console.log("UserPYYAmountToSend  :: " + userPYYAmountToSend);
 
-              var updatedEBTbalance = parseFloat(userEBTBalanceInDb).toFixed(8) - parseFloat(userEBTAmountToSend).toFixed(8);
-              console.log("Update new Balance of user in DB ::" + updatedEBTbalance);
+              var updatedPYYbalance = parseFloat(userPYYBalanceInDb).toFixed(8) - parseFloat(userPYYAmountToSend).toFixed(8);
+              console.log("Update new Balance of user in DB ::" + updatedPYYbalance);
               User.update({
                   email: userEmailAddress
                 }, {
-                  EBTMainbalance: updatedEBTbalance
+                  PYYMainbalance: updatedPYYbalance
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -511,7 +511,7 @@ module.exports = {
                           statusCode: 401
                         });
                       }
-                      console.log("Update User details of EBT " +
+                      console.log("Update User details of PYY " +
                         JSON.stringify(user));
                       res.json({
                         user: user,
@@ -816,8 +816,8 @@ module.exports = {
         });
     });
   },
-  getTxsListEBT: function(req, res, next) {
-    console.log("Enter into getTxsListEBT::: ");
+  getTxsListPYY: function(req, res, next) {
+    console.log("Enter into getTxsListPYY::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
       console.log("Invalid Parameter by user.....");
@@ -843,7 +843,7 @@ module.exports = {
           statusCode: 401
         });
       }
-      clientEBT.cmd(
+      clientPYY.cmd(
         'listtransactions',
         userMailId,
         function(err, transactionList) {
@@ -1150,8 +1150,8 @@ module.exports = {
         });
     });
   },
-  getBalEBT: function(req, res, next) {
-    console.log("Enter into getBalEBT::: ");
+  getBalPYY: function(req, res, next) {
+    console.log("Enter into getBalPYY::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
       console.log("Invalid Parameter by user.....");
@@ -1176,13 +1176,13 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.EBTMainbalance);
-      var userEBTMainbalanceInDb = parseFloat(user.EBTMainbalance).toFixed(8);
-      var userFreezedEBTMainbalanceInDb = parseFloat(user.FreezedEBTbalance).toFixed(8);
-      clientEBT.cmd(
+      console.log("UserBCH Balance ::" + user.PYYMainbalance);
+      var userPYYMainbalanceInDb = parseFloat(user.PYYMainbalance).toFixed(8);
+      var userFreezedPYYMainbalanceInDb = parseFloat(user.FreezedPYYbalance).toFixed(8);
+      clientPYY.cmd(
         'getbalance',
         userMailId,
-        function(err, userEBTMainbalanceFromServer, resHeaders) {
+        function(err, userPYYMainbalanceFromServer, resHeaders) {
           if (err) {
             console.log("Error from sendFromBCHAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
@@ -1214,14 +1214,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalEBTMainbalance = (parseFloat(userEBTMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userEBTMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalEBTMainbalance).toFixed(8));
-          if (parseFloat(userEBTMainbalanceFromServer).toFixed(8) > parseFloat(totalEBTMainbalance).toFixed(8)) {
+          var totalPYYMainbalance = (parseFloat(userPYYMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userPYYMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalPYYMainbalance).toFixed(8));
+          if (parseFloat(userPYYMainbalanceFromServer).toFixed(8) > parseFloat(totalPYYMainbalance).toFixed(8)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                EBTMainbalance: parseFloat(userEBTMainbalanceFromServer).toFixed(8)
+                PYYMainbalance: parseFloat(userPYYMainbalanceFromServer).toFixed(8)
               })
               .exec(function(err, updatedUser) {
                 if (err) {

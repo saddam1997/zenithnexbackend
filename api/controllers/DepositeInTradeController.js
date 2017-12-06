@@ -21,13 +21,13 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
-//EBT Wallet Details
-var bitcoinEBT = require('bitcoin');
-var clientEBT = new bitcoinEBT.Client({
-  host: sails.config.company.clientEBThost,
-  port: sails.config.company.clientEBTport,
-  user: sails.config.company.clientEBTuser,
-  pass: sails.config.company.clientEBTpass
+//PYY Wallet Details
+var bitcoinPYY = require('bitcoin');
+var clientPYY = new bitcoinPYY.Client({
+  host: sails.config.company.clientPYYhost,
+  port: sails.config.company.clientPYYport,
+  user: sails.config.company.clientPYYuser,
+  pass: sails.config.company.clientPYYpass
 });
 //GDS Wallet Details
 var bitcoinGDS = require('bitcoin');
@@ -39,18 +39,18 @@ var clientGDS = new bitcoinGDS.Client({
 });
 var transactionFeeBCH = sails.config.company.txFeeBCH;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
-var transactionFeeEBT = sails.config.company.txFeeEBT;
+var transactionFeePYY = sails.config.company.txFeePYY;
 var transactionFeeGDS = sails.config.company.txFeeGDS;
 
 var companyBTCAccount = sails.config.company.companyBTCAccount;
 var companyBCHAccount = sails.config.company.companyBCHAccount;
 var companyGDSAccount = sails.config.company.companyGDSAccount;
-var companyEBTAccount = sails.config.company.companyEBTAccount;
+var companyPYYAccount = sails.config.company.companyPYYAccount;
 
 var currencyNameBTC = "BTC";
 var currencyNameBCH = "BCH";
 var currencyNameGDS = "GDS";
-var currencyNameEBT = "EBT";
+var currencyNamePYY = "PYY";
 
 var actionNameDeposit = "Deposit";
 var actionNameWithdrawal = "Withdrawal";
@@ -650,12 +650,12 @@ module.exports = {
       }
     });
   },
-  depositeInWalletEBT: function(req, res) {
-    console.log("Enter into depositeInWalletEBT");
+  depositeInWalletPYY: function(req, res) {
+    console.log("Enter into depositeInWalletPYY");
     var userEmailAddress = req.body.userMailId;
-    var userEBTAmountToDeposite = parseFloat(req.body.ebtamount);
+    var userPYYAmountToDeposite = parseFloat(req.body.pyyamount);
     var userSpendingPassword = req.body.spendingPassword;
-    if (!userEmailAddress || !userEBTAmountToDeposite || !userSpendingPassword) {
+    if (!userEmailAddress || !userPYYAmountToDeposite || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
       return res.json({
         "message": "Invalid Parameter",
@@ -694,35 +694,35 @@ module.exports = {
               });
             } else {
               console.log("Valid spending password !!!");
-              var userEBTMainBalanceInDb = userDetails.EBTMainbalance;
-              if (userEBTAmountToDeposite > userEBTMainBalanceInDb) {
-                console.log("User EBT balance is Insufficient");
+              var userPYYMainBalanceInDb = userDetails.PYYMainbalance;
+              if (userPYYAmountToDeposite > userPYYMainBalanceInDb) {
+                console.log("User PYY balance is Insufficient");
                 return res.json({
-                  "message": "You have Insufficient EBT balance",
+                  "message": "You have Insufficient PYY balance",
                   statusCode: 401
                 });
               }
               console.log("Spending password is valid!!!");
-              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance) + parseFloat(userEBTAmountToDeposite));
-              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) - parseFloat(userEBTAmountToDeposite));
+              var updatedPYYbalance = (parseFloat(userDetails.PYYbalance) + parseFloat(userPYYAmountToDeposite));
+              var updatedPYYMainbalance = (parseFloat(userDetails.PYYMainbalance) - parseFloat(userPYYAmountToDeposite));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalance),
-                  EBTMainbalance: parseFloat(updatedEBTMainbalance)
+                  PYYbalance: parseFloat(updatedPYYbalance),
+                  PYYMainbalance: parseFloat(updatedPYYMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
                     console.log("Error to update User after move bid!!!!!!!!!");
                     return res.json({
-                      "message": "Error to update EBT main balance",
+                      "message": "Error to update PYY main balance",
                       statusCode: 401
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: userEBTAmountToDeposite,
-                      currencyName: currencyNameEBT,
+                      amount: userPYYAmountToDeposite,
+                      currencyName: currencyNamePYY,
                       action: actionNameDeposit,
                       tradebalanceorderowner: userDetails.id
                     })
@@ -731,43 +731,43 @@ module.exports = {
                         console.log("Error to update user");
                         return res.serverError(err);
                       }
-                      //Move EBT Company account to User Account on Withdrawal
-                      clientEBT.cmd('move',
+                      //Move PYY Company account to User Account on Withdrawal
+                      clientPYY.cmd('move',
                         userEmailAddress,
-                        companyEBTAccount,
-                        userEBTAmountToDeposite,
-                        function(err, moveEBTTransaction, resHeaders) {
+                        companyPYYAccount,
+                        userPYYAmountToDeposite,
+                        function(err, movePYYTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error from WithdrawalEBT :: ");
+                            console.log("Error from WithdrawalPYY :: ");
                             if (err.code && err.code == "ECONNREFUSED") {
-                              console.log("EBT Server Refuse to connect App");
+                              console.log("PYY Server Refuse to connect App");
                               return res.json({
-                                "message": "EBT Server Refuse to connect App",
+                                "message": "PYY Server Refuse to connect App",
                                 statusCode: 400
                               });
                             }
                             if (err.code && err.code == -6) {
-                              console.log(companyEBTAccount + " Account has Insufficient funds ");
+                              console.log(companyPYYAccount + " Account has Insufficient funds ");
                               return res.json({
-                                "message": companyEBTAccount + " Account has Insufficient funds",
+                                "message": companyPYYAccount + " Account has Insufficient funds",
                                 statusCode: 400
                               });
                             }
                             if (err.code && err.code < 0) {
-                              console.log("Problem in EBT server err.code " + err.code);
+                              console.log("Problem in PYY server err.code " + err.code);
                               return res.json({
-                                "message": "Problem in EBT server",
+                                "message": "Problem in PYY server",
                                 statusCode: 400
                               });
                             }
-                            console.log("Error in EBT Server");
+                            console.log("Error in PYY Server");
                             return res.json({
-                              "message": "Error in EBT Server",
+                              "message": "Error in PYY Server",
                               statusCode: 400
                             });
                           } else {
-                            console.log("moveEBTTransaction status " + moveEBTTransaction);
-                            if (moveEBTTransaction == true) {
+                            console.log("movePYYTransaction status " + movePYYTransaction);
+                            if (movePYYTransaction == true) {
                               User.findOne({
                                   email: userEmailAddress
                                 })
@@ -796,12 +796,12 @@ module.exports = {
     });
 
   },
-  withdrawInWalletEBT: function(req, res) {
-    console.log("Enter into depositeInWalletEBT");
+  withdrawInWalletPYY: function(req, res) {
+    console.log("Enter into depositeInWalletPYY");
     var userEmailAddress = req.body.userMailId;
-    var userEBTAmountToWithDraw = parseFloat(req.body.ebtamount);
+    var userPYYAmountToWithDraw = parseFloat(req.body.pyyamount);
     var userSpendingPassword = req.body.spendingPassword;
-    if (!userEmailAddress || !userEBTAmountToWithDraw || !userSpendingPassword) {
+    if (!userEmailAddress || !userPYYAmountToWithDraw || !userSpendingPassword) {
       console.log("Invalid Parameter by user ");
       return res.json({
         "message": "Invalid Parameter",
@@ -840,26 +840,26 @@ module.exports = {
               });
             } else {
               console.log("Valid spending password !!!");
-              var userEBTBalanceInDb = userDetails.EBTbalance;
-              if (userEBTAmountToWithDraw > userEBTBalanceInDb) {
+              var userPYYBalanceInDb = userDetails.PYYbalance;
+              if (userPYYAmountToWithDraw > userPYYBalanceInDb) {
                 console.log("User BTC balance is Insufficient");
                 return res.json({
                   "message": "You have Insufficient BTC balance",
                   statusCode: 401
                 });
               }
-              //Deduct transactionFeeEBT
-              var afterTransactionFeeAmount = (parseFloat(userEBTAmountToWithDraw) - parseFloat(transactionFeeEBT));
+              //Deduct transactionFeePYY
+              var afterTransactionFeeAmount = (parseFloat(userPYYAmountToWithDraw) - parseFloat(transactionFeePYY));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");
-              var updatedEBTMainbalance = (parseFloat(userDetails.EBTMainbalance) + parseFloat(afterTransactionFeeAmount));
-              var updatedEBTbalance = (parseFloat(userDetails.EBTbalance) - parseFloat(userEBTAmountToWithDraw));
+              var updatedPYYMainbalance = (parseFloat(userDetails.PYYMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedPYYbalance = (parseFloat(userDetails.PYYbalance) - parseFloat(userPYYAmountToWithDraw));
 
               User.update({
                   id: userDetails.id
                 }, {
-                  EBTbalance: parseFloat(updatedEBTbalance),
-                  EBTMainbalance: parseFloat(updatedEBTMainbalance)
+                  PYYbalance: parseFloat(updatedPYYbalance),
+                  PYYMainbalance: parseFloat(updatedPYYMainbalance)
                 })
                 .exec(function(err, updatedUser) {
                   if (err) {
@@ -870,8 +870,8 @@ module.exports = {
                     });
                   }
                   Tradebalanceorder.create({
-                      amount: userEBTAmountToWithDraw,
-                      currencyName: currencyNameEBT,
+                      amount: userPYYAmountToWithDraw,
+                      currencyName: currencyNamePYY,
                       action: actionNameWithdrawal,
                       tradebalanceorderowner: userDetails.id
                     })
@@ -881,43 +881,43 @@ module.exports = {
                         return res.serverError(err);
                       }
 
-                      //Move EBT Company account to User Account on Withdrawal
-                      clientEBT.cmd('move',
-                        companyEBTAccount,
+                      //Move PYY Company account to User Account on Withdrawal
+                      clientPYY.cmd('move',
+                        companyPYYAccount,
                         userEmailAddress,
                         afterTransactionFeeAmount,
-                        function(err, moveEBTTransaction, resHeaders) {
+                        function(err, movePYYTransaction, resHeaders) {
                           if (err) {
-                            console.log("Error from WithdrawalEBT :: ");
+                            console.log("Error from WithdrawalPYY :: ");
                             if (err.code && err.code == "ECONNREFUSED") {
-                              console.log("EBT Server Refuse to connect App");
+                              console.log("PYY Server Refuse to connect App");
                               return res.json({
-                                "message": "EBT Server Refuse to connect App",
+                                "message": "PYY Server Refuse to connect App",
                                 statusCode: 400
                               });
                             }
                             if (err.code && err.code == -6) {
-                              console.log(companyEBTAccount + " Account has Insufficient funds ");
+                              console.log(companyPYYAccount + " Account has Insufficient funds ");
                               return res.json({
-                                "message": companyEBTAccount + " Account has Insufficient funds",
+                                "message": companyPYYAccount + " Account has Insufficient funds",
                                 statusCode: 400
                               });
                             }
                             if (err.code && err.code < 0) {
-                              console.log("Problem in EBT server err.code " + err.code);
+                              console.log("Problem in PYY server err.code " + err.code);
                               return res.json({
-                                "message": "Problem in EBT server",
+                                "message": "Problem in PYY server",
                                 statusCode: 400
                               });
                             }
-                            console.log("Error in EBT Server");
+                            console.log("Error in PYY Server");
                             return res.json({
-                              "message": "Error in EBT Server",
+                              "message": "Error in PYY Server",
                               statusCode: 400
                             });
                           } else {
-                            console.log("moveEBTTransaction status " + moveEBTTransaction);
-                            if (moveEBTTransaction == true) {
+                            console.log("movePYYTransaction status " + movePYYTransaction);
+                            if (movePYYTransaction == true) {
                               User.findOne({
                                   email: userEmailAddress
                                 })
@@ -945,7 +945,6 @@ module.exports = {
     });
   },
   depositeInWalletGDS: function(req, res) {
-
     console.log("Enter into depositeInWalletGDS");
     var userEmailAddress = req.body.userMailId;
     var userGDSAmountToDeposite = parseFloat(req.body.gdsamount);
@@ -1146,7 +1145,7 @@ module.exports = {
                   statusCode: 401
                 });
               }
-              //Deduct transactionFeeEBT
+              //Deduct transactionFeePYY
               var afterTransactionFeeAmount = (parseFloat(userGDSAmountToWithDraw) - parseFloat(transactionFeeGDS));
               console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
               console.log("Spending password is valid!!!");

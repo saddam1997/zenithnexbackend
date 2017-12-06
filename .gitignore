@@ -1,4 +1,3 @@
 .idea/
-config/ServerRPCDetails.js
 node_modules
 api/controllers/TempController.js
