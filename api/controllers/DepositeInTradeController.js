@@ -62,9 +62,9 @@ module.exports = {
     var userBTCAmountToDeposite = parseFloat(req.body.btcamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBTCAmountToDeposite || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -209,9 +209,9 @@ module.exports = {
     var userBTCAmountToWithDraw = parseFloat(req.body.btcamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBTCAmountToWithDraw || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -360,9 +360,9 @@ module.exports = {
     var userBCHAmountToDeposite = parseFloat(req.body.bchamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBCHAmountToDeposite || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -508,9 +508,9 @@ module.exports = {
     var userBCHAmountToWithDraw = parseFloat(req.body.bchamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userBCHAmountToWithDraw || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -656,9 +656,9 @@ module.exports = {
     var userPYYAmountToDeposite = parseFloat(req.body.pyyamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userPYYAmountToDeposite || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -802,9 +802,9 @@ module.exports = {
     var userPYYAmountToWithDraw = parseFloat(req.body.pyyamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userPYYAmountToWithDraw || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -950,9 +950,9 @@ module.exports = {
     var userGDSAmountToDeposite = parseFloat(req.body.gdsamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userGDSAmountToDeposite || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -1098,9 +1098,9 @@ module.exports = {
     var userGDSAmountToWithDraw = parseFloat(req.body.gdsamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userGDSAmountToWithDraw || !userSpendingPassword) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }

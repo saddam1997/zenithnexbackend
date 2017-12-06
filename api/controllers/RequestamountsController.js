@@ -15,8 +15,8 @@ module.exports = {
 		var notes=req.body.notes;
 
 		if(!userMailId ||!messageRecieverMailId||!notes||!requestBCHAmounts){
-			console.log("Invalid Parameter by user.....");
-			return res.json({"message": "Invalid Parameter",statusCode: 400});
+			console.log("Can't be empty!!! by user.....");
+			return res.json({"message": "Can't be empty!!!",statusCode: 400});
 		}
 		User.findOne({
 			email: userMailId
@@ -44,7 +44,7 @@ module.exports = {
 			var mailSenderRequest = {
 				from: 'wallet.bcc@gmail.com',
 				to: user.email,
-				subject: 'Request sent succesfully to '+messageRecieverMailId,
+				subject: 'Request sent successfully to '+messageRecieverMailId,
 				text: 'Hi, \n  you just sent a request '+requestBCHAmounts+
 				' BCH to '+messageRecieverMailId
 			};
@@ -74,8 +74,8 @@ module.exports = {
 		var notes=req.body.notes;
 
 		if(!userMailId ||!messageRecieverMailId||!notes ||!requestBTCAmounts){
-			console.log("Invalid Parameter by user.....");
-			return res.json({"message": "Invalid Parameter",statusCode: 400});
+			console.log("Can't be empty!!! by user.....");
+			return res.json({"message": "Can't be empty!!!",statusCode: 400});
 		}
 		User.findOne({
 			email: userMailId
@@ -103,7 +103,7 @@ module.exports = {
 			var mailSenderRequest = {
 				from: 'wallet.bcc@gmail.com',
 				to: user.email,
-				subject: 'Request sent succesfully to '+messageRecieverMailId,
+				subject: 'Request sent successfully to '+messageRecieverMailId,
 				text: 'Hi, \n  you just sent a request '+requestBTCAmounts+
 				' BTC to '+messageRecieverMailId
 			};

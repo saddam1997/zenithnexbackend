@@ -27,7 +27,7 @@ module.exports = {
     var userAskownerId = req.body.askownerId;
 
     if (!userAskAmountPYY || !userAskAmountBTC || !userAskRate || !userAskownerId) {
-      console.log("Invalid Parameter!!!");
+      console.log("Can't be empty!!!!!!");
       return res.json({
         "message": "Invalid Paramter!!!!",
         statusCode: 400
@@ -1880,7 +1880,7 @@ module.exports = {
     if (!userBidId || !bidownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -1974,7 +1974,7 @@ module.exports = {
     if (!userAskId || !askownerId) {
       console.log("User Entered invalid parameter !!!");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }

@@ -25,7 +25,7 @@ module.exports = {
     if (!useremail || !password || !ip) {
       console.log("email and password required");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 401
       });
     }

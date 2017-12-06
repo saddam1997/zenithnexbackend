@@ -15,7 +15,7 @@ module.exports = {
 
     if (!lastHours || !maxRespArrSize) {
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 401
       });
     }

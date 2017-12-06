@@ -53,9 +53,9 @@ module.exports = {
     miniBTCAmountSentByUser = parseFloat(miniBTCAmountSentByUser).toFixed(8);
     if (!userEmailAddress || !userBTCAmountToSend || !userReceiverBTCAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Invalid Parameter by user ");
+      console.log("Can't be empty!!! by user ");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -215,9 +215,9 @@ module.exports = {
 
     if (!userEmailAddress || !userBCHAmountToSend || !userReceiverBCHAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Invalid Parameter by user!!!");
+      console.log("Can't be empty!!! by user!!!");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -376,9 +376,9 @@ module.exports = {
 
     if (!userEmailAddress || !userPYYAmountToSend || !userReceiverPYYAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Invalid Parameter by user!!!");
+      console.log("Can't be empty!!! by user!!!");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -537,9 +537,9 @@ module.exports = {
 
     if (!userEmailAddress || !userGDSAmountToSend || !userReceiverGDSAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Invalid Parameter by user!!!");
+      console.log("Can't be empty!!! by user!!!");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -689,9 +689,9 @@ module.exports = {
     console.log("Enter into getTransactionListBCH::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -755,9 +755,9 @@ module.exports = {
     console.log("Enter into getTxsListBTC::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -820,9 +820,9 @@ module.exports = {
     console.log("Enter into getTxsListPYY::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -879,9 +879,9 @@ module.exports = {
     console.log("Enter into getTxsListGDS::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -938,9 +938,9 @@ module.exports = {
     console.log("Enter into getBalBCH::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -1050,9 +1050,9 @@ module.exports = {
     console.log("Enter into getBalBTC::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -1154,9 +1154,9 @@ module.exports = {
     console.log("Enter into getBalPYY::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
@@ -1266,9 +1266,9 @@ module.exports = {
     console.log("Enter into getBalBCH::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
-      console.log("Invalid Parameter by user.....");
+      console.log("Can't be empty!!! by user.....");
       return res.json({
-        "message": "Invalid Parameter",
+        "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
