@@ -202,12 +202,20 @@ module.exports = {
             //Deduct Transation Fee Bidder
             console.log("Before deduct TX Fees12312 of BCH Update user " + updatedBCHbalanceBidder);
             //var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-            var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
+            // var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
+            //
+            // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess)
+            // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+            // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
 
-            txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess)
+            var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var  txFeesBidderBCH = txFeesBidderBTC.times(currentBidDetails.bidRate);
             console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-            //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
+
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.toFixed(8);
 
             console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
@@ -337,12 +345,18 @@ module.exports = {
             //Deduct Transation Fee Bidder
             console.log("Before deduct TX Fees of BCH 089089Update user " + updatedBCHbalanceBidder);
             // var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-            var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
-            txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+            // var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
+            // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+            // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+            // // updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
 
+            var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var  txFeesBidderBCH = txFeesBidderBTC.times(currentBidDetails.bidRate);
             console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-            // updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
 
             console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
             updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.toFixed(8);
@@ -531,12 +545,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of42342312 BCH Update user " + updatedBCHbalanceBidder);
               //var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-              var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
-              txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+
+              // var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
+              // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+              // console.log("After deduct TX Fees of BCH Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+
+              var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+              txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var  txFeesBidderBCH = txFeesBidderBTC.times(currentBidDetails.bidRate);
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-              //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
-              console.log("After deduct TX Fees of BCH Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
 
               console.log("Before Update :: asdf115 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBBidder));
@@ -686,12 +707,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deducta7567 TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               //var txFeesBidderBCH = (parseFloat(currentBidDetails.bidAmountBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-              var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
-              txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              // var txFeesBidderBCH = new BigNumber(currentBidDetails.bidAmountBCH);
+              // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+              // console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
+              var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+              txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var  txFeesBidderBCH = txFeesBidderBTC.times(currentBidDetails.bidRate);
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-              //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
-              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
+
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedBCHbalanceBidder:: sadfsdf updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
@@ -800,11 +828,21 @@ module.exports = {
             //var bchAmountSucess = new BigNumber(totoalAskRemainingBCH);
             //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
             //var txFeesBidderBCH = (parseFloat(totoalAskRemainingBCH) * parseFloat(txFeeBCHWithdrawSuccess));
-            var txFeesBidderBCH = new BigNumber(totoalAskRemainingBCH);
-            txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
 
-            //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+
+
+            // var txFeesBidderBCH = new BigNumber(totoalAskRemainingBCH);
+            // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+            //
+            // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+            // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
+            //Need to change here ...111...............askDetails
+            var txFeesBidderBTC = new BigNumber(totoalAskRemainingBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var txFeesBidderBCH = txFeesBidderBTC.times(currentBidDetails.bidRate);
             updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
             console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
             console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
 
@@ -1145,16 +1183,27 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               //var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
-              var bchAmountSucess = new BigNumber(userBidAmountBCH);
-              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+              // var bchAmountSucess = new BigNumber(userBidAmountBCH);
+              // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+              //
+              // //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+              // var txFeesBidderBCH = new BigNumber(bchAmountSucess);
+              // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              //
+              // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
 
-              //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
-              var txFeesBidderBCH = new BigNumber(bchAmountSucess);
-              txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderBCH.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderBCH=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
               //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
               console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
 
               console.log(currentAskDetails.id + " asdftotoalBidRemainingBCH == 0updatedBCHbalanceBidder ::: " + updatedBCHbalanceBidder);
@@ -1346,17 +1395,28 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               //var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
-              var bchAmountSucess = new BigNumber(userBidAmountBCH);
-              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+              // var bchAmountSucess = new BigNumber(userBidAmountBCH);
+              // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+              //
+              // //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+              // var txFeesBidderBCH = new BigNumber(bchAmountSucess);
+              // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              //
+              // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+              // console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
 
-              //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
-              var txFeesBidderBCH = new BigNumber(bchAmountSucess);
-              txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
 
+
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
+
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderBCH.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderBCH=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
-              //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
-              console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
 
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updateasdfdFreezedBCHbalanceAsker updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
@@ -1515,16 +1575,28 @@ module.exports = {
                 //Deduct Transation Fee Bidder
                 console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
                 //var bchAmountSucess = (parseFloat(userBidAmountBCH) - parseFloat(totoalBidRemainingBCH));
-                var bchAmountSucess = new BigNumber(userBidAmountBCH);
-                bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+                // var bchAmountSucess = new BigNumber(userBidAmountBCH);
+                // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingBCH);
+                //
+                //
+                // //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
+                // var txFeesBidderBCH = new BigNumber(bchAmountSucess);
+                // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+                // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+                // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+                // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
 
+                var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+                BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
-                //var txFeesBidderBCH = (parseFloat(bchAmountSucess) * parseFloat(txFeeBCHWithdrawSuccess));
-                var txFeesBidderBCH = new BigNumber(bchAmountSucess);
-                txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+                var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+                txFeesBidderBTC = txFeesBidderBCH.times(txFeeBTCWithdrawSuccess);
+                var txFeesBidderBCH=txFeesBidderBTC.times(currentAskDetails.askRate);
                 console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
                 //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
                 updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
+
+
 
                 console.log("After deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
 
@@ -1797,9 +1869,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of BCH Update user " + updatedBCHbalanceBidder);
               //var txFeesBidderBCH = (parseFloat(updatedBCHbalanceBidder) * parseFloat(txFeeBCHWithdrawSuccess));
-              var txFeesBidderBCH = new BigNumber(userBidAmountBCH);
-              txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              // var txFeesBidderBCH = new BigNumber(userBidAmountBCH);
+              // txFeesBidderBCH = txFeesBidderBCH.times(txFeeBCHWithdrawSuccess);
+              //
+              // console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
+              // //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
+              // updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);
 
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
+
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderBCH.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderBCH=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderBCH :: " + txFeesBidderBCH);
               //updatedBCHbalanceBidder = (parseFloat(updatedBCHbalanceBidder) - parseFloat(txFeesBidderBCH));
               updatedBCHbalanceBidder = updatedBCHbalanceBidder.minus(txFeesBidderBCH);

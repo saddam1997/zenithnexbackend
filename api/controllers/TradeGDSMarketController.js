@@ -20,7 +20,6 @@ const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 
 
 module.exports = {
-
   addAskGDSMarket: async function(req, res) {
     console.log("Enter into ask api addAskGDSMarket : : " + JSON.stringify(req.body));
     var userAskAmountBTC = new BigNumber(req.body.askAmountBTC);
@@ -203,12 +202,20 @@ module.exports = {
             //Deduct Transation Fee Bidder
             console.log("Before deduct TX Fees12312 of GDS Update user " + updatedGDSbalanceBidder);
             //var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-            var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
+            // var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
+            //
+            // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess)
+            // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+            // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
-            txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess)
+            var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-            //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
+
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.toFixed(8);
 
             console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
@@ -338,12 +345,18 @@ module.exports = {
             //Deduct Transation Fee Bidder
             console.log("Before deduct TX Fees of GDS 089089Update user " + updatedGDSbalanceBidder);
             // var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-            var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
-            txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+            // var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
+            // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+            // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+            // // updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
+            var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-            // updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
 
             console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
             updatedFreezedBTCbalanceBidder = updatedFreezedBTCbalanceBidder.toFixed(8);
@@ -532,12 +545,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of42342312 GDS Update user " + updatedGDSbalanceBidder);
               //var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-              var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
-              txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+
+              // var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
+              // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+              // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+              // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+              // console.log("After deduct TX Fees of GDS Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
+
+              var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+              txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-              //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
-              console.log("After deduct TX Fees of GDS Update user rtert updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
 
               console.log("Before Update :: asdf115 userAllDetailsInDBAsker " + JSON.stringify(userAllDetailsInDBBidder));
@@ -687,12 +707,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deducta7567 TX Fees of GDS Update user " + updatedGDSbalanceBidder);
               //var txFeesBidderGDS = (parseFloat(currentBidDetails.bidAmountGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-              var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
-              txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              // var txFeesBidderGDS = new BigNumber(currentBidDetails.bidAmountGDS);
+              // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+              // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+              // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+              // console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+
+              var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
+              txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-              //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
-              console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
+
               console.log(currentBidDetails.id + " updatedFreezedBTCbalanceBidder:: " + updatedFreezedBTCbalanceBidder);
               console.log(currentBidDetails.id + " updatedGDSbalanceBidder:: sadfsdf updatedFreezedBTCbalanceBidder " + updatedFreezedBTCbalanceBidder);
 
@@ -801,11 +828,21 @@ module.exports = {
             //var bchAmountSucess = new BigNumber(totoalAskRemainingGDS);
             //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
             //var txFeesBidderGDS = (parseFloat(totoalAskRemainingGDS) * parseFloat(txFeeGDSWithdrawSuccess));
-            var txFeesBidderGDS = new BigNumber(totoalAskRemainingGDS);
-            txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
 
-            //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+
+
+            // var txFeesBidderGDS = new BigNumber(totoalAskRemainingGDS);
+            // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+            //
+            // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+            // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
+            //Need to change here ...111...............askDetails
+            var txFeesBidderBTC = new BigNumber(totoalAskRemainingBTC);
+            txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+            var txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
             console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
@@ -1146,16 +1183,27 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
               //var bchAmountSucess = (parseFloat(userBidAmountGDS) - parseFloat(totoalBidRemainingGDS));
-              var bchAmountSucess = new BigNumber(userBidAmountGDS);
-              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+              // var bchAmountSucess = new BigNumber(userBidAmountGDS);
+              // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+              //
+              // //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
+              // var txFeesBidderGDS = new BigNumber(bchAmountSucess);
+              // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              //
+              // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+              // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+              // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
-              //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
-              var txFeesBidderGDS = new BigNumber(bchAmountSucess);
-              txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
               console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
               console.log(currentAskDetails.id + " asdftotoalBidRemainingGDS == 0updatedGDSbalanceBidder ::: " + updatedGDSbalanceBidder);
@@ -1347,17 +1395,28 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
               //var bchAmountSucess = (parseFloat(userBidAmountGDS) - parseFloat(totoalBidRemainingGDS));
-              var bchAmountSucess = new BigNumber(userBidAmountGDS);
-              bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+              // var bchAmountSucess = new BigNumber(userBidAmountGDS);
+              // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+              //
+              // //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
+              // var txFeesBidderGDS = new BigNumber(bchAmountSucess);
+              // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              //
+              // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+              // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+              // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+              // console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
-              //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
-              var txFeesBidderGDS = new BigNumber(bchAmountSucess);
-              txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
 
+
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
+
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
-              //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
-              console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updatedBTCbalanceAsker ::: " + updatedBTCbalanceAsker);
               console.log(currentAskDetails.id + " i == allAsksFromdb.length - 1updateasdfdFreezedGDSbalanceAsker updatedFreezedBTCbalanceBidder::: " + updatedFreezedBTCbalanceBidder);
@@ -1516,16 +1575,28 @@ module.exports = {
                 //Deduct Transation Fee Bidder
                 console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
                 //var bchAmountSucess = (parseFloat(userBidAmountGDS) - parseFloat(totoalBidRemainingGDS));
-                var bchAmountSucess = new BigNumber(userBidAmountGDS);
-                bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+                // var bchAmountSucess = new BigNumber(userBidAmountGDS);
+                // bchAmountSucess = bchAmountSucess.minus(totoalBidRemainingGDS);
+                //
+                //
+                // //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
+                // var txFeesBidderGDS = new BigNumber(bchAmountSucess);
+                // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+                // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+                // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+                // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
+                var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+                BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
-                //var txFeesBidderGDS = (parseFloat(bchAmountSucess) * parseFloat(txFeeGDSWithdrawSuccess));
-                var txFeesBidderGDS = new BigNumber(bchAmountSucess);
-                txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+                var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+                txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
+                var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
                 console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
                 //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
                 updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
+
+
 
                 console.log("After deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
 
@@ -1798,9 +1869,19 @@ module.exports = {
               //Deduct Transation Fee Bidder
               console.log("Before deduct TX Fees of GDS Update user " + updatedGDSbalanceBidder);
               //var txFeesBidderGDS = (parseFloat(updatedGDSbalanceBidder) * parseFloat(txFeeGDSWithdrawSuccess));
-              var txFeesBidderGDS = new BigNumber(userBidAmountGDS);
-              txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              // var txFeesBidderGDS = new BigNumber(userBidAmountGDS);
+              // txFeesBidderGDS = txFeesBidderGDS.times(txFeeGDSWithdrawSuccess);
+              //
+              // console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
+              // //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
+              // updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
+              var BTCAmountSucess = new BigNumber(userBidAmountBTC);
+              BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
+
+              var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
+              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
