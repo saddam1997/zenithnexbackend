@@ -211,7 +211,7 @@ module.exports = {
 
             var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
             txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
-            var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
+            var  txFeesBidderGDS = txFeesBidderBTC.dividedBy(currentBidDetails.bidRate);
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
@@ -353,7 +353,7 @@ module.exports = {
 
             var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
             txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
-            var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
+            var  txFeesBidderGDS = txFeesBidderBTC.dividedBy(currentBidDetails.bidRate);
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
@@ -555,7 +555,7 @@ module.exports = {
 
               var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
               txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
-              var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
+              var  txFeesBidderGDS = txFeesBidderBTC.dividedBy(currentBidDetails.bidRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
@@ -716,7 +716,7 @@ module.exports = {
 
               var txFeesBidderBTC = new BigNumber(currentBidDetails.bidAmountBTC);
               txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
-              var  txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
+              var  txFeesBidderGDS = txFeesBidderBTC.dividedBy(currentBidDetails.bidRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
@@ -840,7 +840,7 @@ module.exports = {
             //Need to change here ...111...............askDetails
             var txFeesBidderBTC = new BigNumber(totoalAskRemainingBTC);
             txFeesBidderBTC=txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
-            var txFeesBidderGDS = txFeesBidderBTC.times(currentBidDetails.bidRate);
+            var txFeesBidderGDS = txFeesBidderBTC.dividedBy(currentBidDetails.bidRate);
             updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
             console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
@@ -1198,8 +1198,8 @@ module.exports = {
               BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
               var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
-              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
-              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
+              txFeesBidderBTC = txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderGDS=txFeesBidderBTC.dividedBy(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
@@ -1413,8 +1413,8 @@ module.exports = {
               BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
               var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
-              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
-              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
+              txFeesBidderBTC = txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+              var txFeesBidderGDS=txFeesBidderBTC.dividedBy(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
 
@@ -1590,8 +1590,8 @@ module.exports = {
                 BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
                 var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
-                txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
-                var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
+                txFeesBidderBTC = txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+                var txFeesBidderGDS=txFeesBidderBTC.dividedBy(currentAskDetails.askRate);
                 console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
                 //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
                 updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
@@ -1880,8 +1880,9 @@ module.exports = {
               BTCAmountSucess = BTCAmountSucess.minus(totoalBidRemainingBTC);
 
               var txFeesBidderBTC = new BigNumber(BTCAmountSucess);
-              txFeesBidderBTC = txFeesBidderGDS.times(txFeeBTCWithdrawSuccess);
-              var txFeesBidderGDS=txFeesBidderBTC.times(currentAskDetails.askRate);
+              txFeesBidderBTC = txFeesBidderBTC.times(txFeeBTCWithdrawSuccess);
+
+              var txFeesBidderGDS=txFeesBidderBTC.dividedBy(currentAskDetails.askRate);
               console.log("txFeesBidderGDS :: " + txFeesBidderGDS);
               //updatedGDSbalanceBidder = (parseFloat(updatedGDSbalanceBidder) - parseFloat(txFeesBidderGDS));
               updatedGDSbalanceBidder = updatedGDSbalanceBidder.minus(txFeesBidderGDS);
