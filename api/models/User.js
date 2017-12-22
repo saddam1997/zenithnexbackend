@@ -49,6 +49,22 @@ module.exports = {
       type: 'string'
     },
 
+    CLUBMainbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    CLUBbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    FreezedCLUBbalance: {
+      type: 'float',
+      defaultsTo: 0
+    },
+    userCLUBAddress: {
+      type: 'string'
+    },
+
     GDSMainbalance: {
       type: 'float',
       defaultsTo: 0
@@ -125,6 +141,17 @@ module.exports = {
       collection: 'askBCH',
       via: 'askownerBCH'
     },
+
+    //CLUB
+    bidsCLUB: {
+      collection: 'bidCLUB',
+      via: 'bidownerCLUB'
+    },
+    asksCLUB: {
+      collection: 'askCLUB',
+      via: 'askownerCLUB'
+    },
+
     //GDS
     bidsGDS: {
       collection: 'bidGDS',

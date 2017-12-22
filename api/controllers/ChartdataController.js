@@ -81,6 +81,80 @@ module.exports = {
         }
       });
   },
+  getAllSuccessfullBidCLUB: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullBidCLUB :: ");
+    BidCLUB.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allBidDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error to find  BidCLUB!!",
+            statusCode: 401
+          });
+        }
+        if (!allBidDetailsToExecute) {
+          return res.json({
+            "message": "No BidCLUB Found!!",
+            statusCode: 401
+          });
+        }
+        if (allBidDetailsToExecute) {
+          console.log("Return BidCLUBs all BidCLUBs !!!");
+          if (allBidDetailsToExecute.length >= 1) {
+            return res.json({
+              bidsCLUB: allBidDetailsToExecute,
+              statusCode: 200
+            });
+          } else {
+            console.log("Return BidCLUBs all bids !!!");
+            return res.json({
+              "message": "No Bid Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
+  getAllSuccessfullAskCLUB: function(req, res) {
+    console.log("Enter into ask api getAllSuccessfullAskCLUB :: ");
+    AskCLUB.find({
+        status: {
+          'like': statusOne
+        }
+      })
+      .sort('createTimeUTC DESC')
+      .exec(function(err, allAskDetailsToExecute) {
+        if (err) {
+          return res.json({
+            "message": "Error to find AskCLUB!!",
+            statusCode: 401
+          });
+        }
+        if (!allAskDetailsToExecute) {
+          return res.json({
+            "message": "No AskCLUB Found!!",
+            statusCode: 401
+          });
+        }
+        if (allAskDetailsToExecute) {
+          if (allAskDetailsToExecute.length >= 1) {
+            return res.json({
+              asksCLUB: allAskDetailsToExecute,
+              statusCode: 200
+            });
+          } else {
+            return res.json({
+              "message": "No Ask Found!!",
+              statusCode: 401
+            });
+          }
+        }
+      });
+  },
   getAllSuccessfullBidGDS: function(req, res) {
     console.log("Enter into ask api getAllSuccessfullBidGDS :: ");
     BidGDS.find({

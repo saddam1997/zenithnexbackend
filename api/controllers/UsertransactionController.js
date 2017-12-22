@@ -20,6 +20,14 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
+//CLUB Wallet Details
+var bitcoinCLUB = require('bitcoin');
+var clientCLUB = new bitcoinCLUB.Client({
+  host: sails.config.company.clientCLUBhost,
+  port: sails.config.company.clientCLUBport,
+  user: sails.config.company.clientCLUBuser,
+  pass: sails.config.company.clientCLUBpass
+});
 //PYY Wallet Details
 var bitcoinPYY = require('bitcoin');
 var clientPYY = new bitcoinPYY.Client({
@@ -37,6 +45,7 @@ var clientGDS = new bitcoinGDS.Client({
   pass: sails.config.company.clientGDSpass
 });
 var transactionFeeBCH = sails.config.company.txFeeBCH;
+var transactionFeeCLUB = sails.config.company.txFeeCLUB;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
 var transactionFeePYY = sails.config.company.txFeePYY;
 var transactionFeeGDS = sails.config.company.txFeeGDS;
@@ -203,28 +212,27 @@ module.exports = {
     });
   },
   sendBCH: function(req, res, next) {
-    console.log("Enter into sendBCH with ::: " + JSON.stringify(req.body));
+    console.log("Enter into sendBCH");
     var userEmailAddress = req.body.userMailId;
     var userBCHAmountToSend = parseFloat(req.body.amount).toFixed(8);
     var userReceiverBCHAddress = req.body.recieverBCHCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
-    var minimumAmountBCHSentByUser = 0.008;
-    miniBCHAmountSentByUser = parseFloat(minimumAmountBCHSentByUser).toFixed(8);
-
+    var miniBCHAmountSentByUser = 0.001;
+    miniBCHAmountSentByUser = parseFloat(miniBCHAmountSentByUser).toFixed(8);
     if (!userEmailAddress || !userBCHAmountToSend || !userReceiverBCHAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Can't be empty!!! by user!!!");
+      console.log("Can't be empty!!! by user ");
       return res.json({
         "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
-    if (userBCHAmountToSend < minimumAmountBCHSentByUser) {
-      console.log("amount in not less 0.08 !!!");
+    if (userBCHAmountToSend < miniBCHAmountSentByUser) {
+      console.log("Sending amount is not less then " + miniBCHAmountSentByUser);
       return res.json({
-        "message": "BCH Amount not less than " + minimumAmountBCHSentByUser,
+        "message": "Sending amount BCH is not less then " + miniBCHAmountSentByUser,
         statusCode: 400
       });
     }
@@ -242,311 +250,150 @@ module.exports = {
           "message": "Invalid email!",
           statusCode: 401
         });
-      }
-      var userBCHBalanceInDb = parseFloat(userDetails.BCHMainbalance).toFixed(8);
-      var userBCHAddressInDb = userDetails.userBCHAddress;
-      console.log("UserAMount in database ::: " + userDetails.BCHMainbalance);
-      console.log("BCH Amount send by user ::: " + userBCHAmountToSend);
-      if (userBCHAmountToSend > userBCHBalanceInDb) {
-        console.log("BCH Amount amount Exceed !!!");
-        return res.json({
-          "message": "You have Insufficient BCH balance",
-          statusCode: 401
-        });
-      }
-      if (userReceiverBCHAddress == userBCHAddressInDb) {
-        console.log("User address and recieverBCHCoinAddress Same !!!");
-        return res.json({
-          "message": "recieverBCHCoinAddress and Your BCH Address Same",
-          statusCode: 401
-        });
-      }
-      User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
-        if (err) {
-          console.log("Error to compare password");
-          return res.json({
-            "message": err,
-            statusCode: 400
-          });
-        }
-        if (!valid) {
-          console.log("Spending password is invalid !!!");
-          return res.json({
-            "message": "Please enter correct spending password",
-            statusCode: 400
-          });
-        } else {
-          console.log("Spending password is valid!!!");
-          var minimumNumberOfConfirmation = 1;
-          var netAmountToSend = parseFloat(userBCHAmountToSend).toFixed(8) - parseFloat(transactionFeeBCH).toFixed(8);
-          console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
-          console.log(userEmailAddress + " transactionFeeBCH ::: " + transactionFeeBCH);
-
-          clientBCH.cmd('sendfrom', userEmailAddress, userReceiverBCHAddress, parseFloat(netAmountToSend).toFixed(8),
-            minimumNumberOfConfirmation, userReceiverBCHAddress, userReceiverBCHAddress,
-            function(err, TransactionDetails, resHeaders) {
-              if (err) {
-                console.log("Error from sendFromBCHAccount:: " + err);
-                if (err.code && err.code == "ECONNREFUSED") {
-                  return res.json({
-                    "message": "BCH Server Refuse to connect App",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -5) {
-                  return res.json({
-                    "message": "Invalid BCH Address",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -6) {
-                  return res.json({
-                    "message": "Account has Insufficient funds",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code < 0) {
-                  return res.json({
-                    "message": "Problem in BCH server",
-                    statusCode: 400
-                  });
-                }
+      } else {
+        console.log(JSON.stringify(userDetails));
+        var userBCHBalanceInDb = parseFloat(userDetails.BCHMainbalance).toFixed(8);
+        console.log("User BCH balance in database ::: " + userBCHBalanceInDb);
+        console.log("User want send BCH to send ::: " + userBCHAmountToSend);
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userBCHAddressInDb = userDetails.userBCHAddress;
+              var userBCHBalanceInDb = userDetails.BCHMainbalance;
+              if (userBCHAmountToSend > userBCHBalanceInDb) {
+                console.log("User BCH balance is Insufficient");
                 return res.json({
-                  "message": "Error in BCH Server",
-                  statusCode: 400
+                  "message": "You have Insufficient BCH balance",
+                  statusCode: 401
                 });
               }
-              console.log('TransactionDetails :', TransactionDetails);
-              console.log("User balance in db:: " + userBCHBalanceInDb);
-              console.log("UserBCHAmountToSend  :: " + userBCHAmountToSend);
-
-              var updatedBCHbalance = parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userBCHAmountToSend).toFixed(8);
-              console.log("Update new Balance of user in DB ::" + updatedBCHbalance);
-              User.update({
-                  email: userEmailAddress
-                }, {
-                  BCHMainbalance: updatedBCHbalance
-                })
-                .exec(function(err, updatedUser) {
+              if (userReceiverBCHAddress == userBCHAddressInDb) {
+                console.log("User address and userReceiverBCHAddress Same !!!");
+                return res.json({
+                  "message": "userReceiverBCHAddress and Your BCH Address Same",
+                  statusCode: 401
+                });
+              }
+              console.log("Spending password is valid!!!");
+              var minimumNumberOfConfirmation = 1;
+              var netamountToSend = parseFloat(userBCHAmountToSend).toFixed(8) - parseFloat(transactionFeeBCH).toFixed(8);
+              console.log("clientBCH netamountToSend :: " + netamountToSend);
+              clientBCH.cmd('sendfrom', userEmailAddress, userReceiverBCHAddress, parseFloat(netamountToSend).toFixed(8),
+                minimumNumberOfConfirmation, userReceiverBCHAddress, userReceiverBCHAddress,
+                function(err, TransactionDetails, resHeaders) {
                   if (err) {
+                    console.log("Error from sendFromBCHAccount:: ");
+                    if (err.code && err.code == "ECONNREFUSED") {
+                      return res.json({
+                        "message": "BCH Server Refuse to connect App",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -5) {
+                      return res.json({
+                        "message": "Invalid BCH Address",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -6) {
+                      return res.json({
+                        "message": "Account has Insufficient funds",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code < 0) {
+                      return res.json({
+                        "message": "Problem in BCH server",
+                        statusCode: 400
+                      });
+                    }
                     return res.json({
-                      "message": "Error to update User",
+                      "message": "Error in BCH Server",
                       statusCode: 400
                     });
                   }
-                  User.findOne({
+                  console.log('TransactionDetails :', TransactionDetails);
+                  console.log("userBCHAddressInDb :: " + userBCHAddressInDb);
+                  console.log("userBCHAmountToSend  :: " + userBCHAmountToSend);
+                  var updatedBCHbalance = (parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userBCHAmountToSend).toFixed(8));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedBCHbalance).toFixed(8));
+                  User.update({
                       email: userEmailAddress
-                    }).populateAll()
-                    .exec(function(err, user) {
+                    }, {
+                      BCHMainbalance: parseFloat(updatedBCHbalance).toFixed(8)
+                    })
+                    .exec(function(err, updatedUser) {
                       if (err) {
                         return res.json({
-                          "message": "Error to find user",
-                          statusCode: 401
+                          "message": "Error to update User",
+                          statusCode: 400
                         });
                       }
-                      if (!user) {
-                        return res.json({
-                          "message": "Invalid email!",
-                          statusCode: 401
+                      User.findOne({
+                          email: userEmailAddress
+                        }).populateAll()
+                        .exec(function(err, user) {
+                          if (err) {
+                            return res.json({
+                              "message": "Error to find user",
+                              statusCode: 401
+                            });
+                          }
+                          if (!user) {
+                            return res.json({
+                              "message": "Invalid email!",
+                              statusCode: 401
+                            });
+                          }
+                          console.log("Return user details after sending amount!!");
+                          res.json({
+                            user: user,
+                            statusCode: 200
+                          });
                         });
-                      }
-                      console.log("Update User details of BCH " +
-                        JSON.stringify(user));
-                      res.json({
-                        user: user,
-                        statusCode: 200
-                      });
                     });
                 });
-            });
-        }
-      });
-    });
-  },
-  sendPYY: function(req, res, next) {
-    console.log("Enter into sendPYY with ::: " + JSON.stringify(req.body));
-    var userEmailAddress = req.body.userMailId;
-    var userPYYAmountToSend = parseFloat(req.body.amount).toFixed(8);
-    var userReceiverPYYAddress = req.body.recieverPYYCoinAddress;
-    var userSpendingPassword = req.body.spendingPassword;
-    var userCommentForReceiver = req.body.commentForReciever;
-    var userCommentForSender = req.body.commentForSender;
-    var minimumAmountPYYSentByUser = 0.008;
-    miniPYYAmountSentByUser = parseFloat(minimumAmountPYYSentByUser).toFixed(8);
-
-    if (!userEmailAddress || !userPYYAmountToSend || !userReceiverPYYAddress ||
-      !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Can't be empty!!! by user!!!");
-      return res.json({
-        "message": "Can't be empty!!!",
-        statusCode: 400
-      });
-    }
-    if (userPYYAmountToSend < minimumAmountPYYSentByUser) {
-      console.log("amount in not less 0.08 !!!");
-      return res.json({
-        "message": "PYY Amount not less than " + minimumAmountPYYSentByUser,
-        statusCode: 400
-      });
-    }
-    User.findOne({
-      email: userEmailAddress
-    }).exec(function(err, userDetails) {
-      if (err) {
-        return res.json({
-          "message": "Error to find user",
-          statusCode: 401
-        });
-      }
-      if (!userDetails) {
-        return res.json({
-          "message": "Invalid email!",
-          statusCode: 401
-        });
-      }
-      var userPYYBalanceInDb = parseFloat(userDetails.PYYMainbalance).toFixed(8);
-      var userPYYAddressInDb = userDetails.userPYYAddress;
-      console.log("UserAMount in database ::: " + userDetails.PYYMainbalance);
-      console.log("PYY Amount send by user ::: " + userPYYAmountToSend);
-      if (userPYYAmountToSend > userPYYBalanceInDb) {
-        console.log("PYY Amount amount Exceed !!!");
-        return res.json({
-          "message": "You have Insufficient PYY balance",
-          statusCode: 401
-        });
-      }
-      if (userReceiverPYYAddress == userPYYAddressInDb) {
-        console.log("User address and recieverPYYCoinAddress Same !!!");
-        return res.json({
-          "message": "recieverPYYCoinAddress and Your PYY Address Same",
-          statusCode: 401
-        });
-      }
-      User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
-        if (err) {
-          console.log("Error to compare password");
-          return res.json({
-            "message": err,
-            statusCode: 400
+            }
           });
-        }
-        if (!valid) {
-          console.log("Spending password is invalid !!!");
-          return res.json({
-            "message": "Please enter correct spending password",
-            statusCode: 400
-          });
-        } else {
-          console.log("Spending password is valid!!!");
-          var minimumNumberOfConfirmation = 1;
-          var netAmountToSend = parseFloat(userPYYAmountToSend).toFixed(8) - parseFloat(transactionFeePYY).toFixed(8);
-          console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
-          console.log(userEmailAddress + " transactionFeePYY ::: " + transactionFeePYY);
-
-          clientPYY.cmd('sendfrom', userEmailAddress, userReceiverPYYAddress, parseFloat(netAmountToSend).toFixed(8),
-            minimumNumberOfConfirmation, userReceiverPYYAddress, userReceiverPYYAddress,
-            function(err, TransactionDetails, resHeaders) {
-              if (err) {
-                console.log("Error from sendFromPYYAccount:: " + err);
-                if (err.code && err.code == "ECONNREFUSED") {
-                  return res.json({
-                    "message": "PYY Server Refuse to connect App",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -5) {
-                  return res.json({
-                    "message": "Invalid PYY Address",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -6) {
-                  return res.json({
-                    "message": "Account has Insufficient funds",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code < 0) {
-                  return res.json({
-                    "message": "Problem in PYY server",
-                    statusCode: 400
-                  });
-                }
-                return res.json({
-                  "message": "Error in PYY Server",
-                  statusCode: 400
-                });
-              }
-              console.log('TransactionDetails :', TransactionDetails);
-              console.log("User balance in db:: " + userPYYBalanceInDb);
-              console.log("UserPYYAmountToSend  :: " + userPYYAmountToSend);
-
-              var updatedPYYbalance = parseFloat(userPYYBalanceInDb).toFixed(8) - parseFloat(userPYYAmountToSend).toFixed(8);
-              console.log("Update new Balance of user in DB ::" + updatedPYYbalance);
-              User.update({
-                  email: userEmailAddress
-                }, {
-                  PYYMainbalance: updatedPYYbalance
-                })
-                .exec(function(err, updatedUser) {
-                  if (err) {
-                    return res.json({
-                      "message": "Error to update User",
-                      statusCode: 400
-                    });
-                  }
-                  User.findOne({
-                      email: userEmailAddress
-                    }).populateAll()
-                    .exec(function(err, user) {
-                      if (err) {
-                        return res.json({
-                          "message": "Error to find user",
-                          statusCode: 401
-                        });
-                      }
-                      if (!user) {
-                        return res.json({
-                          "message": "Invalid email!",
-                          statusCode: 401
-                        });
-                      }
-                      console.log("Update User details of PYY " +
-                        JSON.stringify(user));
-                      res.json({
-                        user: user,
-                        statusCode: 200
-                      });
-                    });
-                });
-            });
-        }
-      });
+      }
     });
   },
   sendGDS: function(req, res, next) {
-    console.log("Enter into sendGDS with ::: " + JSON.stringify(req.body));
+    console.log("Enter into sendGDS");
     var userEmailAddress = req.body.userMailId;
     var userGDSAmountToSend = parseFloat(req.body.amount).toFixed(8);
     var userReceiverGDSAddress = req.body.recieverGDSCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
-    var minimumAmountGDSSentByUser = 0.008;
-    miniGDSAmountSentByUser = parseFloat(minimumAmountGDSSentByUser).toFixed(8);
-
+    var miniGDSAmountSentByUser = 0.001;
+    miniGDSAmountSentByUser = parseFloat(miniGDSAmountSentByUser).toFixed(8);
     if (!userEmailAddress || !userGDSAmountToSend || !userReceiverGDSAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
-      console.log("Can't be empty!!! by user!!!");
+      console.log("Can't be empty!!! by user ");
       return res.json({
         "message": "Can't be empty!!!",
         statusCode: 400
       });
     }
-    if (userGDSAmountToSend < minimumAmountGDSSentByUser) {
-      console.log("amount in not less 0.08 !!!");
+    if (userGDSAmountToSend < miniGDSAmountSentByUser) {
+      console.log("Sending amount is not less then " + miniGDSAmountSentByUser);
       return res.json({
-        "message": "GDS Amount not less than " + minimumAmountGDSSentByUser,
+        "message": "Sending amount GDS is not less then " + miniGDSAmountSentByUser,
         statusCode: 400
       });
     }
@@ -564,125 +411,448 @@ module.exports = {
           "message": "Invalid email!",
           statusCode: 401
         });
-      }
-      var userGDSBalanceInDb = parseFloat(userDetails.GDSMainbalance).toFixed(8);
-      var userGDSAddressInDb = userDetails.userGDSAddress;
-      console.log("UserAMount in database ::: " + userDetails.GDSMainbalance);
-      console.log("GDS Amount send by user ::: " + userGDSAmountToSend);
-      if (userGDSAmountToSend > userGDSBalanceInDb) {
-        console.log("GDS Amount amount Exceed !!!");
-        return res.json({
-          "message": "You have Insufficient GDS balance",
-          statusCode: 401
-        });
-      }
-      if (userReceiverGDSAddress == userGDSAddressInDb) {
-        console.log("User address and recieverGDSCoinAddress Same !!!");
-        return res.json({
-          "message": "recieverGDSCoinAddress and Your GDS Address Same",
-          statusCode: 401
-        });
-      }
-      User.compareSpendingpassword(userSpendingPassword, userDetails, function(err, valid) {
-        if (err) {
-          console.log("Error to compare password");
-          return res.json({
-            "message": err,
-            statusCode: 400
-          });
-        }
-        if (!valid) {
-          console.log("Spending password is invalid !!!");
-          return res.json({
-            "message": "Please enter correct spending password",
-            statusCode: 400
-          });
-        } else {
-          console.log("Spending password is valid!!!");
-          var minimumNumberOfConfirmation = 1;
-          var netAmountToSend = parseFloat(userGDSAmountToSend).toFixed(8) - parseFloat(transactionFeeGDS).toFixed(8);
-          console.log(userEmailAddress + " netAmountToSend ::: " + netAmountToSend);
-          console.log(userEmailAddress + " transactionFeeGDS ::: " + transactionFeeGDS);
-
-          clientGDS.cmd('sendfrom', userEmailAddress, userReceiverGDSAddress, parseFloat(netAmountToSend).toFixed(8),
-            minimumNumberOfConfirmation, userReceiverGDSAddress, userReceiverGDSAddress,
-            function(err, TransactionDetails, resHeaders) {
-              if (err) {
-                console.log("Error from sendFromGDSAccount:: " + err);
-                if (err.code && err.code == "ECONNREFUSED") {
-                  return res.json({
-                    "message": "GDS Server Refuse to connect App",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -5) {
-                  return res.json({
-                    "message": "Invalid GDS Address",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code == -6) {
-                  return res.json({
-                    "message": "Account has Insufficient funds",
-                    statusCode: 400
-                  });
-                }
-                if (err.code && err.code < 0) {
-                  return res.json({
-                    "message": "Problem in GDS server",
-                    statusCode: 400
-                  });
-                }
+      } else {
+        console.log(JSON.stringify(userDetails));
+        var userGDSBalanceInDb = parseFloat(userDetails.GDSMainbalance).toFixed(8);
+        console.log("User GDS balance in database ::: " + userGDSBalanceInDb);
+        console.log("User want send GDS to send ::: " + userGDSAmountToSend);
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userGDSAddressInDb = userDetails.userGDSAddress;
+              var userGDSBalanceInDb = userDetails.GDSMainbalance;
+              if (userGDSAmountToSend > userGDSBalanceInDb) {
+                console.log("User GDS balance is Insufficient");
                 return res.json({
-                  "message": "Error in GDS Server",
-                  statusCode: 400
+                  "message": "You have Insufficient GDS balance",
+                  statusCode: 401
                 });
               }
-              console.log('TransactionDetails :', TransactionDetails);
-              console.log("User balance in db:: " + userGDSBalanceInDb);
-              console.log("UserGDSAmountToSend  :: " + userGDSAmountToSend);
-
-              var updatedGDSbalance = parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userGDSAmountToSend).toFixed(8);
-              console.log("Update new Balance of user in DB ::" + updatedGDSbalance);
-              User.update({
-                  email: userEmailAddress
-                }, {
-                  GDSMainbalance: updatedGDSbalance
-                })
-                .exec(function(err, updatedUser) {
+              if (userReceiverGDSAddress == userGDSAddressInDb) {
+                console.log("User address and userReceiverGDSAddress Same !!!");
+                return res.json({
+                  "message": "userReceiverGDSAddress and Your GDS Address Same",
+                  statusCode: 401
+                });
+              }
+              console.log("Spending password is valid!!!");
+              var minimumNumberOfConfirmation = 1;
+              var netamountToSend = parseFloat(userGDSAmountToSend).toFixed(8) - parseFloat(transactionFeeGDS).toFixed(8);
+              console.log("clientGDS netamountToSend :: " + netamountToSend);
+              clientGDS.cmd('sendfrom', userEmailAddress, userReceiverGDSAddress, parseFloat(netamountToSend).toFixed(8),
+                minimumNumberOfConfirmation, userReceiverGDSAddress, userReceiverGDSAddress,
+                function(err, TransactionDetails, resHeaders) {
                   if (err) {
+                    console.log("Error from sendFromGDSAccount:: ");
+                    if (err.code && err.code == "ECONNREFUSED") {
+                      return res.json({
+                        "message": "GDS Server Refuse to connect App",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -5) {
+                      return res.json({
+                        "message": "Invalid GDS Address",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -6) {
+                      return res.json({
+                        "message": "Account has Insufficient funds",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code < 0) {
+                      return res.json({
+                        "message": "Problem in GDS server",
+                        statusCode: 400
+                      });
+                    }
                     return res.json({
-                      "message": "Error to update User",
+                      "message": "Error in GDS Server",
                       statusCode: 400
                     });
                   }
-                  User.findOne({
+                  console.log('TransactionDetails :', TransactionDetails);
+                  console.log("userGDSAddressInDb :: " + userGDSAddressInDb);
+                  console.log("userGDSAmountToSend  :: " + userGDSAmountToSend);
+                  var updatedGDSbalance = (parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userGDSAmountToSend).toFixed(8));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedGDSbalance).toFixed(8));
+                  User.update({
                       email: userEmailAddress
-                    }).populateAll()
-                    .exec(function(err, user) {
+                    }, {
+                      GDSMainbalance: parseFloat(updatedGDSbalance).toFixed(8)
+                    })
+                    .exec(function(err, updatedUser) {
                       if (err) {
                         return res.json({
-                          "message": "Error to find user",
-                          statusCode: 401
+                          "message": "Error to update User",
+                          statusCode: 400
                         });
                       }
-                      if (!user) {
-                        return res.json({
-                          "message": "Invalid email!",
-                          statusCode: 401
+                      User.findOne({
+                          email: userEmailAddress
+                        }).populateAll()
+                        .exec(function(err, user) {
+                          if (err) {
+                            return res.json({
+                              "message": "Error to find user",
+                              statusCode: 401
+                            });
+                          }
+                          if (!user) {
+                            return res.json({
+                              "message": "Invalid email!",
+                              statusCode: 401
+                            });
+                          }
+                          console.log("Return user details after sending amount!!");
+                          res.json({
+                            user: user,
+                            statusCode: 200
+                          });
                         });
-                      }
-                      console.log("Update User details of GDS " +
-                        JSON.stringify(user));
-                      res.json({
-                        user: user,
-                        statusCode: 200
-                      });
                     });
                 });
-            });
-        }
+            }
+          });
+      }
+    });
+  },
+  sendPYY: function(req, res, next) {
+    console.log("Enter into sendPYY");
+    var userEmailAddress = req.body.userMailId;
+    var userPYYAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userReceiverPYYAddress = req.body.recieverPYYCoinAddress;
+    var userSpendingPassword = req.body.spendingPassword;
+    var userCommentForReceiver = req.body.commentForReciever;
+    var userCommentForSender = req.body.commentForSender;
+    var miniPYYAmountSentByUser = 0.001;
+    miniPYYAmountSentByUser = parseFloat(miniPYYAmountSentByUser).toFixed(8);
+    if (!userEmailAddress || !userPYYAmountToSend || !userReceiverPYYAddress ||
+      !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
+      console.log("Can't be empty!!! by user ");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
       });
+    }
+    if (userPYYAmountToSend < miniPYYAmountSentByUser) {
+      console.log("Sending amount is not less then " + miniPYYAmountSentByUser);
+      return res.json({
+        "message": "Sending amount PYY is not less then " + miniPYYAmountSentByUser,
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      } else {
+        console.log(JSON.stringify(userDetails));
+        var userPYYBalanceInDb = parseFloat(userDetails.PYYMainbalance).toFixed(8);
+        console.log("User PYY balance in database ::: " + userPYYBalanceInDb);
+        console.log("User want send PYY to send ::: " + userPYYAmountToSend);
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userPYYAddressInDb = userDetails.userPYYAddress;
+              var userPYYBalanceInDb = userDetails.PYYMainbalance;
+              if (userPYYAmountToSend > userPYYBalanceInDb) {
+                console.log("User PYY balance is Insufficient");
+                return res.json({
+                  "message": "You have Insufficient PYY balance",
+                  statusCode: 401
+                });
+              }
+              if (userReceiverPYYAddress == userPYYAddressInDb) {
+                console.log("User address and userReceiverPYYAddress Same !!!");
+                return res.json({
+                  "message": "userReceiverPYYAddress and Your PYY Address Same",
+                  statusCode: 401
+                });
+              }
+              console.log("Spending password is valid!!!");
+              var minimumNumberOfConfirmation = 1;
+              var netamountToSend = parseFloat(userPYYAmountToSend).toFixed(8) - parseFloat(transactionFeePYY).toFixed(8);
+              console.log("clientPYY netamountToSend :: " + netamountToSend);
+              clientPYY.cmd('sendfrom', userEmailAddress, userReceiverPYYAddress, parseFloat(netamountToSend).toFixed(8),
+                minimumNumberOfConfirmation, userReceiverPYYAddress, userReceiverPYYAddress,
+                function(err, TransactionDetails, resHeaders) {
+                  if (err) {
+                    console.log("Error from sendFromPYYAccount:: ");
+                    if (err.code && err.code == "ECONNREFUSED") {
+                      return res.json({
+                        "message": "PYY Server Refuse to connect App",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -5) {
+                      return res.json({
+                        "message": "Invalid PYY Address",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -6) {
+                      return res.json({
+                        "message": "Account has Insufficient funds",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code < 0) {
+                      return res.json({
+                        "message": "Problem in PYY server",
+                        statusCode: 400
+                      });
+                    }
+                    return res.json({
+                      "message": "Error in PYY Server",
+                      statusCode: 400
+                    });
+                  }
+                  console.log('TransactionDetails :', TransactionDetails);
+                  console.log("userPYYAddressInDb :: " + userPYYAddressInDb);
+                  console.log("userPYYAmountToSend  :: " + userPYYAmountToSend);
+                  var updatedPYYbalance = (parseFloat(userPYYBalanceInDb).toFixed(8) - parseFloat(userPYYAmountToSend).toFixed(8));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedPYYbalance).toFixed(8));
+                  User.update({
+                      email: userEmailAddress
+                    }, {
+                      PYYMainbalance: parseFloat(updatedPYYbalance).toFixed(8)
+                    })
+                    .exec(function(err, updatedUser) {
+                      if (err) {
+                        return res.json({
+                          "message": "Error to update User",
+                          statusCode: 400
+                        });
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        }).populateAll()
+                        .exec(function(err, user) {
+                          if (err) {
+                            return res.json({
+                              "message": "Error to find user",
+                              statusCode: 401
+                            });
+                          }
+                          if (!user) {
+                            return res.json({
+                              "message": "Invalid email!",
+                              statusCode: 401
+                            });
+                          }
+                          console.log("Return user details after sending amount!!");
+                          res.json({
+                            user: user,
+                            statusCode: 200
+                          });
+                        });
+                    });
+                });
+            }
+          });
+      }
+    });
+  },
+  sendCLUB: function(req, res, next) {
+    console.log("Enter into sendCLUB");
+    var userEmailAddress = req.body.userMailId;
+    var userCLUBAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userReceiverCLUBAddress = req.body.recieverCLUBCoinAddress;
+    var userSpendingPassword = req.body.spendingPassword;
+    var userCommentForReceiver = req.body.commentForReciever;
+    var userCommentForSender = req.body.commentForSender;
+    var miniCLUBAmountSentByUser = 0.001;
+    miniCLUBAmountSentByUser = parseFloat(miniCLUBAmountSentByUser).toFixed(8);
+    if (!userEmailAddress || !userCLUBAmountToSend || !userReceiverCLUBAddress ||
+      !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
+      console.log("Can't be empty!!! by user ");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    }
+    if (userCLUBAmountToSend < miniCLUBAmountSentByUser) {
+      console.log("Sending amount is not less then " + miniCLUBAmountSentByUser);
+      return res.json({
+        "message": "Sending amount CLUB is not less then " + miniCLUBAmountSentByUser,
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      } else {
+        console.log(JSON.stringify(userDetails));
+        var userCLUBBalanceInDb = parseFloat(userDetails.CLUBMainbalance).toFixed(8);
+        console.log("User CLUB balance in database ::: " + userCLUBBalanceInDb);
+        console.log("User want send CLUB to send ::: " + userCLUBAmountToSend);
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userCLUBAddressInDb = userDetails.userCLUBAddress;
+              var userCLUBBalanceInDb = userDetails.CLUBMainbalance;
+              if (userCLUBAmountToSend > userCLUBBalanceInDb) {
+                console.log("User CLUB balance is Insufficient");
+                return res.json({
+                  "message": "You have Insufficient CLUB balance",
+                  statusCode: 401
+                });
+              }
+              if (userReceiverCLUBAddress == userCLUBAddressInDb) {
+                console.log("User address and userReceiverCLUBAddress Same !!!");
+                return res.json({
+                  "message": "userReceiverCLUBAddress and Your CLUB Address Same",
+                  statusCode: 401
+                });
+              }
+              console.log("Spending password is valid!!!");
+              var minimumNumberOfConfirmation = 1;
+              var netamountToSend = parseFloat(userCLUBAmountToSend).toFixed(8) - parseFloat(transactionFeeCLUB).toFixed(8);
+              console.log("clientCLUB netamountToSend :: " + netamountToSend);
+              clientCLUB.cmd('sendfrom', userEmailAddress, userReceiverCLUBAddress, parseFloat(netamountToSend).toFixed(8),
+                minimumNumberOfConfirmation, userReceiverCLUBAddress, userReceiverCLUBAddress,
+                function(err, TransactionDetails, resHeaders) {
+                  if (err) {
+                    console.log("Error from sendFromCLUBAccount:: ");
+                    if (err.code && err.code == "ECONNREFUSED") {
+                      return res.json({
+                        "message": "CLUB Server Refuse to connect App",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -5) {
+                      return res.json({
+                        "message": "Invalid CLUB Address",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code == -6) {
+                      return res.json({
+                        "message": "Account has Insufficient funds",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code < 0) {
+                      return res.json({
+                        "message": "Problem in CLUB server",
+                        statusCode: 400
+                      });
+                    }
+                    return res.json({
+                      "message": "Error in CLUB Server",
+                      statusCode: 400
+                    });
+                  }
+                  console.log('TransactionDetails :', TransactionDetails);
+                  console.log("userCLUBAddressInDb :: " + userCLUBAddressInDb);
+                  console.log("userCLUBAmountToSend  :: " + userCLUBAmountToSend);
+                  var updatedCLUBbalance = (parseFloat(userCLUBBalanceInDb).toFixed(8) - parseFloat(userCLUBAmountToSend).toFixed(8));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedCLUBbalance).toFixed(8));
+                  User.update({
+                      email: userEmailAddress
+                    }, {
+                      CLUBMainbalance: parseFloat(updatedCLUBbalance).toFixed(8)
+                    })
+                    .exec(function(err, updatedUser) {
+                      if (err) {
+                        return res.json({
+                          "message": "Error to update User",
+                          statusCode: 400
+                        });
+                      }
+                      User.findOne({
+                          email: userEmailAddress
+                        }).populateAll()
+                        .exec(function(err, user) {
+                          if (err) {
+                            return res.json({
+                              "message": "Error to find user",
+                              statusCode: 401
+                            });
+                          }
+                          if (!user) {
+                            return res.json({
+                              "message": "Invalid email!",
+                              statusCode: 401
+                            });
+                          }
+                          console.log("Return user details after sending amount!!");
+                          res.json({
+                            user: user,
+                            statusCode: 200
+                          });
+                        });
+                    });
+                });
+            }
+          });
+      }
     });
   },
   getTxsListBCH: function(req, res, next) {
@@ -736,13 +906,65 @@ module.exports = {
             });
           }
           console.log("Return transactionList List !! ");
-          // for(var i = 0; i < transactionList.length; i++) {
-          //   console.log("transactionList.account ::"+transactionList[i].address);
-          //   if(transactionList[i].comment == companyBCHAccountAddress){
-          //     console.log("companyBCHAccountAddress found !!!");
-          //       delete transactionList[i];
-          //   }
-          // }
+          return res.json({
+            "tx": transactionList,
+            statusCode: 200
+          });
+        });
+    });
+  },
+  getTxsListCLUB: function(req, res, next) {
+    console.log("Enter into getTransactionListCLUB::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Can't be empty!!! by user.....");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).exec(function(err, user) {
+      if (err) {
+        console.log("Error to find user !!!");
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        console.log("Invalid Email !!!");
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      clientCLUB.cmd(
+        'listtransactions',
+        userMailId,
+        function(err, transactionList) {
+          if (err) {
+            console.log("Error from sendFromCLUBAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "CLUB Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in CLUB server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in CLUB Server",
+              statusCode: 400
+            });
+          }
+          console.log("Return transactionList List !! ");
+
           return res.json({
             "tx": transactionList,
             statusCode: 200
@@ -783,32 +1005,25 @@ module.exports = {
         userMailId,
         function(err, transactionList) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromBTCAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "BTC Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in BTC server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in BTC Server",
               statusCode: 400
             });
           }
           console.log("Return transactionList List !! ");
-          // for(var i = 0; i < transactionList.length; i++) {
-          //   console.log("transactionList.account ::"+transactionList[i].address);
-          //   if(transactionList[i].comment == companyBCHAccountAddress){
-          //     console.log("companyBCHAccountAddress found !!!");
-          //       delete transactionList[i];
-          //   }
-          // }
           return res.json({
             "tx": transactionList,
             statusCode: 200
@@ -848,21 +1063,21 @@ module.exports = {
         userMailId,
         function(err, transactionList) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromPYYAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "PYY Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in PYY server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in PYY Server",
               statusCode: 400
             });
           }
@@ -907,21 +1122,21 @@ module.exports = {
         userMailId,
         function(err, transactionList) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromGDSAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "GDS Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in GDS server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in GDS Server",
               statusCode: 400
             });
           }
@@ -1046,6 +1261,118 @@ module.exports = {
         });
     });
   },
+  getBalCLUB: function(req, res, next) {
+    console.log("Enter into getBalCLUB::: ");
+    var userMailId = req.body.userMailId;
+    if (!userMailId) {
+      console.log("Can't be empty!!! by user.....");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+      console.log("Valid User :: " + JSON.stringify(user));
+      console.log("UserCLUB Balance ::" + user.CLUBMainbalance);
+      var userCLUBMainbalanceInDb = parseFloat(user.CLUBMainbalance).toFixed(8);
+      var userFreezedCLUBMainbalanceInDb = parseFloat(user.FreezedCLUBbalance).toFixed(8);
+      clientCLUB.cmd(
+        'getbalance',
+        userMailId,
+        function(err, userCLUBMainbalanceFromServer, resHeaders) {
+          if (err) {
+            console.log("Error from sendFromCLUBAccount:: ");
+            if (err.code && err.code == "ECONNREFUSED") {
+              return res.json({
+                "message": "CLUB Server Refuse to connect App",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -5) {
+              return res.json({
+                "message": "Invalid CLUB Address",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code == -6) {
+              return res.json({
+                "message": "Account has Insufficient funds",
+                statusCode: 400
+              });
+            }
+            if (err.code && err.code < 0) {
+              return res.json({
+                "message": "Problem in CLUB server",
+                statusCode: 400
+              });
+            }
+            return res.json({
+              "message": "Error in CLUB Server",
+              statusCode: 400
+            });
+          }
+          var totalCLUBMainbalance = (parseFloat(userCLUBMainbalanceInDb)).toFixed(8);
+          console.log(parseFloat(userCLUBMainbalanceFromServer).toFixed(8) + " BHC server and in DB CLUB + Freezed " + parseFloat(totalCLUBMainbalance).toFixed(8));
+          if (parseFloat(userCLUBMainbalanceFromServer).toFixed(8) > parseFloat(totalCLUBMainbalance).toFixed(8)) {
+            console.log("UserBalance Need to update ............");
+            User.update({
+                email: userMailId
+              }, {
+                CLUBMainbalance: parseFloat(userCLUBMainbalanceFromServer).toFixed(8)
+              })
+              .exec(function(err, updatedUser) {
+                if (err) {
+                  return res.json({
+                    "message": "Error to update User balance",
+                    statusCode: 400
+                  });
+                }
+                User.findOne({
+                  email: userMailId
+                }).populateAll().exec(function(err, user) {
+                  if (err) {
+                    return res.json({
+                      "message": "Error to find user",
+                      statusCode: 401
+                    });
+                  }
+                  if (!user) {
+                    return res.json({
+                      "message": "Invalid email!",
+                      statusCode: 401
+                    });
+                  }
+                  console.log("Return Update details for CLUB balance :: " + user);
+                  res.json({
+                    user: user,
+                    statusCode: 200
+                  });
+                });
+              });
+          } else {
+            console.log("No need to update ");
+            res.json({
+              user: user,
+              statusCode: 200
+            });
+          }
+        });
+    });
+  },
   getBalBTC: function(req, res, next) {
     console.log("Enter into getBalBTC::: ");
     var userMailId = req.body.userMailId;
@@ -1072,7 +1399,7 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.BTCMainbalance);
+      console.log("UserBTC Balance ::" + user.BTCMainbalance);
       var userBTCMainbalanceInDb = parseFloat(user.BTCMainbalance).toFixed(8);
       var userFreezedBTCMainbalanceInDb = parseFloat(user.FreezedBTCbalance).toFixed(8);
       clientBTC.cmd(
@@ -1080,21 +1407,21 @@ module.exports = {
         userMailId,
         function(err, userBTCMainbalanceFromServer, resHeaders) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromBTCAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "BTC Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in BTC server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in BTC Server",
               statusCode: 400
             });
           }
@@ -1142,10 +1469,7 @@ module.exports = {
               user: user,
               statusCode: 200
             });
-            // res.json({
-            //   "message": "No need to update",
-            //   statusCode: 201
-            // });
+
           }
         });
     });
@@ -1176,7 +1500,7 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.PYYMainbalance);
+      console.log("UserPYY Balance ::" + user.PYYMainbalance);
       var userPYYMainbalanceInDb = parseFloat(user.PYYMainbalance).toFixed(8);
       var userFreezedPYYMainbalanceInDb = parseFloat(user.FreezedPYYbalance).toFixed(8);
       clientPYY.cmd(
@@ -1184,16 +1508,16 @@ module.exports = {
         userMailId,
         function(err, userPYYMainbalanceFromServer, resHeaders) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromPYYAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "PYY Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code == -5) {
               return res.json({
-                "message": "Invalid BCH Address",
+                "message": "Invalid PYY Address",
                 statusCode: 400
               });
             }
@@ -1205,17 +1529,17 @@ module.exports = {
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in PYY server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in PYY Server",
               statusCode: 400
             });
           }
           var totalPYYMainbalance = (parseFloat(userPYYMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userPYYMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalPYYMainbalance).toFixed(8));
+          console.log(parseFloat(userPYYMainbalanceFromServer).toFixed(8) + " BHC server and in DB PYY + Freezed " + parseFloat(totalPYYMainbalance).toFixed(8));
           if (parseFloat(userPYYMainbalanceFromServer).toFixed(8) > parseFloat(totalPYYMainbalance).toFixed(8)) {
             console.log("UserBalance Need to update ............");
             User.update({
@@ -1245,7 +1569,7 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  console.log("Return Update details for BCH balance :: " + user);
+                  console.log("Return Update details for PYY balance :: " + user);
                   res.json({
                     user: user,
                     statusCode: 200
@@ -1263,7 +1587,7 @@ module.exports = {
     });
   },
   getBalGDS: function(req, res, next) {
-    console.log("Enter into getBalBCH::: ");
+    console.log("Enter into getBalGDS::: ");
     var userMailId = req.body.userMailId;
     if (!userMailId) {
       console.log("Can't be empty!!! by user.....");
@@ -1288,24 +1612,24 @@ module.exports = {
         });
       }
       console.log("Valid User :: " + JSON.stringify(user));
-      console.log("UserBCH Balance ::" + user.GDSMainbalance);
+      console.log("UserGDS Balance ::" + user.GDSMainbalance);
       var userGDSMainbalanceInDb = parseFloat(user.GDSMainbalance).toFixed(8);
       var userFreezedGDSMainbalanceInDb = parseFloat(user.FreezedGDSbalance).toFixed(8);
-      clientBCH.cmd(
+      clientGDS.cmd(
         'getbalance',
         userMailId,
         function(err, userGDSMainbalanceFromServer, resHeaders) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from sendFromGDSAccount:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
-                "message": "BCH Server Refuse to connect App",
+                "message": "GDS Server Refuse to connect App",
                 statusCode: 400
               });
             }
             if (err.code && err.code == -5) {
               return res.json({
-                "message": "Invalid BCH Address",
+                "message": "Invalid GDS Address",
                 statusCode: 400
               });
             }
@@ -1317,17 +1641,17 @@ module.exports = {
             }
             if (err.code && err.code < 0) {
               return res.json({
-                "message": "Problem in BCH server",
+                "message": "Problem in GDS server",
                 statusCode: 400
               });
             }
             return res.json({
-              "message": "Error in BCH Server",
+              "message": "Error in GDS Server",
               statusCode: 400
             });
           }
           var totalGDSMainbalance = (parseFloat(userGDSMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userGDSMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalGDSMainbalance).toFixed(8));
+          console.log(parseFloat(userGDSMainbalanceFromServer).toFixed(8) + " BHC server and in DB GDS + Freezed " + parseFloat(totalGDSMainbalance).toFixed(8));
           if (parseFloat(userGDSMainbalanceFromServer).toFixed(8) > parseFloat(totalGDSMainbalance).toFixed(8)) {
             console.log("UserBalance Need to update ............");
             User.update({
@@ -1357,7 +1681,7 @@ module.exports = {
                       statusCode: 401
                     });
                   }
-                  console.log("Return Update details for BCH balance :: " + user);
+                  console.log("Return Update details for GDS balance :: " + user);
                   res.json({
                     user: user,
                     statusCode: 200

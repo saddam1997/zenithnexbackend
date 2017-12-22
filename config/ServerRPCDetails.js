@@ -1,6 +1,6 @@
 module.exports.company = {
 
-  //BCH Server details
+  //BTC Server details
   clientBTChost: '162.213.252.66',
   clientBTCport: 18336,
   clientBTCuser: 'test',
@@ -11,6 +11,12 @@ module.exports.company = {
   clientBCHport: 18336,
   clientBCHuser: 'test',
   clientBCHpass: 'test123',
+
+  //CLUB Server details
+  clientCLUBhost: '162.213.252.66',
+  clientCLUBport: 18336,
+  clientCLUBuser: 'test',
+  clientCLUBpass: 'test123',
 
   //GDS Server details
   clientGDShost: '162.213.252.66',
@@ -25,12 +31,14 @@ module.exports.company = {
   clientPYYpass: 'test123',
 
   txFeeBCH: 0.0008,
+  txFeeCLUB: 0.0008,
   txFeeBTC: 0.0001,
   txFeePYY: 0.0008,
   txFeeGDS: 0.0008,
 
   companyBTCAccount: "pennybtc@gmail.com",
   companyBCHAccount: "pennybch@gmail.com",
+  companyCLUBAccount: "pennyclub@gmail.com",
   companyPYYAccount: "pennypyy@gmail.com",
   companyGDSAccount: "pennygds@gmail.com",
 

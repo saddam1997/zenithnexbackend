@@ -21,6 +21,16 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
+
+//CLUB Wallet Details
+var bitcoinCLUB = require('bitcoin');
+var clientCLUB = new bitcoinCLUB.Client({
+  host: sails.config.company.clientCLUBhost,
+  port: sails.config.company.clientCLUBport,
+  user: sails.config.company.clientCLUBuser,
+  pass: sails.config.company.clientCLUBpass
+});
+
 //PYY Wallet Details
 var bitcoinPYY = require('bitcoin');
 var clientPYY = new bitcoinPYY.Client({
@@ -38,17 +48,20 @@ var clientGDS = new bitcoinGDS.Client({
   pass: sails.config.company.clientGDSpass
 });
 var transactionFeeBCH = sails.config.company.txFeeBCH;
+var transactionFeeCLUB = sails.config.company.txFeeCLUB;
 var transactionFeeBTC = sails.config.company.txFeeBTC;
 var transactionFeePYY = sails.config.company.txFeePYY;
 var transactionFeeGDS = sails.config.company.txFeeGDS;
 
 var companyBTCAccount = sails.config.company.companyBTCAccount;
 var companyBCHAccount = sails.config.company.companyBCHAccount;
+var companyCLUBAccount = sails.config.company.companyCLUBAccount;
 var companyGDSAccount = sails.config.company.companyGDSAccount;
 var companyPYYAccount = sails.config.company.companyPYYAccount;
 
 var currencyNameBTC = "BTC";
 var currencyNameBCH = "BCH";
+var currencyNameCLUB = "CLUB";
 var currencyNameGDS = "GDS";
 var currencyNamePYY = "PYY";
 
@@ -624,6 +637,302 @@ module.exports = {
                           } else {
                             console.log("moveBCHTransaction status " + moveBCHTransaction);
                             if (moveBCHTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
+                          }
+                        });
+                    });
+                });
+            }
+          });
+      }
+    });
+  },
+  depositeInWalletCLUB: function(req, res) {
+    console.log("Enter into depositeInWalletCLUB");
+    var userEmailAddress = req.body.userMailId;
+    var userCLUBAmountToDeposite = parseFloat(req.body.bchamount);
+    var userSpendingPassword = req.body.spendingPassword;
+    if (!userEmailAddress || !userCLUBAmountToDeposite || !userSpendingPassword) {
+      console.log("Can't be empty!!! by user ");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      } else {
+
+
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userCLUBMainBalanceInDb = userDetails.CLUBMainbalance;
+              if (userCLUBAmountToDeposite > userCLUBMainBalanceInDb) {
+                console.log("User BTC balance is Insufficient");
+                return res.json({
+                  "message": "You have Insufficient BTC balance",
+                  statusCode: 401
+                });
+              }
+              console.log("Spending password is valid!!!");
+              var updatedCLUBbalance = (parseFloat(userDetails.CLUBbalance) + parseFloat(userCLUBAmountToDeposite));
+              var updatedCLUBMainbalance = (parseFloat(userDetails.CLUBMainbalance) - parseFloat(userCLUBAmountToDeposite));
+
+              User.update({
+                  id: userDetails.id
+                }, {
+                  CLUBbalance: parseFloat(updatedCLUBbalance),
+                  CLUBMainbalance: parseFloat(updatedCLUBMainbalance)
+                })
+                .exec(function(err, updatedUser) {
+                  if (err) {
+                    console.log("Error to update User after move bid!!!!!!!!!");
+                    return res.json({
+                      "message": "Error to update BTC main balance",
+                      statusCode: 401
+                    });
+                  }
+                  Tradebalanceorder.create({
+                      amount: userCLUBAmountToDeposite,
+                      currencyName: currencyNameCLUB,
+                      action: actionNameDeposit,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+                      //Move CLUB Company account to User Account on deposite
+                      clientCLUB.cmd('move',
+                        userEmailAddress,
+                        companyCLUBAccount,
+                        userCLUBAmountToDeposite,
+                        function(err, moveCLUBTransaction, resHeaders) {
+                          if (err) {
+                            console.log("Error from WithdrawalCLUB :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("CLUB Server Refuse to connect App");
+                              return res.json({
+                                "message": "CLUB Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyCLUBAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyCLUBAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in CLUB server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in CLUB server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in CLUB Server");
+                            return res.json({
+                              "message": "Error in CLUB Server",
+                              statusCode: 400
+                            });
+                          } else {
+                            console.log("moveCLUBTransaction status " + moveCLUBTransaction);
+                            if (moveCLUBTransaction == true) {
+                              User.findOne({
+                                  email: userEmailAddress
+                                })
+                                .exec(function(err, userDetails) {
+                                  if (err) {
+                                    console.log("Error to find user");
+                                  }
+                                  if (!userDetails) {
+                                    console.log("Invalid email!");
+                                  } else {
+                                    return res.json({
+                                      user: userDetails,
+                                      statusCode: 200
+                                    });
+                                  }
+                                });
+                            }
+                          }
+                        });
+
+                    });
+                });
+            }
+          });
+      }
+    });
+
+  },
+  withdrawInWalletCLUB: function(req, res) {
+    console.log("Enter into withdrawInWalletCLUB");
+    var userEmailAddress = req.body.userMailId;
+    var userCLUBAmountToWithDraw = parseFloat(req.body.bchamount);
+    var userSpendingPassword = req.body.spendingPassword;
+    if (!userEmailAddress || !userCLUBAmountToWithDraw || !userSpendingPassword) {
+      console.log("Can't be empty!!! by user ");
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    }
+    User.findOne({
+      email: userEmailAddress
+    }).exec(function(err, userDetails) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!userDetails) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      } else {
+
+        User.compareSpendingpassword(userSpendingPassword, userDetails,
+          function(err, valid) {
+            if (err) {
+              console.log("Eror To compare password !!!");
+              return res.json({
+                "message": err,
+                statusCode: 401
+              });
+            }
+            if (!valid) {
+              console.log("Invalid spendingpassword !!!");
+              return res.json({
+                "message": 'Enter valid spending password',
+                statusCode: 401
+              });
+            } else {
+              console.log("Valid spending password !!!");
+              var userCLUBBalanceInDb = userDetails.CLUBbalance;
+              if (userCLUBAmountToWithDraw > userCLUBBalanceInDb) {
+                console.log("User CLUB balance is Insufficient");
+                return res.json({
+                  "message": "You have Insufficient CLUB balance",
+                  statusCode: 401
+                });
+              }
+              //Deduct transactionFeeCLUB
+              var afterTransactionFeeAmount = (parseFloat(userCLUBAmountToWithDraw) - parseFloat(transactionFeeCLUB));
+              console.log("afterTransactionFeeAmount :: " + afterTransactionFeeAmount);
+              console.log("Spending password is valid!!!");
+              var updatedCLUBMainbalance = (parseFloat(userDetails.CLUBMainbalance) + parseFloat(afterTransactionFeeAmount));
+              var updatedCLUBbalance = (parseFloat(userDetails.CLUBbalance) - parseFloat(userCLUBAmountToWithDraw));
+              User.update({
+                  id: userDetails.id
+                }, {
+                  CLUBbalance: parseFloat(updatedCLUBbalance),
+                  CLUBMainbalance: parseFloat(updatedCLUBMainbalance)
+                })
+                .exec(function(err, updatedUser) {
+                  if (err) {
+                    console.log("Error to update User after move bid!!!!!!!!!");
+                    return res.json({
+                      "message": "Error to update CLUB main balance",
+                      statusCode: 401
+                    });
+                  }
+                  Tradebalanceorder.create({
+                      amount: userCLUBAmountToWithDraw,
+                      currencyName: currencyNameCLUB,
+                      action: actionNameWithdrawal,
+                      tradebalanceorderowner: userDetails.id
+                    })
+                    .exec(function(err, createtradeOrder) {
+                      if (err) {
+                        console.log("Error to update user");
+                        return res.serverError(err);
+                      }
+
+                      //Move CLUB Company account to User Account on Withdrawal
+                      clientCLUB.cmd('move',
+                        companyCLUBAccount,
+                        userEmailAddress,
+                        afterTransactionFeeAmount,
+                        function(err, moveCLUBTransaction, resHeaders) {
+                          if (err) {
+                            console.log("Error from WithdrawalCLUB :: ");
+                            if (err.code && err.code == "ECONNREFUSED") {
+                              console.log("CLUB Server Refuse to connect App");
+                              return res.json({
+                                "message": "CLUB Server Refuse to connect App",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code == -6) {
+                              console.log(companyCLUBAccount + " Account has Insufficient funds ");
+                              return res.json({
+                                "message": companyCLUBAccount + " Account has Insufficient funds",
+                                statusCode: 400
+                              });
+                            }
+                            if (err.code && err.code < 0) {
+                              console.log("Problem in CLUB server err.code " + err.code);
+                              return res.json({
+                                "message": "Problem in CLUB server",
+                                statusCode: 400
+                              });
+                            }
+                            console.log("Error in CLUB Server");
+                            return res.json({
+                              "message": "Error in CLUB Server",
+                              statusCode: 400
+                            });
+                          } else {
+                            console.log("moveCLUBTransaction status " + moveCLUBTransaction);
+                            if (moveCLUBTransaction == true) {
                               User.findOne({
                                   email: userEmailAddress
                                 })

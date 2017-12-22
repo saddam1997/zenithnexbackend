@@ -28,6 +28,16 @@ var clientBCH = new bitcoinBCH.Client({
   user: sails.config.company.clientBCHuser,
   pass: sails.config.company.clientBCHpass
 });
+
+//CLUB Wallet Details
+var bitcoinCLUB = require('bitcoin');
+var clientCLUB = new bitcoinCLUB.Client({
+  host: sails.config.company.clientCLUBhost,
+  port: sails.config.company.clientCLUBport,
+  user: sails.config.company.clientCLUBuser,
+  pass: sails.config.company.clientCLUBpass
+});
+
 //PYY Wallet Details
 var bitcoinPYY = require('bitcoin');
 var clientPYY = new bitcoinPYY.Client({
@@ -278,6 +288,64 @@ module.exports = {
       });
     });
   },
+  getNewCLUBAddress: function(req, res) {
+    var userMailId = req.body.userMailId;
+    if (!userMailId)
+      return res.json({
+        "message": "Can't be empty!!!",
+        statusCode: 400
+      });
+    User.findOne({
+      email: userMailId
+    }).populateAll().exec(function(err, user) {
+      if (err) {
+        return res.json({
+          "message": "Error to find user",
+          statusCode: 401
+        });
+      }
+      if (!user) {
+        return res.json({
+          "message": "Invalid email!",
+          statusCode: 401
+        });
+      }
+
+
+      if (user.userCLUBAddress)
+        return res.json({
+          "message": "address already exists",
+          statusCode: 401
+        });
+
+
+      clientCLUB.cmd('getnewaddress', userMailId, function(err, address) {
+        if (err)
+          return res.json({
+            "message": "Failed to get new address from bch server",
+            statusCode: 400
+          });
+
+        console.log('bch address generated', address);
+        User.update({
+          email: userMailId
+        }, {
+          userCLUBAddress: address
+        }, function(err, response) {
+          if (err)
+            return res.json({
+              "message": "Failed to update new address in database",
+              statusCode: 401
+            });
+
+          res.json({
+            "message": "Address has been generated and saved in database",
+            statusCode: 200
+          });
+        })
+      });
+    });
+  },
   createNewUser: function(req, res) {
     console.log("Enter into createNewUser :: " + req.body.email);
     var useremailaddress = req.body.email;
@@ -343,7 +411,7 @@ module.exports = {
 
         clientBTC.cmd('getnewaddress', useremailaddress, function(err, newBTCAddressForUser, resHeaders) {
           if (err) {
-            console.log("Error from sendFromBCHAccount:: ");
+            console.log("Error from getnewaddressclientBTC:: ");
             if (err.code && err.code == "ECONNREFUSED") {
               return res.json({
                 "message": "BTC Server Refuse to connect App",
@@ -385,246 +453,268 @@ module.exports = {
             console.log('New address created from BCHServer :: ', newBCHAddressForUser);
             clientPYY.cmd('getnewaddress', useremailaddress, function(err, newPYYAddressForUser, resHeaders) {
               if (err) {
-                console.log("Error from sendFromBCHAccount:: ");
+                console.log("Error from PYYgetnewaddress :: ");
                 if (err.code && err.code == "ECONNREFUSED") {
                   return res.json({
-                    "message": "BCH Server Refuse to connect App",
+                    "message": "PYY Server Refuse to connect App",
                     statusCode: 400
                   });
                 }
                 if (err.code && err.code < 0) {
                   return res.json({
-                    "message": "Problem in BCH server",
+                    "message": "Problem in PYY server",
                     statusCode: 400
                   });
                 }
                 return res.json({
-                  "message": "Error in BCH Server",
+                  "message": "Error in PYY Server",
                   statusCode: 400
                 });
               }
               console.log('New address created from newPYYAddressForUser :: ', newPYYAddressForUser);
               clientGDS.cmd('getnewaddress', useremailaddress, function(err, newGDSAddressForUser, resHeaders) {
                 if (err) {
-                  console.log("Error from sendFromBCHAccount:: ");
+                  console.log("Error from getnewaddressGDS:: ");
                   if (err.code && err.code == "ECONNREFUSED") {
                     return res.json({
-                      "message": "BCH Server Refuse to connect App",
+                      "message": "GDS Server Refuse to connect App",
                       statusCode: 400
                     });
                   }
                   if (err.code && err.code < 0) {
                     return res.json({
-                      "message": "Problem in BCH server",
+                      "message": "Problem in GDS server",
                       statusCode: 400
                     });
                   }
                   return res.json({
-                    "message": "Error in BCH Server",
+                    "message": "Error in GDS Server",
                     statusCode: 400
                   });
                 }
-                console.log('New address created from newPYYAddressForUser :: ', newGDSAddressForUser);
-                console.log('New address created from BCHServer :: ', newBCHAddressForUser);
-                bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
+                clientCLUB.cmd('getnewaddress', useremailaddress, function(err, newCLUBAddressForUser, resHeaders) {
                   if (err) {
-                    console.log("Error To bcrypt spendingpassword");
+                    console.log("Error from getnewaddressCLUB:: ");
+                    if (err.code && err.code == "ECONNREFUSED") {
+                      return res.json({
+                        "message": "CLUB Server Refuse to connect App",
+                        statusCode: 400
+                      });
+                    }
+                    if (err.code && err.code < 0) {
+                      return res.json({
+                        "message": "Problem in CLUB server",
+                        statusCode: 400
+                      });
+                    }
                     return res.json({
-                      "message": err,
-                      statusCode: 500
+                      "message": "Error in CLUB Server",
+                      statusCode: 400
                     });
                   }
-                  var otpForEmail = crypto.randomBytes(20).toString('hex');;
-                  console.log("otpForEmail :: " + otpForEmail);
-                  bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
-                    if (err) return next(err);
-                    var encOtpForEmail = hash;
-                    var userObj = {
-                      email: useremailaddress,
-                      password: userpassword,
-                      encryptedSpendingpassword: hashspendingpassword,
-                      userBTCAddress: newBTCAddressForUser,
-                      userBCHAddress: newBCHAddressForUser,
-                      userPYYAddress: newPYYAddressForUser,
-                      userGDSAddress: newGDSAddressForUser,
-                      encryptedEmailVerificationOTP: encOtpForEmail,
-                      googlesecreatekey: googlesecreatekey
+                  console.log('New address created from newCLUBAddressForUser :: ', newCLUBAddressForUser);
+                  console.log('New address created from BCHServer :: ', newBCHAddressForUser);
+                  bcrypt.hash(userspendingpassword, 10, function(err, hashspendingpassword) {
+                    if (err) {
+                      console.log("Error To bcrypt spendingpassword");
+                      return res.json({
+                        "message": err,
+                        statusCode: 500
+                      });
                     }
-                    User.create(userObj).exec(function(err, userAddDetails) {
-                      if (err) {
-                        console.log("Error to Create New user !!!");
-                        console.log(err);
-                        return res.json({
-                          "message": "Error to create New User",
-                          statusCode: 400
-                        });
+                    var otpForEmail = crypto.randomBytes(20).toString('hex');;
+                    console.log("otpForEmail :: " + otpForEmail);
+                    bcrypt.hash(otpForEmail.toString(), 10, function(err, hash) {
+                      if (err) return next(err);
+                      var encOtpForEmail = hash;
+                      var userObj = {
+                        email: useremailaddress,
+                        password: userpassword,
+                        encryptedSpendingpassword: hashspendingpassword,
+                        userBTCAddress: newBTCAddressForUser,
+                        userBCHAddress: newBCHAddressForUser,
+                        userPYYAddress: newPYYAddressForUser,
+                        userGDSAddress: newGDSAddressForUser,
+                        userCLUBAddress: newCLUBAddressForUser,
+                        encryptedEmailVerificationOTP: encOtpForEmail,
+                        googlesecreatekey: googlesecreatekey
                       }
-                      console.log("User Create Succesfully...........");
-
-                      var verificationURL = projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail;
-                      //console.log("verificationURL ::: " + verificationURL);
-                      var mailOptions = {
-                        from: sails.config.common.supportEmailId,
-                        to: useremailaddress,
-                        subject: 'Please verify email !!!',
-                        html: `
-                        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-                        <html xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                        <head>
-                          <meta name="viewport" content="width=device-width" />
-                          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-                          <title>Actionable emails e.g. reset password</title>
-
-
-                          <style type="text/css">
-                            img {
-                              max-width: 100%;
-                            }
-
-                            body {
-                              -webkit-font-smoothing: antialiased;
-                              -webkit-text-size-adjust: none;
-                              width: 100% !important;
-                              height: 100%;
-                              line-height: 1.6em;
-                            }
-
-                            body {
-                              background-color: #f6f6f6;
-                            }
-
-                            @media only screen and (max-width: 640px) {
-                              body {
-                                padding: 0 !important;
-                              }
-                              h1 {
-                                font-weight: 800 !important;
-                                margin: 20px 0 5px !important;
-                              }
-                              h2 {
-                                font-weight: 800 !important;
-                                margin: 20px 0 5px !important;
-                              }
-                              h3 {
-                                font-weight: 800 !important;
-                                margin: 20px 0 5px !important;
-                              }
-                              h4 {
-                                font-weight: 800 !important;
-                                margin: 20px 0 5px !important;
-                              }
-                              h1 {
-                                font-size: 22px !important;
-                              }
-                              h2 {
-                                font-size: 18px !important;
-                              }
-                              h3 {
-                                font-size: 16px !important;
-                              }
-                              .container {
-                                padding: 0 !important;
-                                width: 100% !important;
-                              }
-                              .content {
-                                padding: 0 !important;
-                              }
-                              .content-wrap {
-                                padding: 10px !important;
-                              }
-                              .invoice {
-                                width: 100% !important;
-                              }
-                            }
-                          </style>
-                        </head>
-
-                        <body itemscope itemtype="http://schema.org/EmailMessage" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6em; background-color: #f6f6f6; margin: 0;"
-                          bgcolor="#f6f6f6">
-
-                          <table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: #f6f6f6; margin: 0;" bgcolor="#f6f6f6">
-                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                              <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
-                              <td class="container" width="600" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;"
-                                valign="top">
-                                <div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
-                                  <table class="main" width="100%" cellpadding="0" cellspacing="0" itemprop="action" itemscope itemtype="http://schema.org/ConfirmAction" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;"
-                                    bgcolor="#fff">
-                                    <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                      <td class="content-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px;" valign="top">
-                                        <meta itemprop="name" content="Confirm Email" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;" />
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-
-                                            </td>
-                                          </tr>
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                              Dear user,
-                                            </td>
-                                          </tr>
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                              Thank you for signing up with us. Please follow this link to verify your Email.
-                                            </td>
-                                          </tr>
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                              Verify Email address
-                                            </td>
-                                          </tr>
-
-
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" itemprop="handler" itemscope itemtype="http://schema.org/HttpActionHandler" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
-                                              valign="top">
-                                              <a href=${verificationURL} class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Confirm email address</a>
-                                            </td>
-                                          </tr>
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                              Kind Regards,
-                                            </td>
-                                          </tr>
-                                          <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                            <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                              The Zenithnex Team
-                                            </td>
-                                          </tr>
-
-                                        </table>
-                                      </td>
-                                    </tr>
-                                  </table>
-                                  <div class="footer" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
-                                    <table width="100%" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                      <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
-                                        <td class="aligncenter content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;" align="center"
-                                          valign="top">Follow <a href="http://twitter.com/zenithnex" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">@Mail_Gun</a> on Twitter.</td>
-                                      </tr>
-                                    </table>
-                                  </div>
-                                </div>
-                              </td>
-                              <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
-                            </tr>
-                          </table>
-                        </body>
-
-                        </html>`
-                      };
-                      transporter.sendMail(mailOptions, function(error, info) {
-                        if (error) {
-                          console.log(error);
-                        } else {
-                          console.log('Email sent: ' + info.response);
-                          return res.json(200, {
-                            "message": "We sent link on your email address please verify link!!!",
-                            "userMailId": useremailaddress,
-                            statusCode: 200
+                      User.create(userObj).exec(function(err, userAddDetails) {
+                        if (err) {
+                          console.log("Error to Create New user !!!");
+                          console.log(err);
+                          return res.json({
+                            "message": "Error to create New User",
+                            statusCode: 400
                           });
                         }
+                        console.log("User Create Succesfully...........");
+
+                        var verificationURL = projectURL + "/user/verifyEmailAddress?email=" + useremailaddress + "&otp=" + otpForEmail;
+                        //console.log("verificationURL ::: " + verificationURL);
+                        var mailOptions = {
+                          from: sails.config.common.supportEmailId,
+                          to: useremailaddress,
+                          subject: 'Please verify email !!!',
+                          html: `
+                          <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+                          <html xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                          <head>
+                            <meta name="viewport" content="width=device-width" />
+                            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                            <title>Actionable emails e.g. reset password</title>
+
+
+                            <style type="text/css">
+                              img {
+                                max-width: 100%;
+                              }
+
+                              body {
+                                -webkit-font-smoothing: antialiased;
+                                -webkit-text-size-adjust: none;
+                                width: 100% !important;
+                                height: 100%;
+                                line-height: 1.6em;
+                              }
+
+                              body {
+                                background-color: #f6f6f6;
+                              }
+
+                              @media only screen and (max-width: 640px) {
+                                body {
+                                  padding: 0 !important;
+                                }
+                                h1 {
+                                  font-weight: 800 !important;
+                                  margin: 20px 0 5px !important;
+                                }
+                                h2 {
+                                  font-weight: 800 !important;
+                                  margin: 20px 0 5px !important;
+                                }
+                                h3 {
+                                  font-weight: 800 !important;
+                                  margin: 20px 0 5px !important;
+                                }
+                                h4 {
+                                  font-weight: 800 !important;
+                                  margin: 20px 0 5px !important;
+                                }
+                                h1 {
+                                  font-size: 22px !important;
+                                }
+                                h2 {
+                                  font-size: 18px !important;
+                                }
+                                h3 {
+                                  font-size: 16px !important;
+                                }
+                                .container {
+                                  padding: 0 !important;
+                                  width: 100% !important;
+                                }
+                                .content {
+                                  padding: 0 !important;
+                                }
+                                .content-wrap {
+                                  padding: 10px !important;
+                                }
+                                .invoice {
+                                  width: 100% !important;
+                                }
+                              }
+                            </style>
+                          </head>
+
+                          <body itemscope itemtype="http://schema.org/EmailMessage" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none; width: 100% !important; height: 100%; line-height: 1.6em; background-color: #f6f6f6; margin: 0;"
+                            bgcolor="#f6f6f6">
+
+                            <table class="body-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; background-color: #f6f6f6; margin: 0;" bgcolor="#f6f6f6">
+                              <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+                                <td class="container" width="600" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto;"
+                                  valign="top">
+                                  <div class="content" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; max-width: 600px; display: block; margin: 0 auto; padding: 20px;">
+                                    <table class="main" width="100%" cellpadding="0" cellspacing="0" itemprop="action" itemscope itemtype="http://schema.org/ConfirmAction" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; border-radius: 3px; background-color: #fff; margin: 0; border: 1px solid #e9e9e9;"
+                                      bgcolor="#fff">
+                                      <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                        <td class="content-wrap" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 20px;" valign="top">
+                                          <meta itemprop="name" content="Confirm Email" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;" />
+                                          <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+
+                                              </td>
+                                            </tr>
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                                                Dear user,
+                                              </td>
+                                            </tr>
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                                                Thank you for signing up with us. Please follow this link to verify your Email.
+                                              </td>
+                                            </tr>
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                                                Verify Email address
+                                              </td>
+                                            </tr>
+
+
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" itemprop="handler" itemscope itemtype="http://schema.org/HttpActionHandler" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;"
+                                                valign="top">
+                                                <a href=${verificationURL} class="btn-primary" itemprop="url" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2em; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background-color: #348eda; margin: 0; border-color: #348eda; border-style: solid; border-width: 10px 20px;">Confirm email address</a>
+                                              </td>
+                                            </tr>
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                                                Kind Regards,
+                                              </td>
+                                            </tr>
+                                            <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                              <td class="content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
+                                                The Zenithnex Team
+                                              </td>
+                                            </tr>
+
+                                          </table>
+                                        </td>
+                                      </tr>
+                                    </table>
+                                    <div class="footer" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; width: 100%; clear: both; color: #999; margin: 0; padding: 20px;">
+                                      <table width="100%" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                        <tr style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
+                                          <td class="aligncenter content-block" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; vertical-align: top; color: #999; text-align: center; margin: 0; padding: 0 0 20px;" align="center"
+                                            valign="top">Follow <a href="http://twitter.com/zenithnex" style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 12px; color: #999; text-decoration: underline; margin: 0;">@Mail_Gun</a> on Twitter.</td>
+                                        </tr>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style="font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;" valign="top"></td>
+                              </tr>
+                            </table>
+                          </body>
+
+                          </html>`
+                        };
+                        transporter.sendMail(mailOptions, function(error, info) {
+                          if (error) {
+                            console.log(error);
+                          } else {
+                            console.log('Email sent: ' + info.response);
+                            return res.json(200, {
+                              "message": "We sent link on your email address please verify link!!!",
+                              "userMailId": useremailaddress,
+                              statusCode: 200
+                            });
+                          }
+                        });
                       });
                     });
                   });
