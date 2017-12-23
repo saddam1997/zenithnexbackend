@@ -53,13 +53,13 @@ module.exports = {
   sendBTC: function(req, res, next) {
     console.log("Enter into sendBTC");
     var userEmailAddress = req.body.userMailId;
-    var userBTCAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userBTCAmountToSend = parseFloat(req.body.amount);
     var userReceiverBTCAddress = req.body.recieverBTCCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
     var miniBTCAmountSentByUser = 0.001;
-    miniBTCAmountSentByUser = parseFloat(miniBTCAmountSentByUser).toFixed(8);
+    miniBTCAmountSentByUser = parseFloat(miniBTCAmountSentByUser);
     if (!userEmailAddress || !userBTCAmountToSend || !userReceiverBTCAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Can't be empty!!! by user ");
@@ -91,7 +91,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userBTCBalanceInDb = parseFloat(userDetails.BTCMainbalance).toFixed(8);
+        var userBTCBalanceInDb = parseFloat(userDetails.BTCMainbalance);
         console.log("User BTC balance in database ::: " + userBTCBalanceInDb);
         console.log("User want send BTC to send ::: " + userBTCAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -129,9 +129,9 @@ module.exports = {
               }
               console.log("Spending password is valid!!!");
               var minimumNumberOfConfirmation = 1;
-              var netamountToSend = parseFloat(userBTCAmountToSend).toFixed(8) - parseFloat(transactionFeeBTC).toFixed(8);
+              var netamountToSend = parseFloat(userBTCAmountToSend) - parseFloat(transactionFeeBTC);
               console.log("clientBTC netamountToSend :: " + netamountToSend);
-              clientBTC.cmd('sendfrom', userEmailAddress, userReceiverBTCAddress, parseFloat(netamountToSend).toFixed(8),
+              clientBTC.cmd('sendfrom', userEmailAddress, userReceiverBTCAddress, parseFloat(netamountToSend),
                 minimumNumberOfConfirmation, userReceiverBTCAddress, userReceiverBTCAddress,
                 function(err, TransactionDetails, resHeaders) {
                   if (err) {
@@ -168,12 +168,12 @@ module.exports = {
                   console.log('TransactionDetails :', TransactionDetails);
                   console.log("userBTCAddressInDb :: " + userBTCAddressInDb);
                   console.log("userBTCAmountToSend  :: " + userBTCAmountToSend);
-                  var updatedBTCbalance = (parseFloat(userBTCBalanceInDb).toFixed(8) - parseFloat(userBTCAmountToSend).toFixed(8));
-                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedBTCbalance).toFixed(8));
+                  var updatedBTCbalance = (parseFloat(userBTCBalanceInDb) - parseFloat(userBTCAmountToSend));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedBTCbalance));
                   User.update({
                       email: userEmailAddress
                     }, {
-                      BTCMainbalance: parseFloat(updatedBTCbalance).toFixed(8)
+                      BTCMainbalance: parseFloat(updatedBTCbalance)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -214,13 +214,13 @@ module.exports = {
   sendBCH: function(req, res, next) {
     console.log("Enter into sendBCH");
     var userEmailAddress = req.body.userMailId;
-    var userBCHAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userBCHAmountToSend = parseFloat(req.body.amount);
     var userReceiverBCHAddress = req.body.recieverBCHCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
     var miniBCHAmountSentByUser = 0.001;
-    miniBCHAmountSentByUser = parseFloat(miniBCHAmountSentByUser).toFixed(8);
+    miniBCHAmountSentByUser = parseFloat(miniBCHAmountSentByUser);
     if (!userEmailAddress || !userBCHAmountToSend || !userReceiverBCHAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Can't be empty!!! by user ");
@@ -252,7 +252,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userBCHBalanceInDb = parseFloat(userDetails.BCHMainbalance).toFixed(8);
+        var userBCHBalanceInDb = parseFloat(userDetails.BCHMainbalance);
         console.log("User BCH balance in database ::: " + userBCHBalanceInDb);
         console.log("User want send BCH to send ::: " + userBCHAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -290,9 +290,9 @@ module.exports = {
               }
               console.log("Spending password is valid!!!");
               var minimumNumberOfConfirmation = 1;
-              var netamountToSend = parseFloat(userBCHAmountToSend).toFixed(8) - parseFloat(transactionFeeBCH).toFixed(8);
+              var netamountToSend = parseFloat(userBCHAmountToSend) - parseFloat(transactionFeeBCH);
               console.log("clientBCH netamountToSend :: " + netamountToSend);
-              clientBCH.cmd('sendfrom', userEmailAddress, userReceiverBCHAddress, parseFloat(netamountToSend).toFixed(8),
+              clientBCH.cmd('sendfrom', userEmailAddress, userReceiverBCHAddress, parseFloat(netamountToSend),
                 minimumNumberOfConfirmation, userReceiverBCHAddress, userReceiverBCHAddress,
                 function(err, TransactionDetails, resHeaders) {
                   if (err) {
@@ -329,12 +329,12 @@ module.exports = {
                   console.log('TransactionDetails :', TransactionDetails);
                   console.log("userBCHAddressInDb :: " + userBCHAddressInDb);
                   console.log("userBCHAmountToSend  :: " + userBCHAmountToSend);
-                  var updatedBCHbalance = (parseFloat(userBCHBalanceInDb).toFixed(8) - parseFloat(userBCHAmountToSend).toFixed(8));
-                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedBCHbalance).toFixed(8));
+                  var updatedBCHbalance = (parseFloat(userBCHBalanceInDb) - parseFloat(userBCHAmountToSend));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedBCHbalance));
                   User.update({
                       email: userEmailAddress
                     }, {
-                      BCHMainbalance: parseFloat(updatedBCHbalance).toFixed(8)
+                      BCHMainbalance: parseFloat(updatedBCHbalance)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -375,13 +375,13 @@ module.exports = {
   sendGDS: function(req, res, next) {
     console.log("Enter into sendGDS");
     var userEmailAddress = req.body.userMailId;
-    var userGDSAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userGDSAmountToSend = parseFloat(req.body.amount);
     var userReceiverGDSAddress = req.body.recieverGDSCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
     var miniGDSAmountSentByUser = 0.001;
-    miniGDSAmountSentByUser = parseFloat(miniGDSAmountSentByUser).toFixed(8);
+    miniGDSAmountSentByUser = parseFloat(miniGDSAmountSentByUser);
     if (!userEmailAddress || !userGDSAmountToSend || !userReceiverGDSAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Can't be empty!!! by user ");
@@ -413,7 +413,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userGDSBalanceInDb = parseFloat(userDetails.GDSMainbalance).toFixed(8);
+        var userGDSBalanceInDb = parseFloat(userDetails.GDSMainbalance);
         console.log("User GDS balance in database ::: " + userGDSBalanceInDb);
         console.log("User want send GDS to send ::: " + userGDSAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -451,9 +451,9 @@ module.exports = {
               }
               console.log("Spending password is valid!!!");
               var minimumNumberOfConfirmation = 1;
-              var netamountToSend = parseFloat(userGDSAmountToSend).toFixed(8) - parseFloat(transactionFeeGDS).toFixed(8);
+              var netamountToSend = parseFloat(userGDSAmountToSend) - parseFloat(transactionFeeGDS);
               console.log("clientGDS netamountToSend :: " + netamountToSend);
-              clientGDS.cmd('sendfrom', userEmailAddress, userReceiverGDSAddress, parseFloat(netamountToSend).toFixed(8),
+              clientGDS.cmd('sendfrom', userEmailAddress, userReceiverGDSAddress, parseFloat(netamountToSend),
                 minimumNumberOfConfirmation, userReceiverGDSAddress, userReceiverGDSAddress,
                 function(err, TransactionDetails, resHeaders) {
                   if (err) {
@@ -490,12 +490,12 @@ module.exports = {
                   console.log('TransactionDetails :', TransactionDetails);
                   console.log("userGDSAddressInDb :: " + userGDSAddressInDb);
                   console.log("userGDSAmountToSend  :: " + userGDSAmountToSend);
-                  var updatedGDSbalance = (parseFloat(userGDSBalanceInDb).toFixed(8) - parseFloat(userGDSAmountToSend).toFixed(8));
-                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedGDSbalance).toFixed(8));
+                  var updatedGDSbalance = (parseFloat(userGDSBalanceInDb) - parseFloat(userGDSAmountToSend));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedGDSbalance));
                   User.update({
                       email: userEmailAddress
                     }, {
-                      GDSMainbalance: parseFloat(updatedGDSbalance).toFixed(8)
+                      GDSMainbalance: parseFloat(updatedGDSbalance)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -536,13 +536,13 @@ module.exports = {
   sendPYY: function(req, res, next) {
     console.log("Enter into sendPYY");
     var userEmailAddress = req.body.userMailId;
-    var userPYYAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userPYYAmountToSend = parseFloat(req.body.amount);
     var userReceiverPYYAddress = req.body.recieverPYYCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
     var miniPYYAmountSentByUser = 0.001;
-    miniPYYAmountSentByUser = parseFloat(miniPYYAmountSentByUser).toFixed(8);
+    miniPYYAmountSentByUser = parseFloat(miniPYYAmountSentByUser);
     if (!userEmailAddress || !userPYYAmountToSend || !userReceiverPYYAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Can't be empty!!! by user ");
@@ -574,7 +574,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userPYYBalanceInDb = parseFloat(userDetails.PYYMainbalance).toFixed(8);
+        var userPYYBalanceInDb = parseFloat(userDetails.PYYMainbalance);
         console.log("User PYY balance in database ::: " + userPYYBalanceInDb);
         console.log("User want send PYY to send ::: " + userPYYAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -612,9 +612,9 @@ module.exports = {
               }
               console.log("Spending password is valid!!!");
               var minimumNumberOfConfirmation = 1;
-              var netamountToSend = parseFloat(userPYYAmountToSend).toFixed(8) - parseFloat(transactionFeePYY).toFixed(8);
+              var netamountToSend = parseFloat(userPYYAmountToSend) - parseFloat(transactionFeePYY);
               console.log("clientPYY netamountToSend :: " + netamountToSend);
-              clientPYY.cmd('sendfrom', userEmailAddress, userReceiverPYYAddress, parseFloat(netamountToSend).toFixed(8),
+              clientPYY.cmd('sendfrom', userEmailAddress, userReceiverPYYAddress, parseFloat(netamountToSend),
                 minimumNumberOfConfirmation, userReceiverPYYAddress, userReceiverPYYAddress,
                 function(err, TransactionDetails, resHeaders) {
                   if (err) {
@@ -651,12 +651,12 @@ module.exports = {
                   console.log('TransactionDetails :', TransactionDetails);
                   console.log("userPYYAddressInDb :: " + userPYYAddressInDb);
                   console.log("userPYYAmountToSend  :: " + userPYYAmountToSend);
-                  var updatedPYYbalance = (parseFloat(userPYYBalanceInDb).toFixed(8) - parseFloat(userPYYAmountToSend).toFixed(8));
-                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedPYYbalance).toFixed(8));
+                  var updatedPYYbalance = (parseFloat(userPYYBalanceInDb) - parseFloat(userPYYAmountToSend));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedPYYbalance));
                   User.update({
                       email: userEmailAddress
                     }, {
-                      PYYMainbalance: parseFloat(updatedPYYbalance).toFixed(8)
+                      PYYMainbalance: parseFloat(updatedPYYbalance)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -697,13 +697,13 @@ module.exports = {
   sendCLUB: function(req, res, next) {
     console.log("Enter into sendCLUB");
     var userEmailAddress = req.body.userMailId;
-    var userCLUBAmountToSend = parseFloat(req.body.amount).toFixed(8);
+    var userCLUBAmountToSend = parseFloat(req.body.amount);
     var userReceiverCLUBAddress = req.body.recieverCLUBCoinAddress;
     var userSpendingPassword = req.body.spendingPassword;
     var userCommentForReceiver = req.body.commentForReciever;
     var userCommentForSender = req.body.commentForSender;
     var miniCLUBAmountSentByUser = 0.001;
-    miniCLUBAmountSentByUser = parseFloat(miniCLUBAmountSentByUser).toFixed(8);
+    miniCLUBAmountSentByUser = parseFloat(miniCLUBAmountSentByUser);
     if (!userEmailAddress || !userCLUBAmountToSend || !userReceiverCLUBAddress ||
       !userSpendingPassword || !userCommentForReceiver || !userCommentForSender) {
       console.log("Can't be empty!!! by user ");
@@ -735,7 +735,7 @@ module.exports = {
         });
       } else {
         console.log(JSON.stringify(userDetails));
-        var userCLUBBalanceInDb = parseFloat(userDetails.CLUBMainbalance).toFixed(8);
+        var userCLUBBalanceInDb = parseFloat(userDetails.CLUBMainbalance);
         console.log("User CLUB balance in database ::: " + userCLUBBalanceInDb);
         console.log("User want send CLUB to send ::: " + userCLUBAmountToSend);
         User.compareSpendingpassword(userSpendingPassword, userDetails,
@@ -773,9 +773,9 @@ module.exports = {
               }
               console.log("Spending password is valid!!!");
               var minimumNumberOfConfirmation = 1;
-              var netamountToSend = parseFloat(userCLUBAmountToSend).toFixed(8) - parseFloat(transactionFeeCLUB).toFixed(8);
+              var netamountToSend = parseFloat(userCLUBAmountToSend) - parseFloat(transactionFeeCLUB);
               console.log("clientCLUB netamountToSend :: " + netamountToSend);
-              clientCLUB.cmd('sendfrom', userEmailAddress, userReceiverCLUBAddress, parseFloat(netamountToSend).toFixed(8),
+              clientCLUB.cmd('sendfrom', userEmailAddress, userReceiverCLUBAddress, parseFloat(netamountToSend),
                 minimumNumberOfConfirmation, userReceiverCLUBAddress, userReceiverCLUBAddress,
                 function(err, TransactionDetails, resHeaders) {
                   if (err) {
@@ -812,12 +812,12 @@ module.exports = {
                   console.log('TransactionDetails :', TransactionDetails);
                   console.log("userCLUBAddressInDb :: " + userCLUBAddressInDb);
                   console.log("userCLUBAmountToSend  :: " + userCLUBAmountToSend);
-                  var updatedCLUBbalance = (parseFloat(userCLUBBalanceInDb).toFixed(8) - parseFloat(userCLUBAmountToSend).toFixed(8));
-                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedCLUBbalance).toFixed(8));
+                  var updatedCLUBbalance = (parseFloat(userCLUBBalanceInDb) - parseFloat(userCLUBAmountToSend));
+                  console.log("Update new Balance of user in DB ::" + parseFloat(updatedCLUBbalance));
                   User.update({
                       email: userEmailAddress
                     }, {
-                      CLUBMainbalance: parseFloat(updatedCLUBbalance).toFixed(8)
+                      CLUBMainbalance: parseFloat(updatedCLUBbalance)
                     })
                     .exec(function(err, updatedUser) {
                       if (err) {
@@ -1176,8 +1176,8 @@ module.exports = {
       }
       console.log("Valid User :: " + JSON.stringify(user));
       console.log("UserBCH Balance ::" + user.BCHMainbalance);
-      var userBCHMainbalanceInDb = parseFloat(user.BCHMainbalance).toFixed(8);
-      var userFreezedBCHMainbalanceInDb = parseFloat(user.FreezedBCHbalance).toFixed(8);
+      var userBCHMainbalanceInDb = parseFloat(user.BCHMainbalance);
+      var userFreezedBCHMainbalanceInDb = parseFloat(user.FreezedBCHbalance);
       clientBCH.cmd(
         'getbalance',
         userMailId,
@@ -1213,14 +1213,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalBCHMainbalance = (parseFloat(userBCHMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userBCHMainbalanceFromServer).toFixed(8) + " BHC server and in DB BCH + Freezed " + parseFloat(totalBCHMainbalance).toFixed(8));
-          if (parseFloat(userBCHMainbalanceFromServer).toFixed(8) > parseFloat(totalBCHMainbalance).toFixed(8)) {
+          var totalBCHMainbalance = (parseFloat(userBCHMainbalanceInDb));
+          console.log(parseFloat(userBCHMainbalanceFromServer) + " BHC server and in DB BCH + Freezed " + parseFloat(totalBCHMainbalance));
+          if (parseFloat(userBCHMainbalanceFromServer) > parseFloat(totalBCHMainbalance)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                BCHMainbalance: parseFloat(userBCHMainbalanceFromServer).toFixed(8)
+                BCHMainbalance: parseFloat(userBCHMainbalanceFromServer)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1288,8 +1288,8 @@ module.exports = {
       }
       console.log("Valid User :: " + JSON.stringify(user));
       console.log("UserCLUB Balance ::" + user.CLUBMainbalance);
-      var userCLUBMainbalanceInDb = parseFloat(user.CLUBMainbalance).toFixed(8);
-      var userFreezedCLUBMainbalanceInDb = parseFloat(user.FreezedCLUBbalance).toFixed(8);
+      var userCLUBMainbalanceInDb = parseFloat(user.CLUBMainbalance);
+      var userFreezedCLUBMainbalanceInDb = parseFloat(user.FreezedCLUBbalance);
       clientCLUB.cmd(
         'getbalance',
         userMailId,
@@ -1325,14 +1325,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalCLUBMainbalance = (parseFloat(userCLUBMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userCLUBMainbalanceFromServer).toFixed(8) + " BHC server and in DB CLUB + Freezed " + parseFloat(totalCLUBMainbalance).toFixed(8));
-          if (parseFloat(userCLUBMainbalanceFromServer).toFixed(8) > parseFloat(totalCLUBMainbalance).toFixed(8)) {
+          var totalCLUBMainbalance = (parseFloat(userCLUBMainbalanceInDb));
+          console.log(parseFloat(userCLUBMainbalanceFromServer) + " BHC server and in DB CLUB + Freezed " + parseFloat(totalCLUBMainbalance));
+          if (parseFloat(userCLUBMainbalanceFromServer) > parseFloat(totalCLUBMainbalance)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                CLUBMainbalance: parseFloat(userCLUBMainbalanceFromServer).toFixed(8)
+                CLUBMainbalance: parseFloat(userCLUBMainbalanceFromServer)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1400,8 +1400,8 @@ module.exports = {
       }
       console.log("Valid User :: " + JSON.stringify(user));
       console.log("UserBTC Balance ::" + user.BTCMainbalance);
-      var userBTCMainbalanceInDb = parseFloat(user.BTCMainbalance).toFixed(8);
-      var userFreezedBTCMainbalanceInDb = parseFloat(user.FreezedBTCbalance).toFixed(8);
+      var userBTCMainbalanceInDb = parseFloat(user.BTCMainbalance);
+      var userFreezedBTCMainbalanceInDb = parseFloat(user.FreezedBTCbalance);
       clientBTC.cmd(
         'getbalance',
         userMailId,
@@ -1425,14 +1425,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalBTCMainbalance = (parseFloat(userBTCMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userBTCMainbalanceFromServer).toFixed(8) + " on server and in DB BTC + Freezed :: " + parseFloat(totalBTCMainbalance).toFixed(8));
-          if (parseFloat(userBTCMainbalanceFromServer).toFixed(8) > parseFloat(totalBTCMainbalance).toFixed(8)) {
+          var totalBTCMainbalance = (parseFloat(userBTCMainbalanceInDb));
+          console.log(parseFloat(userBTCMainbalanceFromServer) + " on server and in DB BTC + Freezed :: " + parseFloat(totalBTCMainbalance));
+          if (parseFloat(userBTCMainbalanceFromServer) > parseFloat(totalBTCMainbalance)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                BTCMainbalance: parseFloat(userBTCMainbalanceFromServer).toFixed(8)
+                BTCMainbalance: parseFloat(userBTCMainbalanceFromServer)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1501,8 +1501,8 @@ module.exports = {
       }
       console.log("Valid User :: " + JSON.stringify(user));
       console.log("UserPYY Balance ::" + user.PYYMainbalance);
-      var userPYYMainbalanceInDb = parseFloat(user.PYYMainbalance).toFixed(8);
-      var userFreezedPYYMainbalanceInDb = parseFloat(user.FreezedPYYbalance).toFixed(8);
+      var userPYYMainbalanceInDb = parseFloat(user.PYYMainbalance);
+      var userFreezedPYYMainbalanceInDb = parseFloat(user.FreezedPYYbalance);
       clientPYY.cmd(
         'getbalance',
         userMailId,
@@ -1538,14 +1538,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalPYYMainbalance = (parseFloat(userPYYMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userPYYMainbalanceFromServer).toFixed(8) + " BHC server and in DB PYY + Freezed " + parseFloat(totalPYYMainbalance).toFixed(8));
-          if (parseFloat(userPYYMainbalanceFromServer).toFixed(8) > parseFloat(totalPYYMainbalance).toFixed(8)) {
+          var totalPYYMainbalance = (parseFloat(userPYYMainbalanceInDb));
+          console.log(parseFloat(userPYYMainbalanceFromServer) + " BHC server and in DB PYY + Freezed " + parseFloat(totalPYYMainbalance));
+          if (parseFloat(userPYYMainbalanceFromServer) > parseFloat(totalPYYMainbalance)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                PYYMainbalance: parseFloat(userPYYMainbalanceFromServer).toFixed(8)
+                PYYMainbalance: parseFloat(userPYYMainbalanceFromServer)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
@@ -1613,8 +1613,8 @@ module.exports = {
       }
       console.log("Valid User :: " + JSON.stringify(user));
       console.log("UserGDS Balance ::" + user.GDSMainbalance);
-      var userGDSMainbalanceInDb = parseFloat(user.GDSMainbalance).toFixed(8);
-      var userFreezedGDSMainbalanceInDb = parseFloat(user.FreezedGDSbalance).toFixed(8);
+      var userGDSMainbalanceInDb = parseFloat(user.GDSMainbalance);
+      var userFreezedGDSMainbalanceInDb = parseFloat(user.FreezedGDSbalance);
       clientGDS.cmd(
         'getbalance',
         userMailId,
@@ -1650,14 +1650,14 @@ module.exports = {
               statusCode: 400
             });
           }
-          var totalGDSMainbalance = (parseFloat(userGDSMainbalanceInDb)).toFixed(8);
-          console.log(parseFloat(userGDSMainbalanceFromServer).toFixed(8) + " BHC server and in DB GDS + Freezed " + parseFloat(totalGDSMainbalance).toFixed(8));
-          if (parseFloat(userGDSMainbalanceFromServer).toFixed(8) > parseFloat(totalGDSMainbalance).toFixed(8)) {
+          var totalGDSMainbalance = (parseFloat(userGDSMainbalanceInDb));
+          console.log(parseFloat(userGDSMainbalanceFromServer) + " BHC server and in DB GDS + Freezed " + parseFloat(totalGDSMainbalance));
+          if (parseFloat(userGDSMainbalanceFromServer) > parseFloat(totalGDSMainbalance)) {
             console.log("UserBalance Need to update ............");
             User.update({
                 email: userMailId
               }, {
-                GDSMainbalance: parseFloat(userGDSMainbalanceFromServer).toFixed(8)
+                GDSMainbalance: parseFloat(userGDSMainbalanceFromServer)
               })
               .exec(function(err, updatedUser) {
                 if (err) {
