@@ -583,7 +583,7 @@ module.exports = {
               var btcAmountSucess = new BigNumber(userAskAmountBTC);
               btcAmountSucess = btcAmountSucess.minus(totoalAskRemainingBTC);
               //var txFeesAskerBTC = (parseFloat(updatedBTCbalanceAsker) * parseFloat(txFeeBTCWithdrawSuccess));
-              var txFeesAskerBTC = new BigNumber(updatedBTCbalanceAsker);
+              var txFeesAskerBTC = new BigNumber(btcAmountSucess);
               txFeesAskerBTC = txFeesAskerBTC.times(txFeeBTCWithdrawSuccess);
 
               console.log("txFeesAskerBTC ::: " + txFeesAskerBTC);
