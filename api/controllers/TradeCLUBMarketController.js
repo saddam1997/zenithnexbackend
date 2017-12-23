@@ -1,7 +1,7 @@
 /**
- * TradeCLUBMarketControllerController
+ * TradeCLUBMarketController
  *
- * @description :: Server-side logic for managing tradeclubmarketcontrollers
+ * @description :: Server-side logic for managing Tradeclubmarkets
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
@@ -20,6 +20,7 @@ const txFeeCLUBWithdrawSuccess = sails.config.common.txFeeCLUBWithdrawSuccess;
 const txFeeBTCWithdrawSuccess = sails.config.common.txFeeBTCWithdrawSuccess;
 
 module.exports = {
+
 
   addAskCLUBMarket: async function(req, res) {
     console.log("Enter into ask api addAskCLUBMarket : : " + JSON.stringify(req.body));
@@ -2313,5 +2314,6 @@ module.exports = {
         }
       });
   },
+
 
 };
