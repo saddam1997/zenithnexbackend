@@ -666,7 +666,7 @@ module.exports = {
   depositeInWalletCLUB: function(req, res) {
     console.log("Enter into depositeInWalletCLUB");
     var userEmailAddress = req.body.userMailId;
-    var userCLUBAmountToDeposite = parseFloat(req.body.bchamount);
+    var userCLUBAmountToDeposite = parseFloat(req.body.clubamount);
     var userSpendingPassword = req.body.spendingPassword;
     if (!userEmailAddress || !userCLUBAmountToDeposite || !userSpendingPassword) {
       console.log("Can't be empty!!! by user ");
