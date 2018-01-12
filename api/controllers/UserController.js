@@ -116,6 +116,7 @@ module.exports = {
 
           res.json({
             "message": "Address has been generated and saved in database",
+            "address": address,
             statusCode: 200
           });
         })
@@ -170,6 +171,7 @@ module.exports = {
 
           res.json({
             "message": "Address has been generated and saved in database",
+            "address": address,
             statusCode: 200
           });
         })
@@ -224,6 +226,7 @@ module.exports = {
 
           res.json({
             "message": "Address has been generated and saved in database",
+            "address": address,
             statusCode: 200
           });
         })
@@ -282,6 +285,7 @@ module.exports = {
 
           res.json({
             "message": "Address has been generated and saved in database",
+            "address": address,
             statusCode: 200
           });
         })
@@ -340,6 +344,7 @@ module.exports = {
 
           res.json({
             "message": "Address has been generated and saved in database",
+            "address": address,
             statusCode: 200
           });
         })
